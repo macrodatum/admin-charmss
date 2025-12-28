@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import GiftService from '../../app/services/gift.service';
 import type { Gift } from '../../app/types/gifts.types';
@@ -20,6 +20,8 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
   const [price, setPrice] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const soundInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initial) {
@@ -107,8 +109,10 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                     setFilePreview(URL.createObjectURL(file));
                   }
                 }}
-                onClick={() => {
-                  document.getElementById('gift-image-input')?.click();
+                onClick={e => {
+                  if (e.target === e.currentTarget && imageInputRef.current) {
+                    imageInputRef.current.click();
+                  }
                 }}
               >
                 {filePreview ? (
@@ -122,10 +126,12 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                 )}
                 <input
                   id="gift-image-input"
+                  ref={imageInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onClick={e => e.stopPropagation()}
+                  onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) {
                       setFile(file);
@@ -182,8 +188,10 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                     setFileSoundPreview(URL.createObjectURL(file));
                   }
                 }}
-                onClick={() => {
-                  document.getElementById('gift-sound-input')?.click();
+                onClick={e => {
+                  if (e.target === e.currentTarget && soundInputRef.current) {
+                    soundInputRef.current.click();
+                  }
                 }}
               >
                 {fileSoundPreview ? (
@@ -195,10 +203,12 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                 )}
                 <input
                   id="gift-sound-input"
+                  ref={soundInputRef}
                   type="file"
                   accept="audio/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onClick={e => e.stopPropagation()}
+                  onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) {
                       setFileSound(file);
