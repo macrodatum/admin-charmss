@@ -19,13 +19,18 @@ test.describe('Cookie consent E2E', () => {
     await page.evaluate(() => sessionStorage.removeItem('allowed-terms-session'));
 
     // Consent bar should be visible (wait longer in case of slow build)
-    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', { timeout: 60000 });
+    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', {
+      timeout: 60000,
+    });
 
     // Initially Aceptar por sesión is disabled until checkbox checked
     await expect(page.locator('button:has-text("Aceptar por sesión")')).toBeDisabled();
 
     // Check the GDPR checkbox by clicking the label (ensures React receives the change event)
-    await page.waitForSelector('label:has-text("Acepto la cláusula GDPR")', { state: 'visible', timeout: 60000 });
+    await page.waitForSelector('label:has-text("Acepto la cláusula GDPR")', {
+      state: 'visible',
+      timeout: 60000,
+    });
     await page.click('label:has-text("Acepto la cláusula GDPR")');
 
     // Now the session accept button should be enabled
@@ -39,7 +44,9 @@ test.describe('Cookie consent E2E', () => {
     expect(sessionFlag).toBe('true');
 
     // Bar should disappear
-    await expect(page.locator('text=Usamos cookies para mejorar tu experiencia.')).not.toBeVisible();
+    await expect(
+      page.locator('text=Usamos cookies para mejorar tu experiencia.')
+    ).not.toBeVisible();
 
     // Clear session and cookies and navigate again
     await page.evaluate(() => sessionStorage.removeItem('allowed-terms-session'));
@@ -47,10 +54,15 @@ test.describe('Cookie consent E2E', () => {
     await page.goto('/');
 
     // Wait for bar to re-appear
-    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', { timeout: 60000 });
+    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', {
+      timeout: 60000,
+    });
 
     // Persistent accept: click the label to set the checkbox and accept persistently
-    await page.waitForSelector('label:has-text("Acepto la cláusula GDPR")', { state: 'visible', timeout: 60000 });
+    await page.waitForSelector('label:has-text("Acepto la cláusula GDPR")', {
+      state: 'visible',
+      timeout: 60000,
+    });
     await page.click('label:has-text("Acepto la cláusula GDPR")');
     await page.click('button:has-text("Aceptar cookies")');
 
@@ -63,13 +75,17 @@ test.describe('Cookie consent E2E', () => {
     await page.evaluate(() => sessionStorage.removeItem('allowed-terms-session'));
     await page.goto('/');
 
-    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', { timeout: 60000 });
+    await page.waitForSelector('text=Usamos cookies para mejorar tu experiencia.', {
+      timeout: 60000,
+    });
     await page.click('button:has-text("Cerrar")');
 
     // Dismiss should not set session flag
     const dismissed = await page.evaluate(() => sessionStorage.getItem('allowed-terms-session'));
     expect(dismissed).toBeNull();
-    await expect(page.locator('text=Usamos cookies para mejorar tu experiencia.')).not.toBeVisible();
+    await expect(
+      page.locator('text=Usamos cookies para mejorar tu experiencia.')
+    ).not.toBeVisible();
 
     // After navigation the bar should reappear
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });

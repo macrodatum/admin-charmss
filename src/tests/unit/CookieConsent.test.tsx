@@ -46,8 +46,6 @@ describe('CookieConsent', () => {
     expect(screen.queryByText(/Cláusula GDPR/i)).not.toBeInTheDocument();
   });
 
-
-
   it('hides bar when dismissed but does not persist session flag', async () => {
     (Cookies.get as unknown as Mock).mockImplementation((_k: string) => undefined);
     vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue({ content: 'gdpr content' } as any);

@@ -99,7 +99,9 @@ export default function CookieConsent() {
                 onClick={acceptPersistent}
                 disabled={!gdprPresent && !gdprAccepted}
                 className={`ml-auto px-4 py-2 rounded-lg text-sm text-white ${
-                  !gdprPresent && !gdprAccepted ? 'bg-gray-400 cursor-not-allowed' : 'bg-pink-600 hover:bg-pink-700'
+                  !gdprPresent && !gdprAccepted
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-pink-600 hover:bg-pink-700'
                 }`}
                 type="button"
               >
