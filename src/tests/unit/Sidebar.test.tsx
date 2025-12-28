@@ -14,5 +14,9 @@ describe('Sidebar', () => {
     const link = screen.getByText('Legales');
     expect(link).toBeInTheDocument();
     expect(link.closest('a')).toHaveAttribute('href', '/legals');
+
+    const giftsLink = screen.getByText('Gifts');
+    expect(giftsLink).toBeInTheDocument();
+    expect(giftsLink.closest('a')).toHaveAttribute('href', '/gifts');
   });
 });
