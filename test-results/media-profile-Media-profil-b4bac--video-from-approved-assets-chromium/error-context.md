@@ -1,0 +1,119 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - img "Charmss Admin" [ref=e7]
+      - paragraph [ref=e8]: Manage your platform with confidence
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - img [ref=e12]
+          - generic [ref=e17]: User Management
+        - generic [ref=e18]:
+          - img [ref=e20]
+          - generic [ref=e22]: Analytics Dashboard
+        - generic [ref=e23]:
+          - img [ref=e25]
+          - generic [ref=e27]: Security Controls
+        - generic [ref=e28]:
+          - img [ref=e30]
+          - generic [ref=e33]: System Configuration
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - heading "Welcome Back" [level=2] [ref=e38]
+        - paragraph [ref=e39]: Sign in to access your admin dashboard
+      - generic [ref=e40]:
+        - button "Continue with Google" [ref=e41]:
+          - img [ref=e42]
+          - generic [ref=e47]: Continue with Google
+        - button "Continue with Facebook" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: Continue with Facebook
+      - paragraph [ref=e53]:
+        - text: Al continuar aceptas nuestra
+        - button "Política de privacidad" [ref=e54]
+        - text: y los
+        - button "Términos y Condiciones de Uso - Livecharmss.com" [ref=e55]
+  - generic [ref=e58]:
+    - generic [ref=e59]:
+      - generic [ref=e60]: Usamos cookies para mejorar tu experiencia.
+      - generic [ref=e61]: Puedes leer la política y aceptar los términos.
+    - generic [ref=e62]:
+      - generic [ref=e63]: Cláusula GDPR
+      - generic [ref=e64]:
+        - heading "Política de Privacidad - [Nombre de tu Sitio de Streaming]" [level=1] [ref=e65]
+        - paragraph [ref=e66]:
+          - strong [ref=e67]: "Última actualización:"
+          - text: "[Fecha actual]"
+        - paragraph [ref=e68]:
+          - text: En
+          - strong [ref=e69]: "[Nombre de tu Sitio]"
+          - text: ", valoramos tu privacidad y nos comprometemos a proteger tus datos personales. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información cuando utilizas nuestro servicio de streaming."
+        - separator [ref=e70]
+        - heading "1. Información que Recopilamos" [level=3] [ref=e71]
+        - paragraph [ref=e72]: "Para ofrecerte la mejor experiencia, recopilamos los siguientes tipos de datos:"
+        - list [ref=e73]:
+          - listitem [ref=e74]:
+            - strong [ref=e75]: "Información de Registro:"
+            - text: Nombre de usuario, dirección de correo electrónico y contraseña cuando creas una cuenta.
+          - listitem [ref=e76]:
+            - strong [ref=e77]: "Información de Uso:"
+            - text: Historial de visualización, títulos buscados, tiempo de permanencia en el sitio y preferencias de contenido.
+          - listitem [ref=e78]:
+            - strong [ref=e79]: "Datos Técnicos:"
+            - text: Dirección IP, tipo de navegador, dispositivo utilizado y cookies para mejorar la navegación.
+          - listitem [ref=e80]:
+            - strong [ref=e81]: "Información de Pago (si aplica):"
+            - text: Si te suscribes a un plan premium, los pagos son procesados por terceros seguros (como PayPal o Stripe). Nosotros no almacenamos los datos completos de tu tarjeta de crédito.
+        - heading "2. Cómo Utilizamos tu Información" [level=3] [ref=e82]
+        - paragraph [ref=e83]: "Utilizamos los datos recolectados para:"
+        - list [ref=e84]:
+          - listitem [ref=e85]: Proporcionar y mantener nuestro servicio de streaming.
+          - listitem [ref=e86]: Personalizar las recomendaciones de contenido según tus gustos.
+          - listitem [ref=e87]: Enviar notificaciones sobre nuevos lanzamientos o cambios en el servicio.
+          - listitem [ref=e88]: Detectar y prevenir actividades fraudulentas o acceso no autorizado.
+        - heading "3. Cookies y Tecnologías de Seguimiento" [level=3] [ref=e89]
+        - paragraph [ref=e90]: Utilizamos cookies para recordar tu sesión y tus preferencias de configuración. Puedes desactivar las cookies en la configuración de tu navegador, pero ten en cuenta que algunas funciones del sitio podrían dejar de funcionar correctamente.
+        - heading "4. Compartir Información con Terceros" [level=3] [ref=e91]
+        - paragraph [ref=e92]: "No vendemos ni alquilamos tus datos personales. Sin embargo, podemos compartir información con:"
+        - list [ref=e93]:
+          - listitem [ref=e94]:
+            - strong [ref=e95]: "Proveedores de Servicios:"
+            - text: Empresas que nos ayudan con el alojamiento web, análisis de datos y procesamiento de pagos.
+          - listitem [ref=e96]:
+            - strong [ref=e97]: "Requerimientos Legales:"
+            - text: Si una autoridad judicial lo solicita para cumplir con la ley vigente.
+        - heading "5. Seguridad de los Datos" [level=3] [ref=e98]
+        - paragraph [ref=e99]: Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos. Sin embargo, recuerda que ningún método de transmisión por Internet es 100% seguro.
+        - heading "6. Tus Derechos" [level=3] [ref=e100]
+        - paragraph [ref=e101]: "Dependiendo de tu ubicación, tienes derecho a:"
+        - list [ref=e102]:
+          - listitem [ref=e103]: Acceder a los datos personales que tenemos sobre ti.
+          - listitem [ref=e104]: Solicitar la corrección o eliminación de tus datos.
+          - listitem [ref=e105]: Retirar tu consentimiento para el procesamiento de datos en cualquier momento.
+        - heading "7. Menores de Edad" [level=3] [ref=e106]
+        - paragraph [ref=e107]: Nuestro servicio no está dirigido a menores de [13/16] años sin el consentimiento de sus padres o tutores. Si descubrimos que hemos recopilado datos de un menor sin autorización, procederemos a eliminarlos.
+        - heading "8. Cambios en esta Política" [level=3] [ref=e108]
+        - paragraph [ref=e109]: Nos reservamos el derecho de actualizar esta Política de Privacidad en cualquier momento. Te notificaremos cualquier cambio importante publicando la nueva versión en este sitio.
+        - separator [ref=e110]
+        - heading "Contacto" [level=3] [ref=e111]
+        - paragraph [ref=e112]: "Si tienes preguntas sobre esta Política de Privacidad, puedes contactarnos en:"
+        - list [ref=e113]:
+          - listitem [ref=e114]:
+            - strong [ref=e115]: "Correo electrónico:"
+            - text: "["
+            - link "tu-email@dominio.com" [ref=e116] [cursor=pointer]:
+              - /url: mailto:tu-email@dominio.com
+            - text: "]"
+          - listitem [ref=e117]:
+            - strong [ref=e118]: "Sitio web:"
+            - text: "[URL de contacto]"
+      - generic [ref=e119]:
+        - checkbox "Acepto la cláusula GDPR" [ref=e120]
+        - generic [ref=e121]: Acepto la cláusula GDPR
+    - generic [ref=e122]:
+      - button "Leer política" [ref=e123]
+      - button "Aceptar cookies" [disabled] [ref=e124]
+      - button "Cerrar" [ref=e125]
+```

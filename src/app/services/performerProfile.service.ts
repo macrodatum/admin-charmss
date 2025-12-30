@@ -18,6 +18,22 @@ class PerformerProfileService {
       throw error;
     }
   }
+
+  /**
+   * Update performer profile partial fields (e.g., videoAssetId, profileAssetId)
+   */
+  async updatePerformerProfile(
+    performerId: string | number,
+    data: Partial<PerformerProfile>
+  ): Promise<PerformerProfile> {
+    try {
+      const response = await ApiClient.patch<PerformerProfile>(`${BASE}/${performerId}/profile`, data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating profile for performer ${performerId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new PerformerProfileService();

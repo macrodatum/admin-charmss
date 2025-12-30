@@ -102,6 +102,18 @@ const getPerformers = async (
   } as GetPerformersResponse;
 };
 
+/**
+ * Update performer by id. Accepts partial fields; commonly used to update avatar.
+ */
+const updatePerformer = async (
+  performerId: string | number,
+  data: Record<string, unknown>
+): Promise<void> => {
+  if (!performerId) throw new Error('performerId required');
+  await ApiClient.patch(`${BASE}/${performerId}`, data);
+};
+
 export default {
   getPerformers,
+  updatePerformer,
 };

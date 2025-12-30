@@ -14,6 +14,8 @@ import {
   PerformerProfile as PerformerProfileType,
 } from '../../app/types/performers.types';
 import PerformerProfileService from '../../app/services/performerProfile.service';
+import { getContentByPerformerProfileId } from '../../app/services/content.service';
+import PerformersService from '../../app/services/performers.service';
 
 interface PerformerProfileProps {
   performer: Performer | null;
@@ -44,6 +46,96 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
     videoCallRate: 18,
     streamingRate: 30,
   });
+
+  // Media selection states
+  interface LocalMediaItem {
+    id: string;
+    type: 'photo' | 'video';
+    fileURL: string;
+    thumbnail?: string;
+    assetName?: string;
+    statusCode?: number;
+  }
+
+  const [mediaItems, setMediaItems] = useState<LocalMediaItem[]>([]);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignError, setAssignError] = useState<string | null>(null);
+  const [assignSuccess, setAssignSuccess] = useState<string | null>(null);
+  const [localAvatar, setLocalAvatar] = useState<string | undefined>(performer?.avatar_url);
+
+  // load media items for performer profile
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!performer?.performerProfile?.id) return setMediaItems([]);
+      try {
+        const resp = await getContentByPerformerProfileId(performer.performerProfile.id);
+        const items = resp?.items ?? [];
+        const mapped = items.map((it) => ({
+          id: String(it.id),
+          type: it.type as 'photo' | 'video',
+          fileURL: it.fileURL ?? it.fileURLThumb ?? '',
+          thumbnail: it.fileURLThumb ?? undefined,
+          assetName: it.assetName,
+          statusCode: it.status,
+        }));
+        if (mounted) setMediaItems(mapped);
+      } catch (error) {
+        console.error('Error loading media items:', error);
+        if (mounted) setMediaItems([]);
+      }
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [performer?.performerProfile?.id]);
+
+  const assignAvatar = async () => {
+    if (!selectedImageId || !performer?.id) return;
+    setAssignError(null);
+    setAssignSuccess(null);
+    setAssignLoading(true);
+    try {
+      const item = mediaItems.find((m) => m.id === selectedImageId);
+      if (!item) throw new Error('Asset not found');
+      // Update performer's avatar via PerformersService
+      await PerformersService.updatePerformer(performer.id, { avatar: item.fileURL });
+      setLocalAvatar(item.fileURL);
+      setAssignSuccess('Avatar asignado correctamente');
+    } catch (err) {
+      console.error(err);
+      setAssignError('Error asignando avatar');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const assignVideo = async () => {
+    if (!selectedVideoId || !performer?.id) return;
+    setAssignError(null);
+    setAssignSuccess(null);
+    setAssignLoading(true);
+    try {
+      const item = mediaItems.find((m) => m.id === selectedVideoId);
+      if (!item) throw new Error('Asset not found');
+      // Update performer profile's videoAssetId
+      await PerformerProfileService.updatePerformerProfile(performer.id, {
+        videoAssetId: Number(item.id),
+      });
+      // update local state
+      setProfileDataFromApi((prev) => (prev ? { ...prev, videoAssetId: Number(item.id) } : prev));
+      setAssignSuccess('Video asignado correctamente');
+    } catch (err) {
+      console.error(err);
+      setAssignError('Error asignando video');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
 
   // Cargar datos del perfil cuando se abre el modal
   useEffect(() => {
@@ -648,8 +740,129 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
             </div>
           )}
           {activeTab === 'media' && (
-            <div className="text-center py-8 text-gray-600">
-              <p>Media profile section - Coming soon</p>
+            <div className="space-y-6 text-gray-700">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Image profile</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Selecciona una única imagen Aprobada (status = 3) para asignarla como avatar.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/** Render approved photos */}
+                  {_profileDataFromApi &&
+                    mediaItems &&
+                    mediaItems
+                      .filter((m) => m.type === 'photo' && m.statusCode === 3)
+                      .map((m) => (
+                        <div
+                          key={m.id}
+                          className={`relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 border ${
+                            selectedImageId === m.id ? 'border-pink-600 border-2 ring-2 ring-pink-300' : 'border-gray-200'
+                          }`}
+                        >
+                          <img src={m.fileURL} alt={m.assetName} className="w-full h-40 object-cover" />
+                          <button
+                            onClick={() => setSelectedImageId(m.id)}
+                            className={`absolute bottom-0 left-0 right-0 py-2 text-sm font-medium transition-all duration-300 ${
+                              selectedImageId === m.id
+                                ? 'bg-pink-600 text-white'
+                                : 'bg-white bg-opacity-90 text-gray-700 hover:bg-pink-500 hover:text-white'
+                            }`}
+                          >
+                            {selectedImageId === m.id ? (
+                              <span className="flex items-center justify-center gap-1">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                Seleccionada
+                              </span>
+                            ) : (
+                              'Seleccionar'
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                </div>
+
+                <div className="mt-4">
+                  <button
+                    onClick={assignAvatar}
+                    disabled={!selectedImageId || assignLoading}
+                    className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+                  >
+                    {assignLoading ? 'Asignando...' : 'Asignar como avatar'}
+                  </button>
+                  {assignError && <p className="text-red-500 mt-2">{assignError}</p>}
+                  {assignSuccess && <p className="text-green-600 mt-2">{assignSuccess}</p>}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Video profile</h3>
+                <p className="text-sm text-gray-500 mb-4">Selecciona un video Aprobado para asignarlo como video del performer.</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {mediaItems &&
+                    mediaItems
+                      .filter((m) => m.type === 'video' && m.statusCode === 3)
+                      .map((m) => (
+                        <div
+                          key={m.id}
+                          className={`relative rounded-lg overflow-hidden bg-black shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${
+                            selectedVideoId === m.id ? 'border-pink-600 border-2 ring-2 ring-pink-300' : 'border-gray-300'
+                          }`}
+                        >
+                          <video 
+                            src={m.fileURL} 
+                            poster={m.thumbnail}
+                            controls
+                            className="w-full h-64 md:h-80 object-contain"
+                          >
+                            Tu navegador no soporta el elemento de video.
+                          </video>
+                          <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                            Video
+                          </div>
+                          <button
+                            onClick={() => setSelectedVideoId(m.id)}
+                            className={`absolute bottom-0 left-0 right-0 py-3 text-sm font-medium transition-all duration-300 ${
+                              selectedVideoId === m.id
+                                ? 'bg-pink-600 text-white'
+                                : 'bg-white bg-opacity-90 text-gray-700 hover:bg-pink-500 hover:text-white'
+                            }}`}
+                          >
+                            {selectedVideoId === m.id ? (
+                              <span className="flex items-center justify-center gap-1">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                Seleccionado
+                              </span>
+                            ) : (
+                              'Seleccionar'
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                </div>
+
+                <div className="mt-4">
+                  <button
+                    onClick={assignVideo}
+                    disabled={!selectedVideoId || assignLoading}
+                    className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+                  >
+                    {assignLoading ? 'Asignando...' : 'Asignar como video'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h4 className="font-semibold">Avatar actual</h4>
+                <div className="mt-2">
+                  <img src={localAvatar || performer?.avatar_url} alt="avatar" className="w-28 h-28 rounded-lg object-cover" />
+                </div>
+              </div>
             </div>
           )}
           {activeTab === 'sales' && renderSalesTab()}
