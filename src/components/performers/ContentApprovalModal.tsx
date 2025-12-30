@@ -47,21 +47,36 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
       try {
         const resp = await getContentByPerformerProfileId(performer.performerProfile.id);
         const items = resp?.items ?? [];
-        const mapped: MediaItem[] = items.map((it) => ({
-          id: String(it.id),
-          type: it.type as 'photo' | 'video',
-          url: it.fileURL ?? it.fileURLThumb ?? '',
-          thumbnail: it.fileURLThumb ?? undefined,
-          uploaded_date:
-            it.createdAt instanceof Date ? it.createdAt.toISOString() : String(it.createdAt),
-          status: 'pending', // default editorial status
-          title: it.assetName || it.description || '',
-          likes: (it.likes ?? 0) as number,
-          comments: (it.comments ?? 0) as number,
-          creator: it.creator ?? undefined,
-          duration: it.duration ?? undefined,
-          statusCode: it.status ?? undefined,
-        }));
+        const mapped: MediaItem[] = items.map((it) => {
+          // Map statusCode to editorial status: 1=pending, 2=rejected, 3=approved
+          const getEditorialStatus = (statusCode: number | undefined): 'pending' | 'approved' | 'rejected' => {
+            switch (statusCode) {
+              case 2:
+                return 'rejected';
+              case 3:
+                return 'approved';
+              case 1:
+              default:
+                return 'pending';
+            }
+          };
+
+          return {
+            id: String(it.id),
+            type: it.type as 'photo' | 'video',
+            url: it.fileURL ?? it.fileURLThumb ?? '',
+            thumbnail: it.fileURLThumb ?? undefined,
+            uploaded_date:
+              it.createdAt instanceof Date ? it.createdAt.toISOString() : String(it.createdAt),
+            status: getEditorialStatus(it.status),
+            title: it.assetName || it.description || '',
+            likes: (it.likes ?? 0) as number,
+            comments: (it.comments ?? 0) as number,
+            creator: it.creator ?? undefined,
+            duration: it.duration ?? undefined,
+            statusCode: it.status ?? undefined,
+          };
+        });
 
         if (mounted) setMediaItems(mapped);
       } catch {

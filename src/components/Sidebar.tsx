@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   Home,
-  DollarSign,
+  // DollarSign,
+  // Mail,
   Users,
-  Mail,
   HelpCircle,
   FileText,
-  LogOut,
+  //LogOut,
   X,
   Gift,
   Package,
@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
     { id: 'gifts', label: 'Gifts', icon: Gift, path: '/gifts' },
     { id: 'products', label: 'Products', icon: Package, path: '/products' },
     { id: 'packages', label: 'Packages', icon: Box, path: '/packages' },
-    { id: 'inbox', label: 'Inbox', icon: Mail, path: '/inbox' },
-    { id: 'payments', label: 'Payments', icon: DollarSign, path: '/payments' },
+    // { id: 'inbox', label: 'Inbox', icon: Mail, path: '/inbox' },
+    // { id: 'payments', label: 'Payments', icon: DollarSign, path: '/payments' },
     { id: 'legals', label: 'Legales', icon: FileText, path: '/legals' },
   ];
 
@@ -124,12 +124,6 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
                 </li>
               );
             })}
-            <li>
-              <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span className="text-sm">Logout</span>
-              </button>
-            </li>
           </ul>
         </div>
       </div>
