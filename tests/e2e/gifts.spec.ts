@@ -165,7 +165,6 @@ test('CRUD flow on gifts page (mocked API)', async ({ page }) => {
 
   // Verify server state directly
   const list = await page.evaluate(async () => await (await fetch('/api/gifts')).json());
-  // eslint-disable-next-line no-console
   console.log('gifts list after patch:', list);
   await expect(list[0].name).toBe('Rose Updated');
 

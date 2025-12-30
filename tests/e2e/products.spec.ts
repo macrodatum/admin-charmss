@@ -144,7 +144,7 @@ test.describe('Products CRUD', () => {
 
     // Click view button to see details
     const productCard = page.getByTestId('product-card-1');
-    await productCard.getByLabelText('Ver').click();
+    await productCard.getByRole('button', { name: 'Ver' }).click();
 
     // Check modal shows details
     await expect(page.getByText('Detalle del Producto')).toBeVisible();
@@ -155,10 +155,10 @@ test.describe('Products CRUD', () => {
     await page.getByRole('button', { name: 'Cerrar' }).first().click();
 
     // Click edit button
-    await productCard.getByLabelText('Editar').click();
+    await productCard.getByRole('button', { name: 'Editar' }).click();
 
     // Edit the name
-    await page.getByDisplayValue('Private Show Test').fill('Updated Private Show');
+    await page.locator('input[value="Private Show Test"]').fill('Updated Private Show');
 
     // Save changes
     await page.getByRole('button', { name: 'Guardar' }).click();
@@ -167,7 +167,7 @@ test.describe('Products CRUD', () => {
     await expect(page.getByText('Updated Private Show')).toBeVisible();
 
     // Click delete button
-    await productCard.getByLabelText('Borrar').click();
+    await productCard.getByRole('button', { name: 'Borrar' }).click();
 
     // Confirm deletion in modal
     await expect(page.getByText('Confirmar Eliminación')).toBeVisible();

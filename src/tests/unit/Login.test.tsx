@@ -2,7 +2,9 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import Login from '../../pages/Login';
 import * as authService from '../../app/services/auth.service';
+import type { LoginConfig } from '../../app/services/auth.service';
 import LegalService from '../../app/services/legal.service';
+import type { LegalDocument } from '../../app/types/legal.types';
 import { vi } from 'vitest';
 
 const mockConfig = {
@@ -14,7 +16,7 @@ const mockConfig = {
 
 describe('Login page legal links', () => {
   beforeEach(() => {
-    vi.spyOn(authService, 'fetchLoginConfig').mockResolvedValue(mockConfig as any);
+    vi.spyOn(authService, 'fetchLoginConfig').mockResolvedValue(mockConfig as LoginConfig);
   });
 
   afterEach(() => {
@@ -32,7 +34,7 @@ describe('Login page legal links', () => {
       updatedAt: new Date().toISOString(),
     };
 
-    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue(doc as unknown as any);
+    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue(doc as LegalDocument);
 
     render(<Login />);
 

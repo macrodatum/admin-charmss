@@ -3,12 +3,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import GiftFormModal from './GiftFormModal';
 import GiftService from '../../app/services/gift.service';
 import type { Gift } from '../../app/types/gifts.types';
+import type { Mock } from 'vitest';
 
 vi.mock('../../app/services/gift.service');
 
 const mockService = GiftService as unknown as {
-  createGift: any;
-  updateGift: any;
+  createGift: Mock;
+  updateGift: Mock;
 };
 
 describe('GiftFormModal', () => {

@@ -30,11 +30,12 @@ describe('Gift Service', () => {
   it('should create gift via POST with FormData', async () => {
     const file = new File(['img'], 'img.png', { type: 'image/png' });
     const fileSound = new File(['snd'], 'snd.mp3', { type: 'audio/mpeg' });
-    const payload = { name: 'Rose Bouquet', description: 'Roses', price: 100, file, fileSound };
+    const payload: Parameters<typeof GiftService.createGift>[0] = { name: 'Rose Bouquet', description: 'Roses', price: 100, file, fileSound };
     const resp = { data: { id: 1, ...payload, createdAt: '2025-01-01', updatedAt: '2025-01-01' } };
     mockApiClient.post.mockResolvedValueOnce(resp as unknown);
 
-    const res = await GiftService.createGift(payload as any);
+    const res = await GiftService.createGift(payload);
+
 
     // Verifica que se use FormData
     const call = mockApiClient.post.mock.calls[0];
@@ -78,11 +79,12 @@ describe('Gift Service', () => {
   it('should update gift via PATCH with FormData', async () => {
     const id = 1;
     const file = new File(['img'], 'img.png', { type: 'image/png' });
-    const payload = { price: 80, file };
+    const payload: Parameters<typeof GiftService.updateGift>[1] = { price: 80, file };
     const updated: Gift = { id, name: 'Rose', price: 80 };
     mockApiClient.patch.mockResolvedValueOnce({ data: updated } as unknown);
 
-    const res = await GiftService.updateGift(id, payload as any);
+    const res = await GiftService.updateGift(id, payload);
+
 
     const call = mockApiClient.patch.mock.calls[0];
     expect(call[0]).toBe(`/api/gifts/${id}`);

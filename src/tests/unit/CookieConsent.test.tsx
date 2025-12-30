@@ -3,6 +3,7 @@ import CookieConsent from '../../components/CookieConsent';
 import Cookies from 'js-cookie';
 import LegalService from '../../app/services/legal.service';
 import { vi, type Mock } from 'vitest';
+import type { LegalDocument } from '../../app/types/legal.types';
 
 vi.mock('js-cookie');
 
@@ -13,7 +14,15 @@ describe('CookieConsent', () => {
 
   it('shows consent bar when cookies not present and requires checkbox', async () => {
     (Cookies.get as unknown as Mock).mockImplementation((_k: string) => undefined);
-    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue({ content: 'gdpr content' } as any);
+    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue({
+      id: 1,
+      name: 'gdpr',
+      content: 'gdpr content',
+      version: '1',
+      active: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as LegalDocument);
 
     render(<CookieConsent />);
 
@@ -48,7 +57,15 @@ describe('CookieConsent', () => {
 
   it('hides bar when dismissed but does not persist session flag', async () => {
     (Cookies.get as unknown as Mock).mockImplementation((_k: string) => undefined);
-    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue({ content: 'gdpr content' } as any);
+    vi.spyOn(LegalService, 'getLegalByName').mockResolvedValue({
+      id: 1,
+      name: 'gdpr',
+      content: 'gdpr content',
+      version: '1',
+      active: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as LegalDocument);
 
     sessionStorage.removeItem('allowed-terms-session');
 
