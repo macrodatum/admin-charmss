@@ -30,12 +30,17 @@ describe('Gift Service', () => {
   it('should create gift via POST with FormData', async () => {
     const file = new File(['img'], 'img.png', { type: 'image/png' });
     const fileSound = new File(['snd'], 'snd.mp3', { type: 'audio/mpeg' });
-    const payload: Parameters<typeof GiftService.createGift>[0] = { name: 'Rose Bouquet', description: 'Roses', price: 100, file, fileSound };
+    const payload: Parameters<typeof GiftService.createGift>[0] = {
+      name: 'Rose Bouquet',
+      description: 'Roses',
+      price: 100,
+      file,
+      fileSound,
+    };
     const resp = { data: { id: 1, ...payload, createdAt: '2025-01-01', updatedAt: '2025-01-01' } };
     mockApiClient.post.mockResolvedValueOnce(resp as unknown);
 
     const res = await GiftService.createGift(payload);
-
 
     // Verifica que se use FormData
     const call = mockApiClient.post.mock.calls[0];
@@ -84,7 +89,6 @@ describe('Gift Service', () => {
     mockApiClient.patch.mockResolvedValueOnce({ data: updated } as unknown);
 
     const res = await GiftService.updateGift(id, payload);
-
 
     const call = mockApiClient.patch.mock.calls[0];
     expect(call[0]).toBe(`/api/gifts/${id}`);

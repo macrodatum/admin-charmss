@@ -109,7 +109,7 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                     setFilePreview(URL.createObjectURL(file));
                   }
                 }}
-                onClick={e => {
+                onClick={(e) => {
                   if (e.target === e.currentTarget && imageInputRef.current) {
                     imageInputRef.current.click();
                   }
@@ -130,8 +130,8 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onClick={e => e.stopPropagation()}
-                  onChange={e => {
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
                       setFile(file);
@@ -188,7 +188,7 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                     setFileSoundPreview(URL.createObjectURL(file));
                   }
                 }}
-                onClick={e => {
+                onClick={(e) => {
                   if (e.target === e.currentTarget && soundInputRef.current) {
                     soundInputRef.current.click();
                   }
@@ -207,8 +207,8 @@ export default function GiftFormModal({ open, onClose, onSaved, initial }: Props
                   type="file"
                   accept="audio/*"
                   className="hidden"
-                  onClick={e => e.stopPropagation()}
-                  onChange={e => {
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
                       setFileSound(file);

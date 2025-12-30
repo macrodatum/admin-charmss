@@ -29,9 +29,7 @@ export default function ProductDetailModal({ product, open, onClose }: Props) {
         <div className="p-6 overflow-y-auto">
           <div className="space-y-4">
             <div>
-              <h4 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {product.name}
-              </h4>
+              <h4 className="text-2xl font-bold text-gray-900 dark:text-white">{product.name}</h4>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
