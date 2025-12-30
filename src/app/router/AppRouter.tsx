@@ -20,6 +20,7 @@ import Login from '../../pages/Login';
 import LegalTestPage from '../../pages/LegalTest';
 import Legals from '../../pages/Legals';
 import Gifts from '../../pages/Gifts';
+import Products from '../../pages/Products';
 
 const AppRouter: React.FC = () => {
   // Mock values for now - these would come from global state
@@ -82,6 +83,7 @@ const AppRouter: React.FC = () => {
                     <Route path="/studios" element={<Studios />} />
                     <Route path="/legals" element={<Legals />} />
                     <Route path="/gifts" element={<Gifts />} />
+                    <Route path="/products" element={<Products />} />
                     <Route
                       path="/help"
                       element={
