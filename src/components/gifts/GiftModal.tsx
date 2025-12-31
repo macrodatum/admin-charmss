@@ -12,7 +12,7 @@ export default function GiftModal({ gift, open, onClose }: Props) {
   if (!open || !gift) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="modal-backdrop-adaptive">
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
           <h3 className="text-lg font-bold">{gift.name}</h3>

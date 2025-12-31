@@ -447,7 +447,7 @@ export default function HelpModal({ onClose }: HelpModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="modal-backdrop-adaptive">
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
@@ -497,7 +497,7 @@ export default function HelpModal({ onClose }: HelpModalProps) {
           {/* Overlay for mobile when sidebar is open */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-[5] md:hidden"
+              className="overlay-backdrop z-[5] md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}

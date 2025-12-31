@@ -38,7 +38,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
   return (
     <>
       {/* Mobile Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={onClose} />
+      <div className="overlay-backdrop md:hidden" onClick={onClose} />
 
       {/* Notification Panel */}
       <div className="fixed md:absolute right-0 top-0 md:top-full md:mt-2 w-full md:w-96 h-full md:h-auto max-h-screen md:max-h-[500px] bg-slate-800 border-l md:border border-slate-700 md:rounded-lg shadow-xl z-50 flex flex-col">

@@ -34,7 +34,7 @@ const StreamingModal: React.FC<StreamingModalProps> = ({ performer, onClose }) =
   }, [isLive]);
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div className="modal-backdrop-dark">
       <div className="bg-slate-900 dark:bg-slate-900 rounded-lg w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">

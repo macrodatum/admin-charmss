@@ -68,7 +68,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   if (!currentStory) return null;
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+    <div className="modal-backdrop-dark">
       {/* Progress bars */}
       <div className="absolute top-4 left-4 right-4 flex space-x-1 z-10">
         {stories.map((_, index) => (

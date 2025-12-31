@@ -83,7 +83,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="modal-backdrop-adaptive">
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-slate-700 flex items-start justify-between gap-4">
           <div>
@@ -291,7 +291,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
 
       {confirmApprove && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black bg-opacity-50" />
+          <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-lg w-full z-10">
             <h3 className="text-lg font-semibold mb-4">Confirmar aprobación</h3>
             <p className="text-sm text-gray-600 mb-4">
@@ -314,7 +314,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
 
       {rejectModal && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black bg-opacity-50" />
+          <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-lg w-full z-10">
             <h3 className="text-lg font-semibold mb-4">Rechazar inscripción</h3>
             <p className="text-sm text-gray-600 mb-2">Indica la causa del rechazo</p>

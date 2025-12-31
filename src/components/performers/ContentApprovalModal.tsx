@@ -157,7 +157,7 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
   const rejectedCount = mediaItems.filter((item) => item.status === 'rejected').length;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="modal-backdrop-adaptive">
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
@@ -443,7 +443,7 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
       {/* Approve confirm modal */}
       {confirmApproveId && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black bg-opacity-50" />
+          <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-lg w-full z-10">
             <h3 className="text-lg font-semibold mb-4">Confirmar aprobación</h3>
             <p className="text-sm text-gray-600 mb-4">¿Deseas aprobar este asset?</p>
@@ -470,7 +470,7 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
       {/* Reject modal (reason textarea 255 chars required) */}
       {rejectModal && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black bg-opacity-50" />
+          <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-md w-full z-10">
             <h3 className="text-lg font-semibold mb-4">Rechazar asset</h3>
             <p className="text-sm text-gray-600 mb-2">
