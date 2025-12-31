@@ -5,13 +5,17 @@ import PerformerProfileService from '../../app/services/performerProfile.service
 import PerformersService from '../../app/services/performers.service';
 import * as ContentService from '../../app/services/content.service';
 import { vi } from 'vitest';
+import type { AlbumWithContentResponse } from '../../app/services/content.service';
+import type { PerformerProfile as PerformerProfileType } from '../../app/types/performers.types';
 
-const mockPerformer = {
+import type { Performer } from '../../app/types/performers.types';
+
+const mockPerformer: Performer = {
   id: '2',
   stage_name: 'Test Performer',
   avatar_url: 'https://example.com/old.jpg',
-  performerProfile: { id: 1 } as any,
-} as any;
+  performerProfile: { id: 1 },
+};
 
 describe('PerformerProfile - Media profile', () => {
   beforeEach(() => {
@@ -21,12 +25,24 @@ describe('PerformerProfile - Media profile', () => {
   it('loads approved images and allows assigning avatar', async () => {
     const assetsResp = {
       items: [
-        { id: 10, type: 'photo', fileURL: 'https://example.com/new.jpg', fileURLThumb: 'thumb', assetName: 'New Photo', status: 3 },
+        {
+          id: 10,
+          type: 'photo',
+          fileURL: 'https://example.com/new.jpg',
+          fileURLThumb: 'thumb',
+          assetName: 'New Photo',
+          status: 3,
+        },
       ],
     };
 
-    vi.spyOn(ContentService, 'getContentByPerformerProfileId').mockResolvedValue(assetsResp as any);
-    vi.spyOn(PerformerProfileService, 'getPerformerProfile').mockResolvedValue({ id: 1, nickName: 'x' } as any);
+    vi.spyOn(ContentService, 'getContentByPerformerProfileId').mockResolvedValue(
+      assetsResp as AlbumWithContentResponse
+    );
+    vi.spyOn(PerformerProfileService, 'getPerformerProfile').mockResolvedValue({
+      id: 1,
+      nickName: 'x',
+    } as PerformerProfileType);
 
     const updateSpy = vi.spyOn(PerformersService, 'updatePerformer').mockResolvedValue(undefined);
 
@@ -46,7 +62,9 @@ describe('PerformerProfile - Media profile', () => {
     const assignBtn = screen.getByRole('button', { name: /Asignar como avatar/i });
     fireEvent.click(assignBtn);
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalledWith('2', { avatar: 'https://example.com/new.jpg' }));
+    await waitFor(() =>
+      expect(updateSpy).toHaveBeenCalledWith('2', { avatar: 'https://example.com/new.jpg' })
+    );
 
     // Avatar image should update (localAvatar)
     expect(screen.getByAltText('avatar')).toHaveAttribute('src', 'https://example.com/new.jpg');
@@ -55,13 +73,27 @@ describe('PerformerProfile - Media profile', () => {
   it('loads approved videos and allows assigning video', async () => {
     const assetsResp = {
       items: [
-        { id: 55, type: 'video', fileURL: 'https://example.com/video.mp4', fileURLThumb: 'thumb', assetName: 'Demo Video', status: 3 },
+        {
+          id: 55,
+          type: 'video',
+          fileURL: 'https://example.com/video.mp4',
+          fileURLThumb: 'thumb',
+          assetName: 'Demo Video',
+          status: 3,
+        },
       ],
     };
 
-    vi.spyOn(ContentService, 'getContentByPerformerProfileId').mockResolvedValue(assetsResp as any);
-    vi.spyOn(PerformerProfileService, 'getPerformerProfile').mockResolvedValue({ id: 1, nickName: 'x' } as any);
-    const updateProfileSpy = vi.spyOn(PerformerProfileService, 'updatePerformerProfile').mockResolvedValue({} as any);
+    vi.spyOn(ContentService, 'getContentByPerformerProfileId').mockResolvedValue(
+      assetsResp as AlbumWithContentResponse
+    );
+    vi.spyOn(PerformerProfileService, 'getPerformerProfile').mockResolvedValue({
+      id: 1,
+      nickName: 'x',
+    } as PerformerProfileType);
+    const updateProfileSpy = vi
+      .spyOn(PerformerProfileService, 'updatePerformerProfile')
+      .mockResolvedValue({} as PerformerProfileType);
 
     render(<PerformerProfile performer={mockPerformer} onClose={() => {}} />);
 

@@ -34,8 +34,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       message: "Hi there! I'm currently live streaming! What brings you here today? 😊",
       time: '10:32 AM',
       type: 'message',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
     },
     {
       id: 2,
@@ -83,8 +82,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       message: 'Hey beautiful, are you available for a private show?',
       time: '10:30 AM',
       type: 'message',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
     },
     {
       id: 2,

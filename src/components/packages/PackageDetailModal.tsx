@@ -68,7 +68,8 @@ export default function PackageDetailModal({ paquete: pkg, open, onClose }: Prop
                         target.style.display = 'none';
                         if (!target.parentNode?.querySelector('.error-message')) {
                           const errorDiv = document.createElement('div');
-                          errorDiv.className = 'error-message text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50';
+                          errorDiv.className =
+                            'error-message text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50';
                           errorDiv.textContent = 'Error al cargar la imagen';
                           target.parentNode?.appendChild(errorDiv);
                         }

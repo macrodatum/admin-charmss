@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Save,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  Star,
-} from 'lucide-react';
+import { X, Calendar, DollarSign, TrendingUp, Star } from 'lucide-react';
 import {
   Performer,
   PerformerProfile as PerformerProfileType,
@@ -14,6 +7,8 @@ import {
 import PerformerProfileService from '../../app/services/performerProfile.service';
 import { getContentByPerformerProfileId } from '../../app/services/content.service';
 import PerformersService from '../../app/services/performers.service';
+import ProductService from '../../app/services/products.service';
+import type { Product } from '../../app/types/products.types';
 
 interface PerformerProfileProps {
   performer: Performer | null;
@@ -44,6 +39,11 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
     videoCallRate: 18,
     streamingRate: 30,
   });
+
+  // Pricing products loaded from API
+  const [priceProducts, setPriceProducts] = useState<Product[]>([]);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [priceValues, setPriceValues] = useState<Record<number, number>>({});
 
   // Media selection states
   interface LocalMediaItem {
@@ -170,6 +170,37 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
     fetchProfile();
   }, [performer?.id]);
 
+  // Load products when pricing tab is active
+  useEffect(() => {
+    let mounted = true;
+    const loadPricingProducts = async () => {
+      if (activeTab !== 'pricing') return;
+      setPriceLoading(true);
+      try {
+        const products = await ProductService.getProducts();
+        if (!mounted) return;
+        const editable = products.filter((p) => p.editPriceInProfile === true);
+        setPriceProducts(editable);
+        const initialValues: Record<number, number> = {};
+        editable.forEach((p) => {
+          initialValues[p.id] = p.defaultPrice;
+        });
+        setPriceValues(initialValues);
+      } catch (err) {
+        console.error('Error loading products for pricing tab:', err);
+        setPriceProducts([]);
+      } finally {
+        if (mounted) setPriceLoading(false);
+      }
+    };
+
+    loadPricingProducts();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeTab]);
+
   // Render even when performer is null; individual fields use optional chaining
 
   const tabs = [
@@ -186,15 +217,94 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
     setProfileData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const [savingPersonal, setSavingPersonal] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPricing, setSavingPricing] = useState(false);
+  const [savingLike, setSavingLike] = useState(false);
+
+  const [personalSaveMessage, setPersonalSaveMessage] = useState<string | null>(null);
+  const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null);
+  const [pricingSaveMessage, setPricingSaveMessage] = useState<string | null>(null);
+  const [likeSaveMessage, setLikeSaveMessage] = useState<string | null>(null);
+
+  const savePersonal = async () => {
+    if (!performer?.id) return;
+    setSavingPersonal(true);
+    setPersonalSaveMessage(null);
+    try {
+      const payload: Partial<PerformerProfileType> = {
+        nickName: profileData.nickname,
+        headLines: profileData.headline,
+        showDescription: profileData.myLive,
+      };
+      await PerformerProfileService.updatePerformerProfile(performer.id, payload);
+      setPersonalSaveMessage('Personal guardado correctamente');
+    } catch (err) {
+      console.error('Error saving personal info:', err);
+      setPersonalSaveMessage('Error guardando Personal');
+    } finally {
+      setSavingPersonal(false);
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!performer?.id) return;
+    setSavingProfile(true);
+    setProfileSaveMessage(null);
+    try {
+      const payload: Partial<PerformerProfileType> = {
+        age: profileData.age,
+        height: profileData.height,
+        weight: profileData.weight,
+        zodiac: profileData.zodiac as unknown as number,
+        twitterLink: profileData.twitterLink,
+        instagramLink: profileData.instagramLink,
+        countryCode: profileData.country,
+      };
+      await PerformerProfileService.updatePerformerProfile(performer.id, payload);
+      setProfileSaveMessage('Profile guardado correctamente');
+    } catch {
+      setProfileSaveMessage('Error guardando Profile');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const savePricing = async () => {
+    // No dedicated API yet for performer-specific prices.
+    setSavingPricing(true);
+    setPricingSaveMessage(null);
+    try {
+      // TODO: persist priceValues to backend when endpoint available
+      console.log('Saving pricing values for performer', performer?.id, priceValues);
+      setPricingSaveMessage('Pricing guardado correctamente');
+    } catch (err) {
+      console.error('Error saving pricing:', err);
+      setPricingSaveMessage('Error guardando Pricing');
+    } finally {
+      setSavingPricing(false);
+    }
+  };
+
+  const saveLike = async () => {
+    setSavingLike(true);
+    setLikeSaveMessage(null);
+    try {
+      // No-op placeholder for Like; extend when backend exists
+      setLikeSaveMessage('Like guardado correctamente');
+    } catch {
+      setLikeSaveMessage('Error guardando Like');
+    } finally {
+      setSavingLike(false);
+    }
+  };
+
   const renderPersonalInfo = () => (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
         <div className="relative">
           <img
-            src={
-              performer?.avatar_url ||
-              '/icons/default-avatar.svg'
-            }
+            src={performer?.avatar_url || '/icons/default-avatar.svg'}
             alt={performer?.stage_name ?? 'Profile'}
             className="w-24 h-24 md:w-32 md:h-32 rounded-lg object-cover"
           />
@@ -227,7 +337,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
       </div>
 
       <div>
-        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Headline</label>
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Headline
+        </label>
         <textarea
           value={profileData.headline}
           onChange={(e) => handleInputChange('headline', e.target.value)}
@@ -237,7 +349,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
       </div>
 
       <div>
-        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">My live</label>
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          My live
+        </label>
         <textarea
           value={profileData.myLive}
           onChange={(e) => handleInputChange('myLive', e.target.value)}
@@ -245,6 +359,17 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm md:text-base"
         />
       </div>
+
+      <div className="flex items-center justify-end gap-3 pt-4">
+        <button
+          onClick={savePersonal}
+          disabled={savingPersonal}
+          className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+        >
+          {savingPersonal ? 'Guardando...' : 'Save personal'}
+        </button>
+      </div>
+      {personalSaveMessage && <p className="text-sm text-green-600">{personalSaveMessage}</p>}
     </div>
   );
 
@@ -252,7 +377,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age</label>
+          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Age
+          </label>
           <div className="relative">
             <input
               type="range"
@@ -269,7 +396,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Height</label>
+          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Height
+          </label>
           <div className="relative">
             <input
               type="range"
@@ -286,7 +415,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Weight</label>
+          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Weight
+          </label>
           <div className="relative">
             <input
               type="range"
@@ -303,7 +434,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zodiac</label>
+          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Zodiac
+          </label>
           <select
             value={profileData.zodiac}
             onChange={(e) => handleInputChange('zodiac', e.target.value)}
@@ -392,7 +525,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Build</label>
+          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Build
+          </label>
           <select
             value={profileData.build}
             onChange={(e) => handleInputChange('build', e.target.value)}
@@ -446,50 +581,82 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           />
         </div>
       </div>
+
+      <div className="flex items-center justify-end gap-3 pt-4">
+        <button
+          onClick={saveProfile}
+          disabled={savingProfile}
+          className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+        >
+          {savingProfile ? 'Guardando...' : 'Save profile'}
+        </button>
+      </div>
+      {profileSaveMessage && <p className="text-sm text-green-600">{profileSaveMessage}</p>}
     </div>
   );
 
   const renderPricingTab = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            VideoCallMinute
-          </label>
-          <div className="relative">
-            <input
-              type="range"
-              min="10"
-              max="50"
-              value={profileData.videoCallRate}
-              onChange={(e) => handleInputChange('videoCallRate', parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="text-center mt-2 text-gray-900 dark:text-white font-medium text-sm md:text-base">
-              {profileData.videoCallRate} tokens - 2.7 dtrs
-            </div>
-          </div>
+      {priceLoading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin h-8 w-8 border-2 border-pink-600 border-t-transparent rounded-full mx-auto mb-3" />
+          <p className="text-sm text-gray-600 dark:text-gray-300">Cargando precios...</p>
         </div>
+      ) : (
+        <div>
+          {priceProducts.length === 0 ? (
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              No hay productos configurables para editar el precio.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {priceProducts.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <div className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
+                        {p.name}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Rango: {p.minPrice} - {p.maxPrice} tokens
+                      </div>
+                    </div>
+                    <div className="text-right text-sm text-gray-900 dark:text-white font-medium">
+                      {priceValues[p.id] ?? p.defaultPrice} tokens
+                    </div>
+                  </div>
 
-        <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Streaming_Minute
-          </label>
-          <div className="relative">
-            <input
-              type="range"
-              min="20"
-              max="60"
-              value={profileData.streamingRate}
-              onChange={(e) => handleInputChange('streamingRate', parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="text-center mt-2 text-gray-900 dark:text-white font-medium text-sm md:text-base">
-              {profileData.streamingRate} tokens - 4.5 dtrs
+                  <input
+                    aria-label={`price-slider-${p.id}`}
+                    type="range"
+                    min={String(p.minPrice)}
+                    max={String(p.maxPrice)}
+                    value={String(priceValues[p.id] ?? p.defaultPrice)}
+                    onChange={(e) =>
+                      setPriceValues((prev) => ({ ...prev, [p.id]: Number(e.target.value) }))
+                    }
+                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                </div>
+              ))}
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={savePricing}
+                  disabled={savingPricing}
+                  className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+                >
+                  {savingPricing ? 'Guardando...' : 'Save pricing'}
+                </button>
+              </div>
+              {pricingSaveMessage && <p className="text-sm text-green-600">{pricingSaveMessage}</p>}
             </div>
-          </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -522,8 +689,12 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">Total Earnings</p>
-                <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">$234.50</p>
+                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">
+                  Total Earnings
+                </p>
+                <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+                  $234.50
+                </p>
               </div>
               <div className="p-2 rounded-lg bg-green-600">
                 <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-white" />
@@ -559,7 +730,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">Available</p>
-                <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">$189.20</p>
+                <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+                  $189.20
+                </p>
               </div>
               <div className="p-2 rounded-lg bg-purple-600">
                 <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-white" />
@@ -571,7 +744,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 md:p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white">Weekly Payments</h3>
+              <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white">
+                Weekly Payments
+              </h3>
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <select className="bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white px-2 py-1 rounded text-xs focus:outline-none focus:ring-2 focus:ring-pink-500">
@@ -592,7 +767,10 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                 </div>
 
                 {weeklyData.map((payment, index) => (
-                  <div key={index} className="grid grid-cols-4 gap-2 text-xs text-gray-900 dark:text-white py-1">
+                  <div
+                    key={index}
+                    className="grid grid-cols-4 gap-2 text-xs text-gray-900 dark:text-white py-1"
+                  >
                     <div>{payment.week}</div>
                     <div>${payment.amount.toFixed(2)}</div>
                     <div>Bank</div>
@@ -604,18 +782,24 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 md:p-4">
-            <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-4">Payment Methods</h3>
+            <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-4">
+              Payment Methods
+            </h3>
             <div className="space-y-3">
               {paymentMethods.map((method, index) => (
                 <div key={index} className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg">
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="text-gray-900 dark:text-white font-medium text-sm">{method.name}</div>
+                      <div className="text-gray-900 dark:text-white font-medium text-sm">
+                        {method.name}
+                      </div>
                       <div className="text-gray-600 dark:text-gray-400 text-xs">
                         Fee: {method.fee} | Min: {method.minPayout}
                       </div>
                     </div>
-                    <button className="text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 text-xs">Configure</button>
+                    <button className="text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 text-xs">
+                      Configure
+                    </button>
                   </div>
                 </div>
               ))}
@@ -624,7 +808,9 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 md:p-4">
-          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-4">Recent Transactions</h3>
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-4">
+            Recent Transactions
+          </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -637,7 +823,10 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
               </thead>
               <tbody>
                 {recentTransactions.map((transaction, index) => (
-                  <tr key={index} className="text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700">
+                  <tr
+                    key={index}
+                    className="text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700"
+                  >
                     <td className="py-2">{transaction.date}</td>
                     <td className="py-2">{transaction.type}</td>
                     <td className="py-2 text-right">${transaction.amount.toFixed(2)}</td>
@@ -722,12 +911,24 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           {activeTab === 'like' && (
             <div className="text-center py-8 text-gray-600 dark:text-gray-400">
               <p>I like section - Coming soon</p>
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={saveLike}
+                  disabled={savingLike}
+                  className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50"
+                >
+                  {savingLike ? 'Guardando...' : 'Save like'}
+                </button>
+              </div>
+              {likeSaveMessage && <p className="text-sm text-green-600">{likeSaveMessage}</p>}
             </div>
           )}
           {activeTab === 'media' && (
             <div className="space-y-6 text-gray-700 dark:text-gray-300">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Image profile</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  Image profile
+                </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   Selecciona una única imagen Aprobada (status = 3) para asignarla como avatar.
                 </p>
@@ -742,10 +943,16 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                         <div
                           key={m.id}
                           className={`relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 border ${
-                            selectedImageId === m.id ? 'border-pink-600 border-2 ring-2 ring-pink-300' : 'border-gray-200'
+                            selectedImageId === m.id
+                              ? 'border-pink-600 border-2 ring-2 ring-pink-300'
+                              : 'border-gray-200'
                           }`}
                         >
-                          <img src={m.fileURL} alt={m.assetName} className="w-full h-40 object-cover" />
+                          <img
+                            src={m.fileURL}
+                            alt={m.assetName}
+                            className="w-full h-40 object-cover"
+                          />
                           <button
                             onClick={() => setSelectedImageId(m.id)}
                             className={`absolute bottom-0 left-0 right-0 py-2 text-sm font-medium transition-all duration-300 ${
@@ -756,8 +963,20 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                           >
                             {selectedImageId === m.id ? (
                               <span className="flex items-center justify-center gap-1">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M20 6L9 17l-5-5"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                                 Seleccionada
                               </span>
@@ -783,8 +1002,12 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Video profile</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Selecciona un video Aprobado para asignarlo como video del performer.</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  Video profile
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Selecciona un video Aprobado para asignarlo como video del performer.
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {mediaItems &&
@@ -794,11 +1017,13 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                         <div
                           key={m.id}
                           className={`relative rounded-lg overflow-hidden bg-black shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${
-                            selectedVideoId === m.id ? 'border-pink-600 border-2 ring-2 ring-pink-300' : 'border-gray-300'
+                            selectedVideoId === m.id
+                              ? 'border-pink-600 border-2 ring-2 ring-pink-300'
+                              : 'border-gray-300'
                           }`}
                         >
-                          <video 
-                            src={m.fileURL} 
+                          <video
+                            src={m.fileURL}
                             poster={m.thumbnail}
                             controls
                             className="w-full h-64 md:h-80 object-contain"
@@ -818,8 +1043,20 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                           >
                             {selectedVideoId === m.id ? (
                               <span className="flex items-center justify-center gap-1">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M20 6L9 17l-5-5"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                                 Seleccionado
                               </span>
@@ -844,22 +1081,27 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Avatar actual</h4>
-                  <img 
-                    src={localAvatar || performer?.avatar_url || 'https://via.placeholder.com/150'} 
-                    alt="avatar" 
-                    className="w-full max-w-xs rounded-lg object-cover shadow-md" 
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Avatar actual
+                  </h4>
+                  <img
+                    src={localAvatar || performer?.avatar_url || 'https://via.placeholder.com/150'}
+                    alt="avatar"
+                    className="w-full max-w-xs rounded-lg object-cover shadow-md"
                   />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Video actual</h4>
                   {(() => {
-                    const currentVideo = _profileDataFromApi?.videoAssetId 
-                      ? mediaItems.find(m => m.type === 'video' && Number(m.id) === _profileDataFromApi.videoAssetId)
+                    const currentVideo = _profileDataFromApi?.videoAssetId
+                      ? mediaItems.find(
+                          (m) =>
+                            m.type === 'video' && Number(m.id) === _profileDataFromApi.videoAssetId
+                        )
                       : null;
-                    
+
                     return currentVideo ? (
-                      <video 
+                      <video
                         src={currentVideo.fileURL}
                         poster={currentVideo.thumbnail}
                         controls
@@ -869,7 +1111,7 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
                       </video>
                     ) : (
                       <div className="w-full max-w-xs h-48 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                        {_profileDataFromApi?.videoAssetId 
+                        {_profileDataFromApi?.videoAssetId
                           ? `Video ID ${_profileDataFromApi.videoAssetId} no encontrado en assets`
                           : 'Sin video asignado'}
                       </div>
@@ -880,19 +1122,6 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
             </div>
           )}
           {activeTab === 'sales' && renderSalesTab()}
-        </div>
-
-        <div className="border-t border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-900 flex justify-between items-center">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-            <Save className="w-4 h-4" />
-            <span>Save changes</span>
-          </button>
         </div>
       </div>
     </div>

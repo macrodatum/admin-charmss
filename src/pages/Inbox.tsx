@@ -42,8 +42,7 @@ const Inbox: React.FC = () => {
       isStarred: true,
       hasAttachment: false,
       type: 'message',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       priority: 'normal',
     },
     {
@@ -60,8 +59,7 @@ const Inbox: React.FC = () => {
       isStarred: false,
       hasAttachment: true,
       type: 'videocall',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       priority: 'high',
       attachments: [
         { name: 'video_call_receipt.pdf', size: '245 KB', type: 'pdf' },
@@ -82,8 +80,7 @@ const Inbox: React.FC = () => {
       isStarred: true,
       hasAttachment: false,
       type: 'videocall',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       priority: 'normal',
     },
     {
@@ -120,8 +117,7 @@ const Inbox: React.FC = () => {
       isStarred: false,
       hasAttachment: false,
       type: 'model',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       priority: 'normal',
     },
   ]);

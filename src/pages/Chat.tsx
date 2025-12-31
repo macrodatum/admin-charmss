@@ -9,8 +9,7 @@ const Chat: React.FC = () => {
     {
       id: 1,
       name: 'dancequeen',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       lastMessage: 'Thanks for the amazing show! 💕',
       time: '10:32 AM',
       unread: 2,
@@ -21,8 +20,7 @@ const Chat: React.FC = () => {
     {
       id: 2,
       name: 'viewer123',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       lastMessage: 'Are you available for a private show?',
       time: '10:33 AM',
       unread: 0,
@@ -32,8 +30,7 @@ const Chat: React.FC = () => {
     {
       id: 3,
       name: 'premium_fan',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       lastMessage: 'Can we schedule another session?',
       time: '9:45 AM',
       unread: 1,
@@ -43,8 +40,7 @@ const Chat: React.FC = () => {
     {
       id: 4,
       name: 'Live Stream Chat',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       lastMessage: 'Welcome everyone! 🎉',
       time: '9:30 AM',
       unread: 15,

@@ -49,7 +49,9 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
         const items = resp?.items ?? [];
         const mapped: MediaItem[] = items.map((it) => {
           // Map statusCode to editorial status: 1=pending, 2=rejected, 3=approved
-          const getEditorialStatus = (statusCode: number | undefined): 'pending' | 'approved' | 'rejected' => {
+          const getEditorialStatus = (
+            statusCode: number | undefined
+          ): 'pending' | 'approved' | 'rejected' => {
             switch (statusCode) {
               case 2:
                 return 'rejected';

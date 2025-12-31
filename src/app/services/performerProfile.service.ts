@@ -27,7 +27,10 @@ class PerformerProfileService {
     data: Partial<PerformerProfile>
   ): Promise<PerformerProfile> {
     try {
-      const response = await ApiClient.patch<PerformerProfile>(`${BASE}/${performerId}/profile`, data);
+      const response = await ApiClient.patch<PerformerProfile>(
+        `${BASE}/${performerId}/profile`,
+        data
+      );
       return response.data;
     } catch (error) {
       console.error(`Error updating profile for performer ${performerId}:`, error);

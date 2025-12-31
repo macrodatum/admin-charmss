@@ -120,10 +120,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src={
-                performer.avatar_url ||
-                '/icons/default-avatar.svg'
-              }
+              src={performer.avatar_url || '/icons/default-avatar.svg'}
               alt={performer.stage_name}
               className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
             />

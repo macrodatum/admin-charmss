@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Request } from '@playwright/test';
 
 test.describe('Media profile tab E2E', () => {
   test('assign avatar and video from approved assets', async ({ page }) => {
@@ -79,7 +80,7 @@ test.describe('Media profile tab E2E', () => {
     });
 
     // Capture patch requests
-    let performerPatchRequest: any = null;
+    let performerPatchRequest: Request | null = null;
     await page.route('**/api/performers/2', (route) => {
       if (route.request().method() === 'PATCH') {
         performerPatchRequest = route.request();
@@ -89,7 +90,7 @@ test.describe('Media profile tab E2E', () => {
       }
     });
 
-    let profilePatchRequest: any = null;
+    let profilePatchRequest: Request | null = null;
     await page.route('**/api/performers/2/profile', (route) => {
       if (route.request().method() === 'PATCH') {
         profilePatchRequest = route.request();
@@ -119,7 +120,7 @@ test.describe('Media profile tab E2E', () => {
 
     // Wait for PATCH request
     await page.waitForRequest('**/api/performers/2');
-    const body = JSON.parse(await performerPatchRequest.postData() || '{}');
+    const body = JSON.parse((await performerPatchRequest.postData()) || '{}');
     expect(body).toEqual({ avatar: 'https://example.com/approved-photo.jpg' });
 
     // Select approved video and assign video
@@ -127,7 +128,7 @@ test.describe('Media profile tab E2E', () => {
     await page.locator('button:has-text("Asignar como video")').click();
 
     await page.waitForRequest('**/api/performers/2/profile');
-    const profileBody = JSON.parse(await profilePatchRequest.postData() || '{}');
+    const profileBody = JSON.parse((await profilePatchRequest.postData()) || '{}');
     expect(profileBody).toEqual({ videoAssetId: 20 });
   });
 });

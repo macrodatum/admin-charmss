@@ -12,16 +12,14 @@ const VideoCall: React.FC = () => {
     {
       id: 1,
       user: 'premium_fan',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       rate: '$2.7/min',
       waiting: '2 min',
     },
     {
       id: 2,
       user: 'viewer123',
-      avatar:
-        '/icons/default-avatar.svg',
+      avatar: '/icons/default-avatar.svg',
       rate: '$2.7/min',
       waiting: '1 min',
     },

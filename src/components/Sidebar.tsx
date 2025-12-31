@@ -47,10 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
     <>
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div
-          className="overlay-backdrop md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="overlay-backdrop md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
