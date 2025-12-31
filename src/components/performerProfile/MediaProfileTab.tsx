@@ -31,6 +31,32 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
   const [localAvatar, setLocalAvatar] = useState<string | null>(performer?.avatar || null);
   const [localVideo, setLocalVideo] = useState<string | null>(performer?.video ?? null);
   const [profileData, setProfileData] = useState<PerformerProfile | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'image' | 'video' | null>(null);
+  const [modalSrc, setModalSrc] = useState<string | null>(null);
+
+  const openModal = (type: 'image' | 'video', src: string) => {
+    setModalType(type);
+    setModalSrc(src);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalType(null);
+    setModalSrc(null);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    if (modalOpen) {
+      document.addEventListener('keydown', onKey);
+      return () => document.removeEventListener('keydown', onKey);
+    }
+    return;
+  }, [modalOpen]);
 
   // Cargar media items al montar
   useEffect(() => {
@@ -172,7 +198,8 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                   <img
                     src={img.fileURL}
                     alt={img.assetName || 'Image'}
-                    className="w-full h-40 object-cover"
+                    className="w-full h-36 object-cover cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); openModal('image', img.fileURL); }}
                   />
                   {selectedImageId === img.id && (
                     <div className="absolute bottom-0 left-0 right-0 bg-pink-600 text-white py-2 text-sm font-medium flex items-center justify-center gap-1">
@@ -215,7 +242,7 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
               {approvedVideos.map((vid) => (
                 <div
                   key={vid.id}
@@ -228,11 +255,17 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                   <video
                     src={vid.fileURL}
                     poster={vid.thumbnail}
-                    controls
-                    className="w-full h-64 md:h-80 object-contain"
+                    className="w-full h-36 object-cover bg-black"
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); openModal('video', vid.fileURL); }}
+                    role="button"
+                    aria-label="Previsualizar video"
                   >
-                    Tu navegador no soporta el elemento de video.
-                  </video>
+                    <div className="bg-black bg-opacity-60 text-white rounded-full p-3 text-xl select-none">▶</div>
+                  </div>
                   <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
                     Video
                   </div>
@@ -276,7 +309,8 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
             <img
               src={localAvatar || 'https://via.placeholder.com/150'}
               alt="avatar"
-              className="w-full max-w-xs rounded-lg object-cover shadow-md"
+              className="w-full max-w-xs h-36 rounded-lg object-cover shadow-md cursor-pointer"
+              onClick={() => localAvatar && openModal('image', localAvatar)}
             />
           </div>
           <div>
@@ -288,11 +322,12 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                 <video
                   src={videoUrl}
                   controls
-                  className="w-full max-w-xs h-64 rounded-lg object-contain bg-black shadow-md"
+                  className="w-full max-w-xs h-36 rounded-lg object-contain bg-black shadow-md cursor-pointer"
+                  onClick={() => openModal('video', String(videoUrl))}
                 >
                   Tu navegador no soporta el elemento de video.
                 </video>
-              ) : (                <div className="w-full max-w-xs h-48 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm p-4">
+              ) : (                <div className="w-full max-w-xs h-36 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm p-4">
                   Sin video asignado
                 </div>
               );
@@ -300,6 +335,33 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
           </div>
         </div>
       </div>
+
+      {modalOpen && modalSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={closeModal}
+        >
+          <div
+            className="relative w-full max-w-3xl mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              className="absolute -top-3 -right-3 bg-white text-gray-700 rounded-full p-2 shadow-md hover:bg-gray-100"
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+            {modalType === 'image' ? (
+              <img src={modalSrc} alt="Preview" className="w-full max-h-[80vh] object-contain rounded" />
+            ) : (
+              <video src={modalSrc} controls autoPlay className="w-full max-h-[80vh] object-contain rounded bg-black" />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
