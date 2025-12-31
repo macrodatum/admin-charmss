@@ -66,13 +66,7 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
 
         <div className="p-6">
           {activeTab === 'personal' && (
-            <PersonalInformationTab
-              performerId={performer.id}
-              stageName={performer.stage_name}
-              avatarUrl={performer.avatar}
-              rating={performer.rating}
-              totalShows={performer.total_shows}
-            />
+            <PersonalInformationTab performer={performer} />
           )}
           {activeTab === 'profile' && <ProfileTab performerId={performer.id} />}
           {activeTab === 'like' && <LikeTab performerId={performer.id} />}

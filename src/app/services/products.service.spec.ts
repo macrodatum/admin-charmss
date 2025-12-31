@@ -161,4 +161,68 @@ describe('ProductService', () => {
       await expect(ProductService.deleteProduct(1)).rejects.toThrow('Delete failed');
     });
   });
+
+  describe('getPerformerProductByPerformerId', () => {
+    it('should return performer products when endpoint returns data', async () => {
+      const performerProducts = [
+        { id: 1, productId: 3, performerProfileId: 1, price: 1, lastUpdate: '2025-12-31T21:28:02.721Z', state: true, productName: 'Streaming minute' },
+      ];
+      vi.mocked(ApiClient.get).mockImplementation((url: string) => {
+        if ((url as string).includes('/performers/2/products')) {
+          return Promise.resolve({ data: performerProducts } as never);
+        }
+        return Promise.resolve({ data: [] } as never);
+      });
+
+      const res = await ProductService.getPerformerProductByPerformerId(2);
+
+      expect(ApiClient.get).toHaveBeenCalledWith('/api/performers/2/products');
+      expect(res).toEqual(performerProducts);
+    });
+
+    it('should fallback to configured products when performer endpoint returns empty', async () => {
+      const configured = [mockProduct];
+      // performer endpoint returns empty array
+      vi.mocked(ApiClient.get).mockImplementation((url: string) => {
+        if ((url as string).includes('/performers/3/products')) {
+          return Promise.resolve({ data: [] } as never);
+        }
+        // /api/products
+        return Promise.resolve({ data: configured } as never);
+      });
+
+      const res = await ProductService.getPerformerProductByPerformerId(3);
+
+      expect(ApiClient.get).toHaveBeenCalledWith('/api/performers/3/products');
+      expect(ApiClient.get).toHaveBeenCalledWith('/api/products');
+      expect(res).toEqual([
+        {
+          id: mockProduct.id,
+          productId: mockProduct.id,
+          performerProfileId: null,
+          price: mockProduct.defaultPrice,
+          lastUpdate: mockProduct.updatedAt,
+          state: true,
+          productName: mockProduct.name,
+        },
+      ]);
+    });
+
+    it('should fallback to configured products when performer endpoint errors', async () => {
+      const configured = [mockProduct];
+      vi.mocked(ApiClient.get).mockImplementation((url: string) => {
+        if ((url as string).includes('/performers/4/products')) {
+          return Promise.reject(new Error('Network error')) as never;
+        }
+        return Promise.resolve({ data: configured } as never);
+      });
+
+      const res = await ProductService.getPerformerProductByPerformerId(4);
+
+      expect(ApiClient.get).toHaveBeenCalledWith('/api/performers/4/products');
+      expect(ApiClient.get).toHaveBeenCalledWith('/api/products');
+      expect(res.length).toBe(1);
+      expect(res[0].productId).toBe(mockProduct.id);
+    });
+  });
 });

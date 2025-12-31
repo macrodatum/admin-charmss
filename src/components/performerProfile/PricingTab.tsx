@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductService from '../../app/services/products.service';
-import type { Product } from '../../app/types/products.types';
+import type { PerformerProduct } from '../../app/types/products.types';
 
 interface PricingTabProps {
   performerId: string;
@@ -8,52 +8,41 @@ interface PricingTabProps {
 
 export default function PricingTab({ performerId }: PricingTabProps) {
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [priceValues, setPriceValues] = useState<Record<number, number>>({});
+  // Use performer products directly (contains price/min/max/productName)
+  const [products, setProducts] = useState<PerformerProduct[]>([]);
 
-  // Cargar productos al montar
+
+  // Cargar productos al montar o cuando cambie el performerId
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        const allProducts = await ProductService.getProducts();
-        const editable = allProducts.filter((p) => p.editPriceInProfile === true);
-        setProducts(editable);
+        // Obtener productos específicos del performer (todos los datos vienen de aquí)
+        const performerProducts = await ProductService.getPerformerProductByPerformerId(performerId);
 
-        const initialValues: Record<number, number> = {};
-        editable.forEach((p) => {
-          initialValues[p.id] = p.defaultPrice;
-        });
-        setPriceValues(initialValues);
+        // Asegurarse de que cada producto tenga min/max/default; si faltan, añadir valores por defecto razonables
+        const normalized = performerProducts.map((pp) => ({
+          ...pp,
+          minPrice: pp.minPrice ?? Math.max(1, Math.floor(pp.price * 0.5)),
+          maxPrice: pp.maxPrice ?? Math.max(pp.price, Math.ceil(pp.price * 1.5)),
+          defaultPrice: pp.price,
+        }));
+
+        setProducts(normalized);
       } catch (err) {
         console.error('Error loading products for pricing tab:', err);
         setProducts([]);
+
       } finally {
         setLoading(false);
       }
     };
 
     loadProducts();
-  }, []);
+  }, [performerId]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setSaveMessage(null);
-    try {
-      // TODO: Implementar endpoint de backend cuando esté disponible
-      // await PerformerPricingService.updatePricing(performerId, priceValues);
-      console.log('Saving pricing values for performer', performerId, priceValues);
-      setSaveMessage('Pricing guardado correctamente');
-    } catch (err) {
-      console.error('Error saving pricing:', err);
-      setSaveMessage('Error guardando Pricing');
-    } finally {
-      setSaving(false);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -82,13 +71,13 @@ export default function PricingTab({ performerId }: PricingTabProps) {
           >
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">{p.name}</h4>
+                <h4 className="font-medium text-gray-900 dark:text-white">{p.productName}</h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {p.minPrice} - {p.maxPrice} tokens
                 </p>
               </div>
               <div className="text-right text-sm text-gray-900 dark:text-white font-medium">
-                {priceValues[p.id] ?? p.defaultPrice} tokens
+                {p.price} tokens
               </div>
             </div>
 
@@ -97,9 +86,11 @@ export default function PricingTab({ performerId }: PricingTabProps) {
               type="range"
               min={String(p.minPrice)}
               max={String(p.maxPrice)}
-              value={String(priceValues[p.id] ?? p.defaultPrice)}
+              value={String(p.price)}
               onChange={(e) =>
-                setPriceValues((prev) => ({ ...prev, [p.id]: Number(e.target.value) }))
+                setProducts((prev) =>
+                  prev.map((item) => (item.id === p.id ? { ...item, price: Number(e.target.value) } : item))
+                )
               }
               className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
             />
@@ -107,24 +98,8 @@ export default function PricingTab({ performerId }: PricingTabProps) {
         ))}
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-4">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-pink-600 text-white rounded-md disabled:opacity-50 hover:bg-pink-700 transition-colors"
-        >
-          {saving ? 'Guardando...' : 'Save pricing'}
-        </button>
-      </div>
-      {saveMessage && (
-        <p
-          className={`text-sm ${
-            saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'
-          }`}
-        >
-          {saveMessage}
-        </p>
-      )}
+
+
     </div>
   );
 }

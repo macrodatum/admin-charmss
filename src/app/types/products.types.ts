@@ -39,6 +39,18 @@ export interface PaginatedProductsResponse {
   totalPages: number;
 }
 
+export interface PerformerProduct {
+  id: number;
+  productId: number;
+  performerProfileId?: number | null;
+  price: number;
+  minPrice: number;
+  maxPrice: number;
+  lastUpdate?: string;
+  state: boolean;
+  productName?: string;
+}
+
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   [ProductType.PRIVATE_SHOW]: 'Show Privado',
   [ProductType.EXCLUSIVE_CONTENT]: 'Contenido Exclusivo',

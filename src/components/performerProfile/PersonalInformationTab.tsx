@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import PerformerProfileService from '../../app/services/performerProfile.service';
-import type { PerformerProfile as PerformerProfileType } from '../../app/types/performers.types';
+import type { PerformerProfile as PerformerProfileType, Performer } from '../../app/types/performers.types';
 
 interface PersonalInformationTabProps {
-  performerId: string;
-  stageName: string;
-  avatarUrl?: string;
-  rating?: number;
-  totalShows?: number;
+  performer: Performer;
 }
 
-export default function PersonalInformationTab({
-  performerId,
-  stageName,
-  avatarUrl,
-  rating = 0,
-  totalShows = 0,
-}: PersonalInformationTabProps) {
+export default function PersonalInformationTab({ performer }: PersonalInformationTabProps) {
+  const performerId = performer.id;
+  const stageName = performer.stage_name;
+  const avatarUrl = performer.avatar;
+  const rating = performer.rating ?? 0;
+  const totalShows = performer.total_shows ?? 0; 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -33,11 +28,11 @@ export default function PersonalInformationTab({
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const profile = await PerformerProfileService.getPerformerProfile(performerId);
+        const profile = performer.performerProfile;
         setFormData({
-          nickname: profile.nickName || stageName,
-          headline: profile.headLines || '',
-          myLive: profile.showDescription || 'Welcome! Share your story and connect with fans.',
+          nickname: profile?.nickName || stageName,
+          headline: profile?.headLines || '',
+          myLive: profile?.showDescription || 'Welcome! Share your story and connect with fans.',
         });
       } catch (error) {
         console.error('Error loading personal info:', error);
@@ -47,7 +42,7 @@ export default function PersonalInformationTab({
     };
 
     fetchProfile();
-  }, [performerId, stageName]);
+  }, []);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

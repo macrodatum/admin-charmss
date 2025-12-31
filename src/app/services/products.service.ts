@@ -103,6 +103,45 @@ class ProductService {
       throw err;
     }
   }
+
+  /**
+   * Returns the list of products configured for a given performer.
+   * If the performer has explicit products configured the endpoint
+   * `/api/performers/{id}/products` is used and its result is returned.
+   * If the endpoint returns no products or fails, the function falls back
+   * to returning the globally configured products mapped to the
+   * PerformerProduct shape (so the caller always receives a list).
+   */
+  async getPerformerProductByPerformerId(performerId: number | string): Promise<import('../types/products.types').PerformerProduct[]> {
+    try {
+      const resp = await ApiClient.get<import('../types/products.types').PerformerProduct[]>(`/api/performers/${performerId}/products`);
+      const data = resp?.data ?? [];
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch (err) {
+      // Log and fallback to configured products
+      console.error(`Error fetching performer products for ${performerId}:`, err);
+    }
+
+    // Fallback: return mapped configured products
+    try {
+      const configured = await this.getProducts();
+      return configured.map((p) => ({
+        id: p.id, // use product id as identifier when performer-specific entry is absent
+        productId: p.id,
+        performerProfileId: null,
+        price: p.defaultPrice,
+        minPrice: p.minPrice,
+        maxPrice: p.maxPrice,
+        lastUpdate: p.updatedAt ?? p.createdAt,
+        state: true,
+        productName: p.name,
+      }));
+    } catch (err) {
+      console.error('Error fetching configured products for fallback:', err);
+      // If even this fails, return empty array to keep return type consistent
+      return [];
+    }
+  }
 }
 
 export default new ProductService();

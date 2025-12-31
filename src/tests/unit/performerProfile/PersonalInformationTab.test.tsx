@@ -2,17 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import PersonalInformationTab from '../../../components/performerProfile/PersonalInformationTab';
 import PerformerProfileService from '../../../app/services/performerProfile.service';
+import type { Performer } from '../../../app/types/performers.types';
 
 vi.mock('../../../app/services/performerProfile.service');
 
 describe('PersonalInformationTab', () => {
-  const mockProps = {
-    performerId: '1',
-    stageName: 'TestPerformer',
-    avatarUrl: 'https://example.com/avatar.jpg',
+  const mockPerformer: Performer = {
+    id: '1',
+    full_name: 'Test Fullname',
+    stage_name: 'TestPerformer',
+    email: 'test@example.com',
+    avatar: 'https://example.com/avatar.jpg',
     rating: 4.5,
-    totalShows: 100,
-  };
+    total_shows: 100,
+    status: 'active',
+  }; 
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -25,7 +29,7 @@ describe('PersonalInformationTab', () => {
       showDescription: 'Test description',
     } as any);
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('TestPerformer')).toBeInTheDocument();
@@ -43,7 +47,7 @@ describe('PersonalInformationTab', () => {
 
     vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue(mockProfile as any);
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(PerformerProfileService.getPerformerProfile).toHaveBeenCalledWith('1');
@@ -60,7 +64,7 @@ describe('PersonalInformationTab', () => {
       showDescription: 'Test description',
     } as any);
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('TestNick')).toBeInTheDocument();
@@ -81,7 +85,7 @@ describe('PersonalInformationTab', () => {
 
     vi.mocked(PerformerProfileService.updatePerformerProfile).mockResolvedValue({} as any);
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('TestNick')).toBeInTheDocument();
@@ -112,7 +116,7 @@ describe('PersonalInformationTab', () => {
       new Error('Save failed')
     );
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('TestNick')).toBeInTheDocument();
@@ -131,7 +135,7 @@ describe('PersonalInformationTab', () => {
       () => new Promise(() => {})
     );
 
-    render(<PersonalInformationTab {...mockProps} />);
+    render(<PersonalInformationTab performer={mockPerformer} />);
 
     expect(screen.getByText('Cargando información personal...')).toBeInTheDocument();
   });
