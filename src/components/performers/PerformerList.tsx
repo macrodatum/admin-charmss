@@ -261,7 +261,7 @@ export default function PerformerList({
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <img
-                    src={performer.avatar_url || '/icons/default-avatar.svg'}
+                    src={performer.avatar || '/icons/default-avatar.svg'}
                     alt={performer.full_name || 'Avatar'}
                     className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-200 dark:ring-slate-600"
                   />
@@ -465,7 +465,7 @@ export default function PerformerList({
           >
             <div className="flex items-start gap-4">
               <img
-                src={performer.avatar_url || '/icons/default-avatar.svg'}
+                src={performer.avatar || '/icons/default-avatar.svg'}
                 alt={performer.full_name || 'Avatar'}
                 className="h-16 w-16 rounded-full object-cover ring-2 ring-gray-200 dark:ring-slate-600"
               />

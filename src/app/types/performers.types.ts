@@ -12,7 +12,8 @@ export interface Performer {
   stage_name: string;
   email: string;
   phone?: string;
-  avatar_url?: string;
+  avatar?: string;
+  video?: string;
   bio?: string;
   status: PerformerStatus;
   rating?: number;
@@ -50,6 +51,7 @@ export interface PerformerDto {
   commissionRate?: number | null;
   appUserId?: string | null;
   avatar?: string | null;
+  video?: string | null;
   rating?: number | null;
   shows?: number | null;
   performerProfile?: PerformerProfile | null;

@@ -36,7 +36,7 @@ const mapDto = (dto: PerformerDto): Performer => {
     stage_name: first || dto.email || `user-${dto.id}`,
     email: dto.email ?? '',
     phone: dto.phone ?? '',
-    avatar_url: dto.avatar ?? '',
+    avatar: dto.avatar ?? '',
     bio: '',
     status: mapStatus(dto.status),
     rating: dto.rating ?? 0,
@@ -55,6 +55,7 @@ const mapDto = (dto: PerformerDto): Performer => {
     studio_id: dto.studioId ?? undefined,
     app_user_id: dto.appUserId ?? undefined,
     performerProfile: dto.performerProfile ?? null,
+    video: dto.video ?? undefined,
   };
 };
 
@@ -103,6 +104,16 @@ const getPerformers = async (
 };
 
 /**
+ * Obtener performer por ID
+ */
+const getPerformer = async (performerId: string | number): Promise<Performer> => {
+  if (!performerId) throw new Error('performerId required');
+  const response = await ApiClient.get(`${BASE}/${performerId}`);
+  const dto = response.data as PerformerDto;
+  return mapDto(dto);
+};
+
+/**
  * Update performer by id. Accepts partial fields; commonly used to update avatar.
  */
 const updatePerformer = async (
@@ -131,6 +142,7 @@ const assignProfileAsset = async (
 
 export default {
   getPerformers,
+  getPerformer,
   updatePerformer,
   assignProfileAsset,
 };

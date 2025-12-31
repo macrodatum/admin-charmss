@@ -77,7 +77,7 @@ export default function PerformerDetail({ performer, onClose }: PerformerDetailP
           <div className="flex flex-col md:flex-row gap-6">
             <div className="shrink-0">
               <img
-                src={performer.avatar_url || '/icons/default-avatar.svg'}
+                src={performer.avatar || '/icons/default-avatar.svg'}
                 alt={performer.full_name}
                 className="w-32 h-32 md:w-48 md:h-48 rounded-lg object-cover ring-4 ring-gray-200"
               />

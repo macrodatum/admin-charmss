@@ -165,7 +165,7 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <img
-                src={performer.avatar_url}
+                src={performer.avatar}
                 alt={performer.stage_name}
                 className="w-16 h-16 rounded-full object-cover"
               />
