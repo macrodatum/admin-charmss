@@ -79,7 +79,7 @@ export default function PerformerDetail({ performer, onClose }: PerformerDetailP
               <img
                 src={
                   performer.avatar_url ||
-                  'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400'
+                  '/icons/default-avatar.svg'
                 }
                 alt={performer.full_name}
                 className="w-32 h-32 md:w-48 md:h-48 rounded-lg object-cover ring-4 ring-gray-200"

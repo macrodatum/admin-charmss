@@ -14,7 +14,7 @@ const Photos: React.FC = () => {
   const photos = [
     {
       id: 1,
-      url: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+      url: '/icons/default-avatar.svg',
       title: 'Sunset Portrait',
       category: 'premium',
       views: 892,
@@ -24,7 +24,7 @@ const Photos: React.FC = () => {
     },
     {
       id: 2,
-      url: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+      url: '/icons/default-avatar.svg',
       title: 'Studio Session',
       category: 'public',
       views: 456,
@@ -34,7 +34,7 @@ const Photos: React.FC = () => {
     },
     {
       id: 3,
-      url: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+      url: '/icons/default-avatar.svg',
       title: 'Fashion Shoot',
       category: 'premium',
       views: 743,
@@ -44,7 +44,7 @@ const Photos: React.FC = () => {
     },
     {
       id: 4,
-      url: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+      url: '/icons/default-avatar.svg',
       title: 'Behind the Scenes',
       category: 'private',
       views: 234,

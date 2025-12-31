@@ -10,7 +10,7 @@ const Chat: React.FC = () => {
       id: 1,
       name: 'dancequeen',
       avatar:
-        'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       lastMessage: 'Thanks for the amazing show! 💕',
       time: '10:32 AM',
       unread: 2,
@@ -22,7 +22,7 @@ const Chat: React.FC = () => {
       id: 2,
       name: 'viewer123',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       lastMessage: 'Are you available for a private show?',
       time: '10:33 AM',
       unread: 0,
@@ -33,7 +33,7 @@ const Chat: React.FC = () => {
       id: 3,
       name: 'premium_fan',
       avatar:
-        'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       lastMessage: 'Can we schedule another session?',
       time: '9:45 AM',
       unread: 1,
@@ -44,7 +44,7 @@ const Chat: React.FC = () => {
       id: 4,
       name: 'Live Stream Chat',
       avatar:
-        'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       lastMessage: 'Welcome everyone! 🎉',
       time: '9:30 AM',
       unread: 15,

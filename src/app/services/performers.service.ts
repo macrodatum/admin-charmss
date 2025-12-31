@@ -113,7 +113,24 @@ const updatePerformer = async (
   await ApiClient.patch(`${BASE}/${performerId}`, data);
 };
 
+/**
+ * Assign asset's fileURL to performer's avatar or video and return a pre-signed URL.
+ * @param performerId - The performer ID
+ * @param assetId - The asset ID to assign
+ * @returns Pre-signed URL or null
+ */
+const assignProfileAsset = async (
+  performerId: string | number,
+  assetId: string | number
+): Promise<{ url: string | null }> => {
+  if (!performerId) throw new Error('performerId required');
+  if (!assetId) throw new Error('assetId required');
+  const response = await ApiClient.patch(`${BASE}/profileAsset/${performerId}/${assetId}`);
+  return response.data;
+};
+
 export default {
   getPerformers,
   updatePerformer,
+  assignProfileAsset,
 };

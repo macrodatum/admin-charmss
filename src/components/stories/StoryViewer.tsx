@@ -88,7 +88,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       <div className="absolute top-8 left-4 right-4 flex items-center justify-between z-10 mt-6">
         <div className="flex items-center space-x-3">
           <img
-            src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop"
+            src="/icons/default-avatar.svg"
             alt="Profile"
             className="w-10 h-10 rounded-full border-2 border-white"
           />

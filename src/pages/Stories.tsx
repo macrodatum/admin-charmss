@@ -31,7 +31,7 @@ const Stories: React.FC = () => {
     {
       id: '1',
       type: 'photo',
-      url: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop',
+      url: '/icons/default-avatar.svg',
       comment:
         '¡Qué día tan hermoso! ☀️ Disfrutando de la playa y sintiendo la brisa del mar. La vida es bella cuando sabes apreciar los pequeños momentos. 🌊✨',
       publishDate: '2025-01-15',
@@ -63,7 +63,7 @@ const Stories: React.FC = () => {
     {
       id: '3',
       type: 'photo',
-      url: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop',
+      url: '/icons/default-avatar.svg',
       comment:
         'Momento de relajación con mi café favorito ☕ A veces necesitamos parar y disfrutar de las cosas simples de la vida.',
       publishDate: '2025-01-13',

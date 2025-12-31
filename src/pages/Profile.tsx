@@ -78,7 +78,7 @@ const Profile: React.FC = () => {
       <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
         <div className="relative">
           <img
-            src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop"
+            src="/icons/default-avatar.svg"
             alt="Profile"
             className="w-24 h-24 md:w-32 md:h-32 rounded-lg object-cover"
           />

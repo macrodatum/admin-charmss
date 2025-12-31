@@ -13,7 +13,7 @@ const VideoCall: React.FC = () => {
       id: 1,
       user: 'premium_fan',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       rate: '$2.7/min',
       waiting: '2 min',
     },
@@ -21,7 +21,7 @@ const VideoCall: React.FC = () => {
       id: 2,
       user: 'viewer123',
       avatar:
-        'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       rate: '$2.7/min',
       waiting: '1 min',
     },
@@ -47,7 +47,7 @@ const VideoCall: React.FC = () => {
           <div className="flex items-center justify-between p-3 md:p-4 bg-slate-800 border-b border-slate-700">
             <div className="flex items-center space-x-3">
               <img
-                src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop"
+                src="/icons/default-avatar.svg"
                 alt="User"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full"
               />

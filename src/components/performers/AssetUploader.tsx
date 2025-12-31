@@ -122,7 +122,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
             <img
               src={
                 performer.avatar_url ||
-                'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100'
+                '/icons/default-avatar.svg'
               }
               alt={performer.stage_name}
               className="h-10 w-10 rounded-full object-cover ring-2 ring-white"

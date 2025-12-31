@@ -50,7 +50,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onClose }) => {
         <div className="p-4 border-b border-slate-700">
           <div className="flex items-center space-x-3">
             <img
-              src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop"
+              src="/icons/default-avatar.svg"
               alt="Profile"
               className="w-12 h-12 rounded-full border-2 border-pink-500"
             />

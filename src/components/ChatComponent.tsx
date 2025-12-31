@@ -35,7 +35,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       time: '10:32 AM',
       type: 'message',
       avatar:
-        'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
     },
     {
       id: 2,
@@ -84,7 +84,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       time: '10:30 AM',
       type: 'message',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
     },
     {
       id: 2,

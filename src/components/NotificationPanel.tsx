@@ -12,7 +12,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
       id: 1,
       user: 'Elizabethrous',
       avatar:
-        'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       message: 'está en línea',
       description: "Hello, I'm Elizabethrous! Follow me in livecharmss",
       time: 'Hace 514d',
@@ -23,7 +23,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
       id: 2,
       user: 'Scart',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       message: 'ha iniciado un show',
       description:
         '🔥 **Dare to cross the line...** 🔥 Your desires whisper in the dark, waiting to be heard. Do you dare to answer the call? Come, dive into a conversation where words burn, where every sentence is a touch, and every response, an electrifying',

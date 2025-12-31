@@ -7,7 +7,6 @@ import Streaming from '../../pages/Streaming';
 import VideoCall from '../../pages/VideoCall';
 import Payments from '../../pages/Payments';
 import Photos from '../../pages/Photos';
-import Videos from '../../pages/Videos';
 import Stories from '../../pages/Stories';
 import CustomerRegister from '../../pages/CustomerRegister';
 import Inbox from '../../pages/Inbox';
@@ -76,7 +75,6 @@ const AppRouter: React.FC = () => {
                     <Route path="/videocall" element={<VideoCall />} />
                     <Route path="/payments" element={<Payments earnings={mockEarnings} />} />
                     <Route path="/photos" element={<Photos />} />
-                    <Route path="/videos" element={<Videos />} />
                     <Route path="/stories" element={<Stories />} />
                     <Route path="/customers/register" element={<CustomerRegister />} />
                     <Route path="/inbox" element={<Inbox />} />

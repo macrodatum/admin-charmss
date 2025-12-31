@@ -43,7 +43,7 @@ const Inbox: React.FC = () => {
       hasAttachment: false,
       type: 'message',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       priority: 'normal',
     },
     {
@@ -61,7 +61,7 @@ const Inbox: React.FC = () => {
       hasAttachment: true,
       type: 'videocall',
       avatar:
-        'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       priority: 'high',
       attachments: [
         { name: 'video_call_receipt.pdf', size: '245 KB', type: 'pdf' },
@@ -83,7 +83,7 @@ const Inbox: React.FC = () => {
       hasAttachment: false,
       type: 'videocall',
       avatar:
-        'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       priority: 'normal',
     },
     {
@@ -121,7 +121,7 @@ const Inbox: React.FC = () => {
       hasAttachment: false,
       type: 'model',
       avatar:
-        'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
+        '/icons/default-avatar.svg',
       priority: 'normal',
     },
   ]);
