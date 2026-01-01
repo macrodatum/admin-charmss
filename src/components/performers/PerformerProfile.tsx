@@ -68,9 +68,11 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
           {activeTab === 'personal' && (
             <PersonalInformationTab performer={performer} />
           )}
-          {activeTab === 'profile' && <ProfileTab performerId={performer.id} />}
+          {activeTab === 'profile' && <ProfileTab performer={performer} />}
           {activeTab === 'like' && <LikeTab performerId={performer.id} />}
-          {activeTab === 'pricing' && <PricingTab performerId={performer.id} />}
+          {activeTab === 'pricing' && performer.performerProfile?.id !== undefined && (
+            <PricingTab performerId={performer.id} performerProfileId={performer.performerProfile.id} />
+          )}
           {activeTab === 'media' && (
             <MediaProfileTab performer={performer} />
           )}

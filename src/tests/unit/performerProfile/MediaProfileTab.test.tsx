@@ -45,8 +45,8 @@ describe('MediaProfileTab', () => {
     render(<MediaProfileTab performer={mockPerformer as any} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Avatar del perfil')).toBeInTheDocument();
-      expect(screen.getByText('Video de presentación')).toBeInTheDocument();
+      expect(screen.getByText('Imagenes disponibles para Perfil')).toBeInTheDocument();
+      expect(screen.getByText('Videos disponibles para Perfil')).toBeInTheDocument();
     });
   });
 
@@ -67,7 +67,7 @@ describe('MediaProfileTab', () => {
     render(<MediaProfileTab performer={mockPerformer as any} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Avatar del perfil')).toBeInTheDocument();
+      expect(screen.getByText('Imagenes disponibles para Perfil')).toBeInTheDocument();
     });
 
     const imageContainer = screen.getAllByRole('img')[0].parentElement;
@@ -89,7 +89,7 @@ describe('MediaProfileTab', () => {
     render(<MediaProfileTab performer={mockPerformer as any} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Avatar del perfil')).toBeInTheDocument();
+      expect(screen.getByText('Imagenes disponibles para Perfil')).toBeInTheDocument();
     });
 
     // Select image
@@ -115,7 +115,7 @@ describe('MediaProfileTab', () => {
     render(<MediaProfileTab performer={mockPerformer as any} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Avatar del perfil')).toBeInTheDocument();
+      expect(screen.getByText('Imagenes disponibles para Perfil')).toBeInTheDocument();
     });
 
     // Select image

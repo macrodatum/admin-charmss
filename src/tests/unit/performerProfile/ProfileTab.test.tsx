@@ -6,25 +6,24 @@ import PerformerProfileService from '../../../app/services/performerProfile.serv
 vi.mock('../../../app/services/performerProfile.service');
 
 describe('ProfileTab', () => {
-  const mockProps = {
-    performerId: '1',
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('renders profile form fields', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
+  const mockPerformer = {
+    id: '1',
+    performerProfile: {
       age: 26,
       height: 165,
       weight: 60,
       countryCode: 'Colombia +57',
       twitterLink: 'https://twitter.com/test',
       instagramLink: 'https://instagram.com/test',
-    } as any);
+    },
+  } as any;
 
-    render(<ProfileTab {...mockProps} />);
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders profile form fields from performer prop', async () => {
+    render(<ProfileTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('26 years')).toBeInTheDocument();
@@ -33,31 +32,18 @@ describe('ProfileTab', () => {
     });
   });
 
-  it('loads profile data on mount', async () => {
-    const mockProfile = {
-      age: 26,
-      height: 165,
-      weight: 60,
-      countryCode: 'Colombia +57',
-      twitterLink: 'https://twitter.com/test',
-      instagramLink: 'https://instagram.com/test',
-    };
-
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue(mockProfile as any);
-
-    render(<ProfileTab {...mockProps} />);
+  it('uses performer prop to populate fields on mount', async () => {
+    render(<ProfileTab performer={mockPerformer} />);
 
     await waitFor(() => {
-      expect(PerformerProfileService.getPerformerProfile).toHaveBeenCalledWith('1');
+      // ensure we didn't call the fetching service
+      expect(PerformerProfileService.getPerformerProfile).not.toHaveBeenCalled();
+      expect(screen.getByText('26 years')).toBeInTheDocument();
     });
   });
 
   it('updates age slider value', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      age: 26,
-    } as any);
-
-    render(<ProfileTab {...mockProps} />);
+    render(<ProfileTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('26 years')).toBeInTheDocument();
@@ -70,15 +56,9 @@ describe('ProfileTab', () => {
   });
 
   it('saves profile data when save button is clicked', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      age: 26,
-      height: 165,
-      weight: 60,
-    } as any);
-
     vi.mocked(PerformerProfileService.updatePerformerProfile).mockResolvedValue({} as any);
 
-    render(<ProfileTab {...mockProps} />);
+    render(<ProfileTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('26 years')).toBeInTheDocument();
@@ -95,15 +75,11 @@ describe('ProfileTab', () => {
   });
 
   it('displays error message when save fails', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      age: 26,
-    } as any);
-
     vi.mocked(PerformerProfileService.updatePerformerProfile).mockRejectedValue(
       new Error('Save failed')
     );
 
-    render(<ProfileTab {...mockProps} />);
+    render(<ProfileTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('26 years')).toBeInTheDocument();
@@ -117,13 +93,9 @@ describe('ProfileTab', () => {
     });
   });
 
-  it('shows loading state initially', () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockImplementation(
-      () => new Promise(() => {})
-    );
+  it('does not show loading state initially when performer is provided', () => {
+    render(<ProfileTab performer={mockPerformer} />);
 
-    render(<ProfileTab {...mockProps} />);
-
-    expect(screen.getByText('Cargando perfil...')).toBeInTheDocument();
+    expect(screen.queryByText('Cargando perfil...')).not.toBeInTheDocument();
   });
 });

@@ -1,55 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PerformerProfileService from '../../app/services/performerProfile.service';
-import type { PerformerProfile as PerformerProfileType } from '../../app/types/performers.types';
+import type { PerformerProfile as PerformerProfileType, Performer } from '../../app/types/performers.types';
 
 interface ProfileTabProps {
-  performerId: string;
+  performer: Performer;
 }
 
-export default function ProfileTab({ performerId }: ProfileTabProps) {
-  const [loading, setLoading] = useState(false);
+export default function ProfileTab({ performer }: ProfileTabProps) {
+  const performerId = performer.id;
+  const profile = performer.performerProfile || ({} as Partial<PerformerProfileType>);
+
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    age: 26,
-    height: 165,
-    weight: 60,
-    zodiac: 'Sagittarius',
-    ethnicity: 'White',
-    sexualPreference: 'Straight',
-    hairColor: 'Brown',
-    eyeColor: 'Green',
-    build: 'Slender',
-    country: 'Colombia +57',
-    twitterLink: '',
-    instagramLink: '',
+    age: (profile.age as number) ?? 26,
+    height: (profile.height as number) ?? 165,
+    weight: (profile.weight as number) ?? 60,
+    zodiac: (profile.zodiac as unknown as string) ?? 'Sagittarius',
+    ethnicity: (profile.ethnicity as unknown as string) ?? 'White',
+    sexualPreference: (profile.sexualPreference as unknown as string) ?? 'Straight',
+    hairColor: (profile.hairColor as unknown as string) ?? 'Brown',
+    eyeColor: (profile.eyeColor as unknown as string) ?? 'Green',
+    build: (profile.build as unknown as string) ?? 'Slender',
+    country: (profile.countryCode as string) ?? 'Colombia +57',
+    twitterLink: (profile.twitterLink as string) ?? '',
+    instagramLink: (profile.instagramLink as string) ?? '',
   });
-
-  // Cargar datos del perfil al montar
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const profile = await PerformerProfileService.getPerformerProfile(performerId);
-        setFormData((prev) => ({
-          ...prev,
-          age: profile.age || prev.age,
-          height: profile.height || prev.height,
-          weight: profile.weight || prev.weight,
-          country: profile.countryCode || prev.country,
-          twitterLink: profile.twitterLink || prev.twitterLink,
-          instagramLink: profile.instagramLink || prev.instagramLink,
-        }));
-      } catch (error) {
-        console.error('Error loading profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [performerId]);
 
   const handleInputChange = (field: keyof typeof formData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -76,15 +53,6 @@ export default function ProfileTab({ performerId }: ProfileTabProps) {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="text-center py-8">
-        <div className="animate-spin h-8 w-8 border-2 border-pink-600 border-t-transparent rounded-full mx-auto mb-3" />
-        <p className="text-sm text-gray-600 dark:text-gray-300">Cargando perfil...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

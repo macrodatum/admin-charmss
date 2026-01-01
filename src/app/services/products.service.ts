@@ -116,32 +116,40 @@ class ProductService {
     try {
       const resp = await ApiClient.get<import('../types/products.types').PerformerProduct[]>(`/api/performers/${performerId}/products`);
       const data = resp?.data ?? [];
-      if (Array.isArray(data) && data.length > 0) return data;
+      return data;
     } catch (err) {
       // Log and fallback to configured products
       console.error(`Error fetching performer products for ${performerId}:`, err);
-    }
-
-    // Fallback: return mapped configured products
-    try {
-      const configured = await this.getProducts();
-      return configured.map((p) => ({
-        id: p.id, // use product id as identifier when performer-specific entry is absent
-        productId: p.id,
-        performerProfileId: null,
-        price: p.defaultPrice,
-        minPrice: p.minPrice,
-        maxPrice: p.maxPrice,
-        lastUpdate: p.updatedAt ?? p.createdAt,
-        state: true,
-        productName: p.name,
-      }));
-    } catch (err) {
-      console.error('Error fetching configured products for fallback:', err);
-      // If even this fails, return empty array to keep return type consistent
       return [];
     }
   }
+
+  async setPerformerProduct(
+    performerId: number | string,
+    productId: number,
+    price: number,
+    state = true,
+  ): Promise<import('../types/products.types').PerformerProduct> {
+    try {
+      const payload = {
+        productId,
+        price,
+        state,
+        lastUpdate: new Date().toISOString(),
+      };
+
+      const resp = await ApiClient.post<import('../types/products.types').PerformerProduct>(
+        `/api/performers/${performerId}/products`,
+        payload,
+      );
+
+      return resp.data;
+    } catch (err) {
+      console.error(`Error setting performer product for ${performerId}:`, err);
+      throw err;
+    }
+  }
+
 }
 
 export default new ProductService();

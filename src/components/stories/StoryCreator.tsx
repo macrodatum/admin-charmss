@@ -168,7 +168,7 @@ const StoryCreator: React.FC<StoryCreatorProps> = ({ onClose, onPublish }) => {
   };
 
   return (
-    <div className="modal-backdrop-dark">
+    <div className="modal-backdrop-dark modal-backdrop-adaptative">
       <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 rounded-2xl w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-4 md:p-6 text-center border-b border-white/10">

@@ -5,7 +5,8 @@ import type { Mock } from 'vitest';
 
 vi.mock('../../app/services/products.service', () => ({
   default: {
-    getProducts: vi.fn(),
+    getPerformerProductByPerformerId: vi.fn(),
+    getProducts: vi.fn(), // keep for other tests
   },
 }));
 
@@ -29,47 +30,38 @@ import type { PerformerProfile as PerformerProfileType } from '../../app/types/p
 const sampleProducts = [
   {
     id: 3,
-    name: 'Streaming minute',
-    productType: 1,
-    durationDays: 1,
+    productName: 'Streaming minute',
+    price: 1,
     minPrice: 1,
     maxPrice: 15,
-    editPriceInProfile: true,
-    defaultPrice: 1,
   },
   {
     id: 4,
-    name: 'Video Call',
-    productType: 1,
-    durationDays: 1,
+    productName: 'Video Call',
+    price: 10,
     minPrice: 10,
     maxPrice: 150,
-    editPriceInProfile: true,
-    defaultPrice: 10,
   },
   {
     id: 5,
-    name: 'Private message',
-    productType: 2,
-    durationDays: 1,
+    productName: 'Private message',
+    price: 10,
     minPrice: 10,
     maxPrice: 50,
-    editPriceInProfile: false,
-    defaultPrice: 10,
   },
 ];
 
 describe('PerformerProfile Pricing tab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (ProductService.getProducts as unknown as Mock).mockResolvedValue(sampleProducts);
+    (ProductService.getPerformerProductByPerformerId as unknown as Mock).mockResolvedValue(sampleProducts);
     (PerformerProfileService.getPerformerProfile as unknown as Mock).mockResolvedValue({
       nickName: undefined,
     } as PerformerProfileType);
     (getContentByPerformerProfileId as unknown as Mock).mockResolvedValue({ items: [] });
   });
 
-  it('renders only products with editPriceInProfile = true and shows default values', async () => {
+  it('renders all products and shows default values', async () => {
     const performer: Performer = {
       id: '1',
       stage_name: 'Test Performer',
@@ -83,13 +75,12 @@ describe('PerformerProfile Pricing tab', () => {
     fireEvent.click(pricingBtn);
 
     // wait for products to load
-    await waitFor(() => expect(ProductService.getProducts).toHaveBeenCalled());
+    await waitFor(() => expect(ProductService.getPerformerProductByPerformerId).toHaveBeenCalled());
 
-    // Should render Streaming minute and Video Call
+    // Should render all products
     expect(screen.getByText('Streaming minute')).toBeInTheDocument();
     expect(screen.getByText('Video Call')).toBeInTheDocument();
-    // Should not render Private message
-    expect(screen.queryByText('Private message')).toBeNull();
+    expect(screen.getByText('Private message')).toBeInTheDocument();
 
     // Verify sliders and default values
     const sliderStreaming = screen.getByLabelText('price-slider-3') as HTMLInputElement;
@@ -99,9 +90,13 @@ describe('PerformerProfile Pricing tab', () => {
     const sliderVideo = screen.getByLabelText('price-slider-4') as HTMLInputElement;
     expect(Number(sliderVideo.value)).toBe(10);
 
+    const sliderPrivate = screen.getByLabelText('price-slider-5') as HTMLInputElement;
+    expect(Number(sliderPrivate.value)).toBe(10);
+
     // Check displayed token values
     expect(screen.getByText('1 tokens')).toBeInTheDocument();
-    expect(screen.getByText('10 tokens')).toBeInTheDocument();
+    const tokenElements = screen.getAllByText('10 tokens');
+    expect(tokenElements.length).toBe(2); // Should appear twice (Video Call and Private message)
   });
 
   it('updates displayed value when slider changes', async () => {
@@ -116,7 +111,7 @@ describe('PerformerProfile Pricing tab', () => {
     const pricingBtn = screen.getByRole('button', { name: /pricing/i });
     fireEvent.click(pricingBtn);
 
-    await waitFor(() => expect(ProductService.getProducts).toHaveBeenCalled());
+    await waitFor(() => expect(ProductService.getPerformerProductByPerformerId).toHaveBeenCalled());
 
     const sliderVideo = screen.getByLabelText('price-slider-4') as HTMLInputElement;
     expect(Number(sliderVideo.value)).toBe(10);

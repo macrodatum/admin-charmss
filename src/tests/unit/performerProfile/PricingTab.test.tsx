@@ -8,24 +8,23 @@ vi.mock('../../../app/services/products.service');
 describe('PricingTab', () => {
   const mockProps = {
     performerId: '1',
+    performerProfileId: 100,
   };
 
   const mockProducts = [
     {
       id: 1,
-      name: 'Private Show',
-      editPriceInProfile: true,
+      productName: 'Private Show',
+      price: 50,
       minPrice: 10,
       maxPrice: 100,
-      defaultPrice: 50,
     },
     {
       id: 2,
-      name: 'Video Call',
-      editPriceInProfile: true,
+      productName: 'Video Call',
+      price: 25,
       minPrice: 5,
       maxPrice: 50,
-      defaultPrice: 25,
     },
   ];
 
@@ -33,8 +32,8 @@ describe('PricingTab', () => {
     vi.clearAllMocks();
   });
 
-  it('loads and displays editable products', async () => {
-    vi.mocked(ProductService.getProducts).mockResolvedValue(mockProducts as any);
+  it('loads and displays returned products', async () => {
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(mockProducts as any);
 
     render(<PricingTab {...mockProps} />);
 
@@ -44,31 +43,31 @@ describe('PricingTab', () => {
     });
   });
 
-  it('filters only editable products', async () => {
+  it('displays whatever the service returns (no extra filtering)', async () => {
     const allProducts = [
       ...mockProducts,
       {
         id: 3,
-        name: 'Non-editable Product',
-        editPriceInProfile: false,
+        productName: 'Non-editable Product',
+        price: 10,
         minPrice: 10,
         maxPrice: 100,
-        defaultPrice: 50,
       },
     ];
 
-    vi.mocked(ProductService.getProducts).mockResolvedValue(allProducts as any);
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(allProducts as any);
 
     render(<PricingTab {...mockProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('Private Show')).toBeInTheDocument();
-      expect(screen.queryByText('Non-editable Product')).not.toBeInTheDocument();
+      // now the third product should also be rendered because the component displays returned items
+      expect(screen.getByText('Non-editable Product')).toBeInTheDocument();
     });
   });
 
   it('updates price slider value', async () => {
-    vi.mocked(ProductService.getProducts).mockResolvedValue(mockProducts as any);
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(mockProducts as any);
 
     render(<PricingTab {...mockProps} />);
 
@@ -82,25 +81,11 @@ describe('PricingTab', () => {
     expect(slider.value).toBe('75');
   });
 
-  it('displays message when save button is clicked', async () => {
-    vi.mocked(ProductService.getProducts).mockResolvedValue(mockProducts as any);
+  // PricingTab no incluye funcionalidad de guardado en el componente actual, por lo tanto se elimina la prueba de guardar.
 
-    render(<PricingTab {...mockProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Private Show')).toBeInTheDocument();
-    });
-
-    const saveButton = screen.getByText('Save pricing');
-    fireEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Pricing guardado correctamente')).toBeInTheDocument();
-    });
-  });
-
-  it('shows message when no editable products exist', async () => {
-    vi.mocked(ProductService.getProducts).mockResolvedValue([]);
+  it('shows message when no products are returned', async () => {
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue([]);
 
     render(<PricingTab {...mockProps} />);
 
@@ -110,7 +95,7 @@ describe('PricingTab', () => {
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(ProductService.getProducts).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockImplementation(() => new Promise(() => {}));
 
     render(<PricingTab {...mockProps} />);
 

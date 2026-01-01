@@ -180,49 +180,69 @@ describe('ProductService', () => {
       expect(res).toEqual(performerProducts);
     });
 
-    it('should fallback to configured products when performer endpoint returns empty', async () => {
-      const configured = [mockProduct];
+    it('should return empty array when performer endpoint returns empty', async () => {
       // performer endpoint returns empty array
       vi.mocked(ApiClient.get).mockImplementation((url: string) => {
         if ((url as string).includes('/performers/3/products')) {
           return Promise.resolve({ data: [] } as never);
         }
-        // /api/products
-        return Promise.resolve({ data: configured } as never);
+        return Promise.resolve({ data: [] } as never);
       });
 
       const res = await ProductService.getPerformerProductByPerformerId(3);
 
       expect(ApiClient.get).toHaveBeenCalledWith('/api/performers/3/products');
-      expect(ApiClient.get).toHaveBeenCalledWith('/api/products');
-      expect(res).toEqual([
-        {
-          id: mockProduct.id,
-          productId: mockProduct.id,
-          performerProfileId: null,
-          price: mockProduct.defaultPrice,
-          lastUpdate: mockProduct.updatedAt,
-          state: true,
-          productName: mockProduct.name,
-        },
-      ]);
+      expect(res).toEqual([]);
     });
 
-    it('should fallback to configured products when performer endpoint errors', async () => {
-      const configured = [mockProduct];
+    it('should return empty array when performer endpoint errors', async () => {
       vi.mocked(ApiClient.get).mockImplementation((url: string) => {
         if ((url as string).includes('/performers/4/products')) {
           return Promise.reject(new Error('Network error')) as never;
         }
-        return Promise.resolve({ data: configured } as never);
+        return Promise.resolve({ data: [] } as never);
       });
 
       const res = await ProductService.getPerformerProductByPerformerId(4);
 
       expect(ApiClient.get).toHaveBeenCalledWith('/api/performers/4/products');
-      expect(ApiClient.get).toHaveBeenCalledWith('/api/products');
-      expect(res.length).toBe(1);
-      expect(res[0].productId).toBe(mockProduct.id);
+      expect(res).toEqual([]);
     });
   });
+
+  describe('setPerformerProduct', () => {
+    it('should set performer product successfully', async () => {
+      const created = {
+        id: 10,
+        productId: 3,
+        performerProfileId: 2,
+        price: 100,
+        minPrice: 0,
+        maxPrice: 0,
+        lastUpdate: '2025-12-31T00:00:00.000Z',
+        state: true,
+        productName: 'Streaming minute',
+      } as any;
+
+      vi.mocked(ApiClient.post).mockResolvedValue({ data: created } as never);
+
+      const res = await ProductService.setPerformerProduct(2, 3, 100);
+
+      expect(ApiClient.post).toHaveBeenCalledWith('/api/performers/2/products', expect.objectContaining({
+        productId: 3,
+        price: 100,
+        state: true,
+        lastUpdate: expect.any(String),
+      }));
+
+      expect(res).toEqual(created);
+    });
+
+    it('should throw error when API call fails', async () => {
+      vi.mocked(ApiClient.post).mockRejectedValue(new Error('Post failed'));
+
+      await expect(ProductService.setPerformerProduct(5, 7, 50)).rejects.toThrow('Post failed');
+    });
+  });
+
 });

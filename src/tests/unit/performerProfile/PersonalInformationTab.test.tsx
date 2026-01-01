@@ -16,54 +16,39 @@ describe('PersonalInformationTab', () => {
     rating: 4.5,
     total_shows: 100,
     status: 'active',
-  }; 
+    // New: include performerProfile directly as the component reads it from the performer prop
+    performerProfile: {
+      nickName: 'TestNick',
+      headLines: 'Test headline',
+      showDescription: 'Test description',
+    },
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders performer information correctly', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      nickName: 'TestNick',
-      headLines: 'Test headline',
-      showDescription: 'Test description',
-    } as any);
-
+    // The component reads the profile from the performer prop (performer.performerProfile)
     render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
       expect(screen.getByText('TestPerformer')).toBeInTheDocument();
       expect(screen.getByText(/4.5/)).toBeInTheDocument();
       expect(screen.getByText(/100 shows/)).toBeInTheDocument();
+      // nickname should come from performer.performerProfile
+      expect(screen.getByDisplayValue('TestNick')).toBeInTheDocument();
     });
   });
 
-  it('loads profile data on mount', async () => {
-    const mockProfile = {
-      nickName: 'TestNick',
-      headLines: 'Test headline',
-      showDescription: 'Test description',
-    };
-
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue(mockProfile as any);
-
+  it('loads profile data on mount from performer prop', async () => {
     render(<PersonalInformationTab performer={mockPerformer} />);
-
-    await waitFor(() => {
-      expect(PerformerProfileService.getPerformerProfile).toHaveBeenCalledWith('1');
-    });
 
     const nicknameInput = await screen.findByDisplayValue('TestNick');
     expect(nicknameInput).toBeInTheDocument();
   });
 
   it('updates form data when inputs change', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      nickName: 'TestNick',
-      headLines: 'Test headline',
-      showDescription: 'Test description',
-    } as any);
-
     render(<PersonalInformationTab performer={mockPerformer} />);
 
     await waitFor(() => {
@@ -77,12 +62,6 @@ describe('PersonalInformationTab', () => {
   });
 
   it('saves profile data when save button is clicked', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      nickName: 'TestNick',
-      headLines: 'Test headline',
-      showDescription: 'Test description',
-    } as any);
-
     vi.mocked(PerformerProfileService.updatePerformerProfile).mockResolvedValue({} as any);
 
     render(<PersonalInformationTab performer={mockPerformer} />);
@@ -106,12 +85,6 @@ describe('PersonalInformationTab', () => {
   });
 
   it('displays error message when save fails', async () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
-      nickName: 'TestNick',
-      headLines: 'Test headline',
-      showDescription: 'Test description',
-    } as any);
-
     vi.mocked(PerformerProfileService.updatePerformerProfile).mockRejectedValue(
       new Error('Save failed')
     );
@@ -130,13 +103,10 @@ describe('PersonalInformationTab', () => {
     });
   });
 
-  it('shows loading state initially', () => {
-    vi.mocked(PerformerProfileService.getPerformerProfile).mockImplementation(
-      () => new Promise(() => {})
-    );
-
+  it('does not show loading state (profile is available on performer prop)', () => {
     render(<PersonalInformationTab performer={mockPerformer} />);
 
-    expect(screen.getByText('Cargando información personal...')).toBeInTheDocument();
+    // The component reads profile synchronously from the performer prop, so the loading text should not be present
+    expect(screen.queryByText('Cargando información personal...')).not.toBeInTheDocument();
   });
 });

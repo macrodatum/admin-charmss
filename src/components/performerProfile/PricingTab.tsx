@@ -4,14 +4,19 @@ import type { PerformerProduct } from '../../app/types/products.types';
 
 interface PricingTabProps {
   performerId: string;
+  performerProfileId: number;
 }
 
-export default function PricingTab({ performerId }: PricingTabProps) {
+export default function PricingTab({ performerId, performerProfileId }: PricingTabProps) {
   const [loading, setLoading] = useState(false);
 
   // Use performer products directly (contains price/min/max/productName)
   const [products, setProducts] = useState<PerformerProduct[]>([]);
 
+  // Mantener la lógica de actualización dentro del componente para facilitar el acceso a setProducts
+  const updateProductPrice = (productId: number, price: number) => {
+    setProducts((prev) => prev.map((item) => (String(item.id) === String(productId) ? { ...item, price } : item)));
+  };
 
   // Cargar productos al montar o cuando cambie el performerId
   useEffect(() => {
@@ -19,13 +24,31 @@ export default function PricingTab({ performerId }: PricingTabProps) {
       setLoading(true);
       try {
         // Obtener productos específicos del performer (todos los datos vienen de aquí)
-        const performerProducts = await ProductService.getPerformerProductByPerformerId(performerId);
+        const performerProductsRaw = await ProductService.getPerformerProductByPerformerId(performerId);
+
+        // El servicio debería devolver un array, pero protegernos contra formas inesperadas
+        let performerProducts: PerformerProduct[] = [];
+        if (Array.isArray(performerProductsRaw)) {
+          performerProducts = performerProductsRaw;
+        } else if (performerProductsRaw && typeof performerProductsRaw === 'object') {
+          // Soporte para estructuras como { data: [] } o { items: [] }
+          const asRecord = performerProductsRaw as { data?: PerformerProduct[]; items?: PerformerProduct[] };
+          if (Array.isArray(asRecord.data)) {
+            performerProducts = asRecord.data;
+          } else if (Array.isArray(asRecord.items)) {
+            performerProducts = asRecord.items;
+          } else {
+            console.warn('Unexpected performerProducts shape:', performerProductsRaw);
+            performerProducts = [];
+          }
+        }
 
         // Asegurarse de que cada producto tenga min/max/default; si faltan, añadir valores por defecto razonables
         const normalized = performerProducts.map((pp) => ({
           ...pp,
-          minPrice: pp.minPrice ?? Math.max(1, Math.floor(pp.price * 0.5)),
-          maxPrice: pp.maxPrice ?? Math.max(pp.price, Math.ceil(pp.price * 1.5)),
+          price: typeof pp.price === 'number' ? pp.price : Number(pp.price) || 0,
+          minPrice: pp.minPrice ?? Math.max(1, Math.floor((pp.price as number) * 0.5)),
+          maxPrice: pp.maxPrice ?? Math.max((pp.price as number), Math.ceil((pp.price as number) * 1.5)),
           defaultPrice: pp.price,
         }));
 
@@ -40,7 +63,7 @@ export default function PricingTab({ performerId }: PricingTabProps) {
     };
 
     loadProducts();
-  }, [performerId]);
+  }, [performerId, performerProfileId]);
 
 
 
@@ -87,11 +110,7 @@ export default function PricingTab({ performerId }: PricingTabProps) {
               min={String(p.minPrice)}
               max={String(p.maxPrice)}
               value={String(p.price)}
-              onChange={(e) =>
-                setProducts((prev) =>
-                  prev.map((item) => (item.id === p.id ? { ...item, price: Number(e.target.value) } : item))
-                )
-              }
+              onChange={(e) => updateProductPrice(performerProfileId, Number(e.target.value))}
               className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
             />
           </div>
