@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProductService from '../../app/services/products.service';
 import type { PerformerProduct } from '../../app/types/products.types';
+import { Check } from 'lucide-react';
 
 interface PricingTabProps {
   performerId: string;
@@ -13,9 +14,48 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
   // Use performer products directly (contains price/min/max/productName)
   const [products, setProducts] = useState<PerformerProduct[]>([]);
 
+  // Estado para mostrar confirmaciones breves por producto
+  const [confirmations, setConfirmations] = useState<Record<string, boolean>>({});
+  const timersRef = useRef<Record<string, number>>({});
+
+  // Limpiar timers pendientes al desmontar
+  useEffect(() => {
+    return () => {
+      Object.values(timersRef.current).forEach((t) => clearTimeout(t));
+      timersRef.current = {};
+    };
+  }, []);
+
   // Mantener la lógica de actualización dentro del componente para facilitar el acceso a setProducts
-  const updateProductPrice = (productId: number, price: number) => {
-    setProducts((prev) => prev.map((item) => (String(item.id) === String(productId) ? { ...item, price } : item)));
+  const updateProductPrice = async (productId: number, price: number) => {
+    const idStr = String(productId);
+    // Actualizar UI inmediatamente
+    setProducts((prev) => prev.map((item) => (String(item.productId) === idStr ? { ...item, price } : item)));
+
+    // Enviar al backend
+    const result = await ProductService.setPerformerProduct(performerProfileId, productId, price).catch((err) => {
+      console.error('Error updating product price:', err);
+      return undefined;
+    });
+
+    // Si hay resultado, mostrar confirmación temporal
+    if (result) {
+      setConfirmations((prev) => ({ ...prev, [idStr]: true }));
+
+      // Limpiar timer previo si existe
+      if (timersRef.current[idStr]) {
+        clearTimeout(timersRef.current[idStr]);
+      }
+
+      timersRef.current[idStr] = window.setTimeout(() => {
+        setConfirmations((prev) => {
+          const copy = { ...prev };
+          delete copy[idStr];
+          return copy;
+        });
+        delete timersRef.current[idStr];
+      }, 3000);
+    }
   };
 
   // Cargar productos al montar o cuando cambie el performerId
@@ -100,17 +140,25 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
                 </p>
               </div>
               <div className="text-right text-sm text-gray-900 dark:text-white font-medium">
-                {p.price} tokens
+                <div className="flex items-center justify-end space-x-2">
+                  <span>{p.price} tokens</span>
+                  {confirmations[String(p.productId)] && (
+                    <span className="text-green-500 text-xs flex items-center space-x-1">
+                      <Check className="w-4 h-4" />
+                      <span>Guardado</span>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             <input
-              aria-label={`price-slider-${p.id}`}
+              aria-label={`price-slider-${p.productId}`}
               type="range"
               min={String(p.minPrice)}
               max={String(p.maxPrice)}
               value={String(p.price)}
-              onChange={(e) => updateProductPrice(performerProfileId, Number(e.target.value))}
+              onChange={(e) => updateProductPrice(p.productId, Number(e.target.value))}
               className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
             />
           </div>

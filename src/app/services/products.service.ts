@@ -125,7 +125,7 @@ class ProductService {
   }
 
   async setPerformerProduct(
-    performerId: number | string,
+    performerProfileId: number | string,
     productId: number,
     price: number,
     state = true,
@@ -139,13 +139,13 @@ class ProductService {
       };
 
       const resp = await ApiClient.post<import('../types/products.types').PerformerProduct>(
-        `/api/performers/${performerId}/products`,
+        `/api/performers/${performerProfileId}/products`,
         payload,
       );
 
       return resp.data;
     } catch (err) {
-      console.error(`Error setting performer product for ${performerId}:`, err);
+      console.error(`Error setting performer product for ${performerProfileId}:`, err);
       throw err;
     }
   }
