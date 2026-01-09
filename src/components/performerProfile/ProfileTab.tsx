@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
+import { Star } from 'lucide-react';
 import PerformerProfileService from '../../app/services/performerProfile.service';
 import type { PerformerProfile as PerformerProfileType, Performer } from '../../app/types/performers.types';
+import {
+  ZodiacType,
+  EthnicityType,
+  SexualPreferenceType,
+  HairColorType,
+  EyeColorType,
+  BuildType,
+} from '../../performers/enums/profile.enums';
+import CountrySelector from '../ui/CountrySelector';
 
 interface ProfileTabProps {
   performer: Performer;
@@ -9,23 +19,34 @@ interface ProfileTabProps {
 export default function ProfileTab({ performer }: ProfileTabProps) {
   const performerId = performer.id;
   const profile = performer.performerProfile || ({} as Partial<PerformerProfileType>);
+  const stageName = performer.stage_name;
+  const avatarUrl = performer.avatar;
+  const rating = performer.rating ?? 0;
+  const totalShows = performer.total_shows ?? 0;
 
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  // Default to numeric enum values where appropriate
+  // Default to numeric enum values where appropriate
   const [formData, setFormData] = useState({
     age: (profile.age as number) ?? 26,
     height: (profile.height as number) ?? 165,
     weight: (profile.weight as number) ?? 60,
-    zodiac: (profile.zodiac as unknown as string) ?? 'Sagittarius',
-    ethnicity: (profile.ethnicity as unknown as string) ?? 'White',
-    sexualPreference: (profile.sexualPreference as unknown as string) ?? 'Straight',
-    hairColor: (profile.hairColor as unknown as string) ?? 'Brown',
-    eyeColor: (profile.eyeColor as unknown as string) ?? 'Green',
-    build: (profile.build as unknown as string) ?? 'Slender',
-    country: (profile.countryCode as string) ?? 'Colombia +57',
+    zodiac: typeof profile.zodiac === 'number' ? (profile.zodiac as number) : ZodiacType.Saggitarius,
+    ethnicity: typeof profile.ethnicity === 'number' ? (profile.ethnicity as number) : EthnicityType.White,
+    sexualPreference:
+      typeof profile.sexualPreference === 'number' ? (profile.sexualPreference as number) : SexualPreferenceType.Straight,
+    hairColor: typeof profile.hairColor === 'number' ? (profile.hairColor as number) : HairColorType.Brown,
+    eyeColor: typeof profile.eyeColor === 'number' ? (profile.eyeColor as number) : EyeColorType.Green,
+    build: typeof profile.build === 'number' ? (profile.build as number) : BuildType.Slender,
+    // store country as an ISO code (e.g. 'CO') instead of full text
+    country: typeof profile.countryCode === 'string' && /^[A-Z]{2}$/.test(profile.countryCode) ? profile.countryCode : 'CO',
     twitterLink: (profile.twitterLink as string) ?? '',
     instagramLink: (profile.instagramLink as string) ?? '',
+    // Personal information fields previously in PersonalInformationTab
+    headline: (profile.headLines as string) ?? '',
+    myLive: (profile.showDescription as string) ?? 'Welcome! Share your story and connect with fans.',
   });
 
   const handleInputChange = (field: keyof typeof formData, value: string | number) => {
@@ -36,18 +57,56 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
     setSaving(true);
     setSaveMessage(null);
     try {
+      // Build payload containing only the permitted fields (no extra keys)
       const payload: Partial<PerformerProfileType> = {
+        languages: (profile.languages as string) ?? null,
+        headLines: formData.headline ?? profile.headLines ?? null,
+        showDescription: formData.myLive ?? profile.showDescription ?? null,
+        turnOns: profile.turnOns ?? null,
+        expertise: profile.expertise ?? null,
+        nickName: profile.nickName ?? stageName,
+
         age: formData.age,
+        ethnicity: formData.ethnicity as number,
+        sexualPreference: formData.sexualPreference as number,
+        zodiac: formData.zodiac as number,
         height: formData.height,
         weight: formData.weight,
-        zodiac: formData.zodiac as unknown as number,
+        hairColor: formData.hairColor as number,
+        eyeColor: formData.eyeColor as number,
+        pubicHair: profile.pubicHair ?? null,
+        waist: profile.waist ?? null,
+        build: formData.build as number,
+        bust: profile.bust ?? null,
+        bustName: profile.bustName ?? null,
+        hips: profile.hips ?? null,
+
+        countryCode: formData.country,
+
+        blockCountryOrigin: profile.blockCountryOrigin ?? false,
+        mac: profile.mac ?? null,
+        faceBookLink: profile.faceBookLink ?? null,
         twitterLink: formData.twitterLink,
         instagramLink: formData.instagramLink,
-        countryCode: formData.country,
+
+        favoriteColor: profile.favoriteColor ?? null,
+        favoriteCandies: profile.favoriteCandies ?? null,
+        favoriteBeverages: profile.favoriteBeverages ?? null,
+        favoriteFood: profile.favoriteFood ?? null,
+        favoriteMusic: profile.favoriteMusic ?? null,
+        favoritePerfumes: profile.favoritePerfumes ?? null,
+        favoriteFashion: profile.favoriteFashion ?? null,
+        favoriteJewells: profile.favoriteJewells ?? null,
+        favoritePlaces: profile.favoritePlaces ?? null,
+        hobbies: profile.hobbies ?? null,
+        favoriteMovies: profile.favoriteMovies ?? null,
+        favoriteBooks: profile.favoriteBooks ?? null,
       };
+
       await PerformerProfileService.updatePerformerProfile(performerId, payload);
       setSaveMessage('Profile guardado correctamente');
-    } catch {
+    } catch (err) {
+      console.error('Error saving profile:', err);
       setSaveMessage('Error guardando Profile');
     } finally {
       setSaving(false);
@@ -56,6 +115,58 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+        <div className="relative">
+          <img
+            src={avatarUrl || '/icons/default-avatar.svg'}
+            alt={stageName}
+            className="w-24 h-24 md:w-32 md:h-32 rounded-lg object-cover"
+          />
+        </div>
+        <div className="flex-1 text-center md:text-left">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {stageName}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base flex items-center justify-center md:justify-start gap-2">
+            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+            {rating.toFixed(1)} • {totalShows} shows
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          NickName
+        </label>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {profile.nickName || stageName}
+        </h2>
+      </div>
+
+      <div>
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Headline
+        </label>
+        <textarea
+          value={formData.headline}
+          onChange={(e) => handleInputChange('headline', e.target.value)}
+          rows={2}
+          className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm md:text-base"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          My live
+        </label>
+        <textarea
+          value={formData.myLive}
+          onChange={(e) => handleInputChange('myLive', e.target.value)}
+          rows={2}
+          className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm md:text-base"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div>
           <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -120,21 +231,21 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.zodiac}
-            onChange={(e) => handleInputChange('zodiac', e.target.value)}
+            onChange={(e) => handleInputChange('zodiac', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="Sagittarius">Sagittarius</option>
-            <option value="Aries">Aries</option>
-            <option value="Taurus">Taurus</option>
-            <option value="Gemini">Gemini</option>
-            <option value="Cancer">Cancer</option>
-            <option value="Leo">Leo</option>
-            <option value="Virgo">Virgo</option>
-            <option value="Libra">Libra</option>
-            <option value="Scorpio">Scorpio</option>
-            <option value="Capricorn">Capricorn</option>
-            <option value="Aquarius">Aquarius</option>
-            <option value="Pisces">Pisces</option>
+            <option value={ZodiacType.Saggitarius}>Saggitarius</option>
+            <option value={ZodiacType.Aries}>Aries</option>
+            <option value={ZodiacType.Taurus}>Taurus</option>
+            <option value={ZodiacType.Gemini}>Gemini</option>
+            <option value={ZodiacType.Cancer}>Cancer</option>
+            <option value={ZodiacType.Leo}>Leo</option>
+            <option value={ZodiacType.Virgo}>Virgo</option>
+            <option value={ZodiacType.Libra}>Libra</option>
+            <option value={ZodiacType.Scorpio}>Scorpio</option>
+            <option value={ZodiacType.Capricorn}>Capricorn</option>
+            <option value={ZodiacType.Aquarius}>Aquarius</option>
+            <option value={ZodiacType.Pisces}>Pisces</option>
           </select>
         </div>
 
@@ -144,14 +255,14 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.ethnicity}
-            onChange={(e) => handleInputChange('ethnicity', e.target.value)}
+            onChange={(e) => handleInputChange('ethnicity', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="White">White</option>
-            <option value="Black">Black</option>
-            <option value="Asian">Asian</option>
-            <option value="Hispanic">Hispanic</option>
-            <option value="Mixed">Mixed</option>
+            <option value={EthnicityType.White}>White</option>
+            <option value={EthnicityType.Black}>Black</option>
+            <option value={EthnicityType.Asian}>Asian</option>
+            <option value={EthnicityType.Hispanic}>Hispanic</option>
+            <option value={EthnicityType.Roma}>Mixed</option>
           </select>
         </div>
 
@@ -161,13 +272,12 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.sexualPreference}
-            onChange={(e) => handleInputChange('sexualPreference', e.target.value)}
+            onChange={(e) => handleInputChange('sexualPreference', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="Straight">Straight</option>
-            <option value="Gay">Gay</option>
-            <option value="Bisexual">Bisexual</option>
-            <option value="Lesbian">Lesbian</option>
+            <option value={SexualPreferenceType.Straight}>Straight</option>
+            <option value={SexualPreferenceType.Gay}>Gay</option>
+            <option value={SexualPreferenceType.Bisexual}>Bisexual</option>
           </select>
         </div>
 
@@ -177,14 +287,14 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.hairColor}
-            onChange={(e) => handleInputChange('hairColor', e.target.value)}
+            onChange={(e) => handleInputChange('hairColor', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="Brown">Brown</option>
-            <option value="Black">Black</option>
-            <option value="Blonde">Blonde</option>
-            <option value="Red">Red</option>
-            <option value="Other">Other</option>
+            <option value={HairColorType.Brown}>Brown</option>
+            <option value={HairColorType.Black}>Black</option>
+            <option value={HairColorType.Blond}>Blonde</option>
+            <option value={HairColorType.Red}>Red</option>
+            <option value={HairColorType.Dyed}>Other</option>
           </select>
         </div>
 
@@ -194,14 +304,14 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.eyeColor}
-            onChange={(e) => handleInputChange('eyeColor', e.target.value)}
+            onChange={(e) => handleInputChange('eyeColor', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="Green">Green</option>
-            <option value="Brown">Brown</option>
-            <option value="Blue">Blue</option>
-            <option value="Hazel">Hazel</option>
-            <option value="Gray">Gray</option>
+            <option value={EyeColorType.Green}>Green</option>
+            <option value={EyeColorType.Brown}>Brown</option>
+            <option value={EyeColorType.Blue}>Blue</option>
+            <option value={EyeColorType.Hazel}>Hazel</option>
+            <option value={EyeColorType.Grey}>Gray</option>
           </select>
         </div>
 
@@ -211,31 +321,27 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           </label>
           <select
             value={formData.build}
-            onChange={(e) => handleInputChange('build', e.target.value)}
+            onChange={(e) => handleInputChange('build', parseInt(e.target.value))}
             className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
           >
-            <option value="Slender">Slender</option>
-            <option value="Athletic">Athletic</option>
-            <option value="Average">Average</option>
-            <option value="Curvy">Curvy</option>
-            <option value="Plus Size">Plus Size</option>
+            <option value={BuildType.Slender}>Slender</option>
+            <option value={BuildType.Athletic}>Athletic</option>
+            <option value={BuildType.Curvaceous}>Curvy</option>
+            <option value={BuildType.Few_extra_pounds}>Few extra pounds</option>
+            <option value={BuildType.Big_beautiful_woman}>Plus Size</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Display Country
-          </label>
-          <select
+          {/* Country selector */}
+          <CountrySelector
+            label="Display Country"
+            id="countryCode"
             value={formData.country}
-            onChange={(e) => handleInputChange('country', e.target.value)}
-            className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white px-3 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
-          >
-            <option value="Colombia +57">Colombia +57</option>
-            <option value="USA +1">USA +1</option>
-            <option value="Mexico +52">Mexico +52</option>
-            <option value="Argentina +54">Argentina +54</option>
-          </select>
+            onChange={(c) => handleInputChange('country', c)}
+            error={null}
+            required
+          />
         </div>
 
         <div>

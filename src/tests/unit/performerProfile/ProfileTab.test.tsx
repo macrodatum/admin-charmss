@@ -4,6 +4,7 @@ import ProfileTab from '../../../components/performerProfile/ProfileTab';
 import PerformerProfileService from '../../../app/services/performerProfile.service';
 
 vi.mock('../../../app/services/performerProfile.service');
+vi.mock('../../../app/services/geodata.service');
 
 describe('ProfileTab', () => {
   const mockPerformer = {
@@ -12,7 +13,7 @@ describe('ProfileTab', () => {
       age: 26,
       height: 165,
       weight: 60,
-      countryCode: 'Colombia +57',
+      countryCode: 'CO',
       twitterLink: 'https://twitter.com/test',
       instagramLink: 'https://instagram.com/test',
     },

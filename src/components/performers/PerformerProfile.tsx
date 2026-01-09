@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Performer } from '../../app/types/performers.types';
-import PersonalInformationTab from '../performerProfile/PersonalInformationTab';
 import ProfileTab from '../performerProfile/ProfileTab';
 import LikeTab from '../performerProfile/LikeTab';
 import PricingTab from '../performerProfile/PricingTab';
@@ -15,10 +14,9 @@ interface PerformerProfileProps {
 }
 
 export default function PerformerProfile({ performer, onClose }: PerformerProfileProps) {
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState('profile');
 
   const tabs = [
-    { id: 'personal', label: 'Personal Information' },
     { id: 'profile', label: 'Profile' },
     { id: 'like', label: 'I like' },
     { id: 'pricing', label: 'Pricing' },
@@ -65,9 +63,6 @@ export default function PerformerProfile({ performer, onClose }: PerformerProfil
         </div>
 
         <div className="p-6">
-          {activeTab === 'personal' && (
-            <PersonalInformationTab performer={performer} />
-          )}
           {activeTab === 'profile' && <ProfileTab performer={performer} />}
           {activeTab === 'like' && <LikeTab performerId={performer.id} />}
           {activeTab === 'pricing' && performer.performerProfile?.id !== undefined && (

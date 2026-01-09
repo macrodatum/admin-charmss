@@ -117,7 +117,7 @@ export interface PerformerProfile {
   streamId?: string | null;
   appStatus?: number | null;
   chatPhrases?: string | null;
-  roomTopic?: string | null;
+
   blockCountryOrigin?: boolean | null;
   mac?: string | null;
   mobilePhone?: string | null;
@@ -138,7 +138,6 @@ export interface PerformerProfile {
   favoriteJewells?: string | null;
   favoritePlaces?: string | null;
   hobbies?: string | null;
-  whatToDoMillion?: string | null;
   favoriteMovies?: string | null;
   favoriteBooks?: string | null;
   isStreamingEnabled?: boolean | null;

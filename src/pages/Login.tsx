@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Users, BarChart3, Shield, Settings } from 'lucide-react';
 import { fetchLoginConfig, type LoginConfig } from '../app/services/auth.service';
 import { BRAND_NAME } from '../app/config/appConfig';
@@ -10,6 +11,10 @@ const Login: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [legalOpen, setLegalOpen] = React.useState(false);
   const [legalName, setLegalName] = React.useState('');
+
+  const location = useLocation();
+  const navState = location.state as { from?: string; authError?: string } | null;
+  const authError = navState?.authError;
 
   React.useEffect(() => {
     let mounted = true;
@@ -96,6 +101,11 @@ const Login: React.FC = () => {
             </div>
 
             <div className="space-y-4">
+              {authError && (
+                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-md text-red-800 dark:text-red-300 text-sm">
+                  {authError}
+                </div>
+              )}
               {/* Google Login */}
               {config?.oauth.google.enabled && (
                 <button

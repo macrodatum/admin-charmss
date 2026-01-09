@@ -18,31 +18,7 @@ export interface PerformerLikePreferences {
   updatedAt?: string;
 }
 
-// Mock data de categorías disponibles
-const mockCategories = {
-  activities: [
-    'Dancing',
-    'Yoga',
-    'Travel',
-    'Cooking',
-    'Reading',
-    'Gaming',
-    'Photography',
-    'Sports',
-  ],
-  interests: [
-    'Art',
-    'Music',
-    'Fashion',
-    'Technology',
-    'Nature',
-    'Animals',
-    'Movies',
-    'Fitness',
-  ],
-  music: ['Pop', 'Rock', 'Electronic', 'Jazz', 'Hip Hop', 'Classical', 'Reggaeton', 'Country'],
-  movies: ['Action', 'Comedy', 'Drama', 'Romance', 'Sci-Fi', 'Horror', 'Thriller', 'Documentary'],
-};
+
 
 class LikeService {
   /**
@@ -51,8 +27,6 @@ class LikeService {
    * @returns Preferencias del performer
    */
   async getPerformerLikes(performerId: string): Promise<PerformerLikePreferences> {
-    // TODO: Implementar llamada a backend cuando esté disponible
-    console.log('Mock: Getting likes for performer', performerId);
 
     // Simulación de delay de red
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -95,12 +69,19 @@ class LikeService {
     };
   }
 
+
   /**
-   * Obtener categorías disponibles
-   * @returns Categorías con sus opciones
+   * Opciones para favoritos (para usar en UI de selección tipo tags)
    */
-  getAvailableCategories(): typeof mockCategories {
-    return mockCategories;
+  getFavoriteOptions() {
+    return {
+      favoriteColor: ['Red', 'Blue', 'Green', 'Black', 'White', 'Purple'],
+      favoriteCandies: ['Chocolate', 'Gummies', 'Lollipops', 'Hard candies'],
+      favoriteBeverages: ['Coffee', 'Tea', 'Soda', 'Juice', 'Water', 'Wine'],
+      favoriteFood: ['Pizza', 'Sushi', 'Pasta', 'Burgers', 'Salads'],
+      favoriteMusic: ['Pop', 'Rock', 'Electronic', 'Jazz', 'Hip Hop', 'Classical'],
+      languages: ['English', 'Spanish', 'French', 'Portuguese', 'German', 'Italian'],
+    };
   }
 }
 
