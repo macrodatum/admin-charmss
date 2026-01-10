@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Camera, Mic, MicOff, CameraOff, Eye, DollarSign, Users, Clock } from 'lucide-react';
-import ChatComponent from '../ChatComponent';
+import StreamingChat from './StreamingChat';
 import { Performer } from '../../app/types/performers.types';
 
 interface StreamingModalProps {
@@ -75,7 +75,7 @@ const StreamingModal: React.FC<StreamingModalProps> = ({ performer, onClose }) =
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-slate-800 rounded-lg border border-slate-700 aspect-video relative overflow-hidden">
                 {cameraEnabled ? (
-                  <div className="w-full h-full bg-gradient-to-br from-pink-900 to-purple-900 flex items-center justify-center">
+                  <div className="w-full h-full bg-linear-to-br from-pink-900 to-purple-900 flex items-center justify-center">
                     <div className="text-center">
                       <Camera className="w-16 h-16 text-white mx-auto mb-4" />
                       <p className="text-white text-lg font-semibold">
@@ -181,7 +181,11 @@ const StreamingModal: React.FC<StreamingModalProps> = ({ performer, onClose }) =
 
             <div className="space-y-4">
               <div className="h-full">
-                <ChatComponent title="Chat" isPublic={true} showTabs={false} className="h-full" />
+                <StreamingChat
+                  room={`performer_${performer.id}`}
+                  performerName={performer.stage_name || 'Performer'}
+                  className="h-full"
+                />
               </div>
             </div>
           </div>
