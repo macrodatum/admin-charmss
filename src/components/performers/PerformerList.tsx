@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Power,
   User,
   Video,
   Upload,
@@ -129,25 +128,6 @@ export default function PerformerList({
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: number | string | undefined) => {
-    switch (String(status)) {
-      case 'online':
-        return 'Online';
-      case 'offline':
-        return 'Offline';
-      case '1':
-        return 'Active';
-      case '2':
-        return 'Inactive';
-      case '0':
-        return 'Pendiente';
-      case '3':
-        return 'Suspendido';
-      default:
-        return String(status ?? '');
     }
   };
 
@@ -301,9 +281,9 @@ export default function PerformerList({
                         id={`status-select-${performer.id}`}
                         value={String(performer.status ?? '')}
                         onChange={(e) => onToggleStatus(performer.id, Number(e.target.value))}
-                        className={`px-3 py-1 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          getStatusColor(performer.status)
-                        }`}
+                        className={`px-3 py-1 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(
+                          performer.status
+                        )}`}
                         title="Cambiar estado"
                       >
                         <option value={0}>Pendiente</option>
@@ -472,7 +452,6 @@ export default function PerformerList({
                   {performer.email}
                 </p>
               </div>
-
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center py-2 border-y border-gray-100 dark:border-slate-700">
@@ -507,7 +486,9 @@ export default function PerformerList({
 
             <div className="grid grid-cols-4 gap-2">
               <div className="flex flex-col items-center gap-1">
-                <label htmlFor={`status-select-mobile-${performer.id}`} className="sr-only">Cambiar estado</label>
+                <label htmlFor={`status-select-mobile-${performer.id}`} className="sr-only">
+                  Cambiar estado
+                </label>
                 <select
                   id={`status-select-mobile-${performer.id}`}
                   value={String(performer.status ?? '')}

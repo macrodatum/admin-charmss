@@ -1,5 +1,13 @@
 import * as React from 'react';
-import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useAuthStore, validateAuthState } from '../stores/auth.store';
 import {
@@ -394,28 +402,51 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     [on]
   );
 
-  const value = {
-    socket: socketState,
-    connected,
-    emit,
-    on,
-    off,
-    disconnect,
-    connect,
-    sendPing,
-    onClientConnect,
-    onClientReceivedMessage,
-    onClientPurchase,
-    // nuevos:
-    joinRoom,
-    leaveRoom,
-    sendRoomMessage,
-    sendRoomTextMessage,
-    onRoomMessage,
-    onUserJoined,
-    sendPrivateMessage,
-    onPrivateMessage,
-  };
+  const value = useMemo(
+    () => ({
+      socket: socketState,
+      connected,
+      emit,
+      on,
+      off,
+      disconnect,
+      connect,
+      sendPing,
+      onClientConnect,
+      onClientReceivedMessage,
+      onClientPurchase,
+      // nuevos:
+      joinRoom,
+      leaveRoom,
+      sendRoomMessage,
+      sendRoomTextMessage,
+      onRoomMessage,
+      onUserJoined,
+      sendPrivateMessage,
+      onPrivateMessage,
+    }),
+    [
+      socketState,
+      connected,
+      emit,
+      on,
+      off,
+      disconnect,
+      connect,
+      sendPing,
+      onClientConnect,
+      onClientReceivedMessage,
+      onClientPurchase,
+      joinRoom,
+      leaveRoom,
+      sendRoomMessage,
+      sendRoomTextMessage,
+      onRoomMessage,
+      onUserJoined,
+      sendPrivateMessage,
+      onPrivateMessage,
+    ]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -424,6 +455,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     };
   }, [disconnect]);
 
+  // The context value includes callbacks that may access refs (socketRef) during invocation,
+  // but those refs are only accessed inside event handlers/effects, not during render.
+  // Suppress the rule here as the functions are stable and safe to pass in context.
+  // eslint-disable-next-line react-hooks/refs
   return React.createElement(SocketContext.Provider, { value }, children);
 };
 

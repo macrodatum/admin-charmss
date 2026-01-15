@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Users, RefreshCw, CheckCircle, X as XIcon } from 'lucide-react';
 import PerformerList from '../components/performers/PerformerList';
 import PerformersService from '../app/services/performers.service';
-import { GetPerformersParams, Performer, PerformerStatus } from '../app/types/performers.types';
+import { GetPerformersParams, Performer } from '../app/types/performers.types';
 import PerformerProfile from '../components/performers/PerformerProfile';
 import AssetUploader from '../components/performers/AssetUploader';
 import StreamingModal from '../components/performers/StreamingModal';
@@ -107,17 +107,24 @@ export default function Performers() {
     const oldStatus = performer?.status;
 
     // Optimistically update UI
-    setPerformers((prev) => prev.map((p) => (p.id === id ? { ...p, status: statusNumber as any } : p)));
+    setPerformers((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: statusNumber as any } : p))
+    );
 
     try {
       await PerformersService.updatePerformerStatus(id, statusNumber);
       // Show success toast with who and new status
-      showToast(`Estado de ${performer?.stage_name ?? id} actualizado a ${statusLabel(statusNumber)}`,'success');
+      showToast(
+        `Estado de ${performer?.stage_name ?? id} actualizado a ${statusLabel(statusNumber)}`,
+        'success'
+      );
     } catch (error) {
       console.error('Error updating performer status', error);
       // Revert UI on failure
-      setPerformers((prev) => prev.map((p) => (p.id === id ? { ...p, status: oldStatus as any } : p)));
-      showToast(`Error actualizando estado de ${performer?.stage_name ?? id}`,'error');
+      setPerformers((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, status: oldStatus as any } : p))
+      );
+      showToast(`Error actualizando estado de ${performer?.stage_name ?? id}`, 'error');
     }
   };
 
@@ -194,10 +201,18 @@ export default function Performers() {
               }`}
             >
               <div className="mt-0.5">
-                {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XIcon className="w-5 h-5" />}
+                {toast.type === 'success' ? (
+                  <CheckCircle className="w-5 h-5" />
+                ) : (
+                  <XIcon className="w-5 h-5" />
+                )}
               </div>
               <div className="flex-1">{toast.message}</div>
-              <button className="ml-2 opacity-80" onClick={() => setToast(null)} aria-label="Cerrar">
+              <button
+                className="ml-2 opacity-80"
+                onClick={() => setToast(null)}
+                aria-label="Cerrar"
+              >
                 <XIcon className="w-4 h-4" />
               </button>
             </div>
