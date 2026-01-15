@@ -125,11 +125,11 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
       if (!item) throw new Error('Asset not found');
 
       await PerformersService.assignProfileAsset(performer.id, item.id);
-      
+
       // Recargar el perfil para obtener el video actualizado
       const updatedProfile = await PerformerProfileService.getPerformerProfile(performer.id);
       setProfileData(updatedProfile);
-      
+
       // Recargar performer para obtener el video actualizado
       const updatedPerformer = await PerformersService.getPerformer(performer.id);
       if (updatedPerformer?.video) setLocalVideo(updatedPerformer.video);
@@ -199,7 +199,10 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                     src={img.fileURL}
                     alt={img.assetName || 'Image'}
                     className="w-full h-36 object-cover cursor-pointer"
-                    onClick={(e) => { e.stopPropagation(); openModal('image', img.fileURL); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal('image', img.fileURL);
+                    }}
                   />
                   {selectedImageId === img.id && (
                     <div className="absolute bottom-0 left-0 right-0 bg-pink-600 text-white py-2 text-sm font-medium flex items-center justify-center gap-1">
@@ -260,11 +263,16 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                   />
                   <div
                     className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    onClick={(e) => { e.stopPropagation(); openModal('video', vid.fileURL); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal('video', vid.fileURL);
+                    }}
                     role="button"
                     aria-label="Previsualizar video"
                   >
-                    <div className="bg-black bg-opacity-60 text-white rounded-full p-3 text-xl select-none">▶</div>
+                    <div className="bg-black bg-opacity-60 text-white rounded-full p-3 text-xl select-none">
+                      ▶
+                    </div>
                   </div>
                   <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
                     Video
@@ -316,7 +324,10 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Video actual</h4>
             {(() => {
-              const videoUrl = localVideo ?? performer?.video ?? (profileData as PerformerProfileWithVideo)?.video as string | undefined;
+              const videoUrl =
+                localVideo ??
+                performer?.video ??
+                ((profileData as PerformerProfileWithVideo)?.video as string | undefined);
 
               return videoUrl ? (
                 <video
@@ -327,7 +338,8 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
                 >
                   Tu navegador no soporta el elemento de video.
                 </video>
-              ) : (                <div className="w-full max-w-xs h-36 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm p-4">
+              ) : (
+                <div className="w-full max-w-xs h-36 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm p-4">
                   Sin video asignado
                 </div>
               );
@@ -343,10 +355,7 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
           aria-modal="true"
           onClick={closeModal}
         >
-          <div
-            className="relative w-full max-w-3xl mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative w-full max-w-3xl mx-auto" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={closeModal}
               className="absolute -top-3 -right-3 bg-white text-gray-700 rounded-full p-2 shadow-md hover:bg-gray-100"
@@ -355,9 +364,18 @@ export default function MediaProfileTab({ performer }: MediaProfileTabProps) {
               ✕
             </button>
             {modalType === 'image' ? (
-              <img src={modalSrc} alt="Preview" className="w-full max-h-[80vh] object-contain rounded" />
+              <img
+                src={modalSrc}
+                alt="Preview"
+                className="w-full max-h-[80vh] object-contain rounded"
+              />
             ) : (
-              <video src={modalSrc} controls autoPlay className="w-full max-h-[80vh] object-contain rounded bg-black" />
+              <video
+                src={modalSrc}
+                controls
+                autoPlay
+                className="w-full max-h-[80vh] object-contain rounded bg-black"
+              />
             )}
           </div>
         </div>

@@ -61,7 +61,7 @@ describe('messageUtils', () => {
       const messageContent = createTextMessage('Test');
       const sender: MessageSender = { id: 'user1', name: 'Test User' };
       const msg = createSocketMessage('room1', messageContent, sender);
-      
+
       expect(msg.id).toBeDefined();
       expect(msg.room).toBe('room1');
       expect(msg.messageContent).toEqual(messageContent);
@@ -98,10 +98,10 @@ describe('messageUtils', () => {
 
     it('should parse goal content correctly', () => {
       const parsed = parseGoalContent('TipGoal_performer456_100');
-      expect(parsed).toEqual({ 
-        goalName: 'TipGoal', 
-        performerId: 'performer456', 
-        tokens: 100 
+      expect(parsed).toEqual({
+        goalName: 'TipGoal',
+        performerId: 'performer456',
+        tokens: 100,
       });
     });
 
@@ -176,7 +176,7 @@ describe('messageUtils', () => {
     it('should convert legacy string message to structured message', () => {
       const legacyMsg = 'Hello world';
       const converted = convertLegacyMessage(legacyMsg, 'room1');
-      
+
       expect(converted.id).toBeDefined();
       expect(converted.room).toBe('room1');
       expect(converted.messageContent.type).toBe('text');
@@ -221,7 +221,7 @@ describe('messageUtils', () => {
     it('should identify system messages', () => {
       const msg = createSystemMessage('connected', 'client123');
       expect(isSystemMessage(msg)).toBe(true);
-      
+
       const textMsg = createTextMessage('Hello');
       expect(isSystemMessage(textMsg)).toBe(false);
     });

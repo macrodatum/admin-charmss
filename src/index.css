@@ -129,7 +129,8 @@
   }
 
   /* Backdrop adaptativo al tema */
-  .modal-backdrop-adaptive, .modal-backdrop-adaptative {
+  .modal-backdrop-adaptive,
+  .modal-backdrop-adaptative {
     position: fixed;
     inset: 0;
     z-index: 50;
@@ -143,7 +144,8 @@
     animation: fadeIn 0.25s ease-out;
   }
 
-  .dark .modal-backdrop-adaptive, .dark .modal-backdrop-adaptative {
+  .dark .modal-backdrop-adaptive,
+  .dark .modal-backdrop-adaptative {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);

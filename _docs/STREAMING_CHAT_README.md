@@ -26,24 +26,18 @@
 import StreamingChat from './components/performers/StreamingChat';
 
 function MiComponente() {
-  return (
-    <StreamingChat
-      room="performer_123"
-      performerName="Performer Name"
-      className="h-full"
-    />
-  );
+  return <StreamingChat room="performer_123" performerName="Performer Name" className="h-full" />;
 }
 ```
 
 ### Props
 
-| Prop | Tipo | Requerido | Descripción |
-|------|------|-----------|-------------|
-| `room` | `string` | Sí | ID de la sala de chat (ej: `performer_123`) |
-| `performerName` | `string` | Sí | Nombre del performer para mostrar en el placeholder |
-| `className` | `string` | No | Clases CSS adicionales para el contenedor |
-| `onGiftClick` | `() => void` | No | Callback al hacer clic en el botón de regalo |
+| Prop            | Tipo         | Requerido | Descripción                                         |
+| --------------- | ------------ | --------- | --------------------------------------------------- |
+| `room`          | `string`     | Sí        | ID de la sala de chat (ej: `performer_123`)         |
+| `performerName` | `string`     | Sí        | Nombre del performer para mostrar en el placeholder |
+| `className`     | `string`     | No        | Clases CSS adicionales para el contenedor           |
+| `onGiftClick`   | `() => void` | No        | Callback al hacer clic en el botón de regalo        |
 
 ### Ejemplo completo en StreamingModal
 
@@ -83,6 +77,7 @@ src/
 ## 📊 Tipos de Mensajes Soportados
 
 ### 1. Mensaje de Texto
+
 ```typescript
 {
   type: 'text',
@@ -92,6 +87,7 @@ src/
 ```
 
 ### 2. Mensaje Multimedia
+
 ```typescript
 {
   type: 'media',
@@ -103,6 +99,7 @@ src/
 ```
 
 ### 3. Evento del Sistema
+
 ```typescript
 {
   type: 'system',
@@ -112,6 +109,7 @@ src/
 ```
 
 ### 4. Mensaje de Tokens
+
 ```typescript
 {
   type: 'tokens',
@@ -121,6 +119,7 @@ src/
 ```
 
 ### 5. Mensaje de Objetivo/Meta
+
 ```typescript
 {
   type: 'goal',

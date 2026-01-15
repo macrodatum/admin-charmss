@@ -18,8 +18,6 @@ export interface PerformerLikePreferences {
   updatedAt?: string;
 }
 
-
-
 class LikeService {
   /**
    * Obtener preferencias del performer
@@ -27,7 +25,6 @@ class LikeService {
    * @returns Preferencias del performer
    */
   async getPerformerLikes(performerId: string): Promise<PerformerLikePreferences> {
-
     // Simulación de delay de red
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -68,7 +65,6 @@ class LikeService {
       updatedAt: new Date().toISOString(),
     };
   }
-
 
   /**
    * Opciones para favoritos (para usar en UI de selección tipo tags)

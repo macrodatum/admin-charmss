@@ -143,12 +143,18 @@ describe('OnboardingModal', () => {
     const frontLabel = screen.getByText('Front');
     // climb up until we find the container that holds the action buttons
     let cardNode: Element | null = frontLabel;
-    while (cardNode && cardNode.querySelectorAll && cardNode.querySelectorAll('button').length === 0) {
+    while (
+      cardNode &&
+      cardNode.querySelectorAll &&
+      cardNode.querySelectorAll('button').length === 0
+    ) {
       cardNode = cardNode.parentElement;
     }
     if (!cardNode) throw new Error('Front card not found');
 
-    const approveBtn = Array.from(cardNode.querySelectorAll('button')).find((b) => /Aceptar/i.test(b.textContent || '')) as HTMLButtonElement;
+    const approveBtn = Array.from(cardNode.querySelectorAll('button')).find((b) =>
+      /Aceptar/i.test(b.textContent || '')
+    ) as HTMLButtonElement;
     expect(approveBtn).toBeDefined();
     fireEvent.click(approveBtn);
 
@@ -192,10 +198,16 @@ describe('OnboardingModal', () => {
     // stage first doc as approved
     const frontLabel = screen.getByText('Front');
     let cardNode: Element | null = frontLabel;
-    while (cardNode && cardNode.querySelectorAll && cardNode.querySelectorAll('button').length === 0) {
+    while (
+      cardNode &&
+      cardNode.querySelectorAll &&
+      cardNode.querySelectorAll('button').length === 0
+    ) {
       cardNode = cardNode.parentElement;
     }
-    const approveBtn = Array.from(cardNode!.querySelectorAll('button')).find((b) => /Aceptar/i.test(b.textContent || '')) as HTMLButtonElement;
+    const approveBtn = Array.from(cardNode!.querySelectorAll('button')).find((b) =>
+      /Aceptar/i.test(b.textContent || '')
+    ) as HTMLButtonElement;
     fireEvent.click(approveBtn);
 
     // click global approve and confirm

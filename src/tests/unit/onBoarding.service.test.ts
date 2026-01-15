@@ -183,7 +183,7 @@ describe('Onboarding Service', () => {
 
       mockApiClient.patch.mockResolvedValueOnce({ data: mockData } as unknown);
 
-      const res = await (
+      await (
         await import('../../app/services/onBoarding.service')
       ).decideOnboarding(2, 2, 'Aprobado');
 
@@ -191,7 +191,6 @@ describe('Onboarding Service', () => {
         statusOnboarding: 2,
         notes: 'Aprobado',
       });
-
     });
 
     it('maps provided documentStatuses to explicit payload fields and sends documentNotes', async () => {
@@ -281,7 +280,9 @@ describe('Onboarding Service', () => {
       mockApiClient.patch.mockRejectedValueOnce(mockError);
 
       await expect(
-        (await import('../../app/services/onBoarding.service')).updateDocumentStatus(2, 1, 3, 'Mala calidad')
+        (
+          await import('../../app/services/onBoarding.service')
+        ).updateDocumentStatus(2, 1, 3, 'Mala calidad')
       ).rejects.toThrow('Patch failed');
     });
   });

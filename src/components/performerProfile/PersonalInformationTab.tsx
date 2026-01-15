@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import PerformerProfileService from '../../app/services/performerProfile.service';
-import type { PerformerProfile as PerformerProfileType, Performer } from '../../app/types/performers.types';
+import type {
+  PerformerProfile as PerformerProfileType,
+  Performer,
+} from '../../app/types/performers.types';
 
 interface PersonalInformationTabProps {
   performer: Performer;
@@ -12,7 +15,7 @@ export default function PersonalInformationTab({ performer }: PersonalInformatio
   const stageName = performer.stage_name;
   const avatarUrl = performer.avatar;
   const rating = performer.rating ?? 0;
-  const totalShows = performer.total_shows ?? 0; 
+  const totalShows = performer.total_shows ?? 0;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -146,9 +149,7 @@ export default function PersonalInformationTab({ performer }: PersonalInformatio
       </div>
       {saveMessage && (
         <p
-          className={`text-sm ${
-            saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'
-          }`}
+          className={`text-sm ${saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'}`}
         >
           {saveMessage}
         </p>

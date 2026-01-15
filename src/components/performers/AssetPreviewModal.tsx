@@ -1,19 +1,14 @@
 import React from 'react';
-import { X, Heart, MessageSquare } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ContentItem } from '../../types/content';
 
 interface AssetPreviewModalProps {
   asset: ContentItem;
-  editorialStatus?: 'pending' | 'approved' | 'rejected';
   onClose: () => void;
 }
 
-export default function AssetPreviewModal({
-  asset,
-  editorialStatus,
-  onClose,
-}: AssetPreviewModalProps) {
+export default function AssetPreviewModal({ asset, onClose }: AssetPreviewModalProps) {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
@@ -44,7 +39,6 @@ export default function AssetPreviewModal({
               </div>
             </div>
             <div className="flex items-center gap-3">
-
               <button
                 aria-label="Cerrar preview"
                 onClick={(e) => {
@@ -79,7 +73,6 @@ export default function AssetPreviewModal({
             </div>
 
             <div className="w-full md:w-64 flex flex-col">
-
               <div className="mb-4">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Detalles</div>
                 <ul className="mt-2 text-sm text-gray-700 dark:text-gray-300 space-y-2">

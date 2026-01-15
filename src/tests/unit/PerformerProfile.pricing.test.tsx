@@ -54,7 +54,9 @@ const sampleProducts = [
 describe('PerformerProfile Pricing tab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (ProductService.getPerformerProductByPerformerId as unknown as Mock).mockResolvedValue(sampleProducts);
+    (ProductService.getPerformerProductByPerformerId as unknown as Mock).mockResolvedValue(
+      sampleProducts
+    );
     (PerformerProfileService.getPerformerProfile as unknown as Mock).mockResolvedValue({
       nickName: undefined,
     } as PerformerProfileType);

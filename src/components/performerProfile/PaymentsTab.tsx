@@ -160,9 +160,7 @@ export default function PaymentsTab({ performerId }: PaymentsTabProps) {
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg"
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {method.name}
-                  </p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{method.name}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
                     Fee: {method.fee} • Min: {method.minPayout}
                   </p>
@@ -206,10 +204,7 @@ export default function PaymentsTab({ performerId }: PaymentsTabProps) {
             </thead>
             <tbody>
               {paymentData.recentTransactions.map((transaction) => (
-                <tr
-                  key={transaction.id}
-                  className="border-b border-gray-100 dark:border-slate-800"
-                >
+                <tr key={transaction.id} className="border-b border-gray-100 dark:border-slate-800">
                   <td className="py-2 px-3 text-gray-900 dark:text-white">{transaction.date}</td>
                   <td className="py-2 px-3 text-gray-700 dark:text-gray-300">
                     {transaction.type.replace(/_/g, ' ')}

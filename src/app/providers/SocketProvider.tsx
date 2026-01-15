@@ -55,7 +55,8 @@ interface PrivateMessageEvent {
 }
 
 interface SocketContextValue {
-  socket: Socket | null;
+  // Do not expose ref values directly during render. Provide a getter instead.
+  getSocket?: () => Socket | null;
   connected: boolean;
   emit: (event: string, ...args: unknown[]) => void;
   on: (event: string, handler: SocketHandler) => void;
@@ -381,9 +382,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     [on]
   );
 
+  const getSocket = useCallback(() => socketRef.current, []);
+
   const value = useMemo(
     () => ({
-      socket: socketRef.current,
+      getSocket,
       connected,
       emit,
       on,
@@ -405,6 +408,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       onPrivateMessage,
     }),
     [
+      getSocket,
       connected,
       emit,
       on,
@@ -433,6 +437,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     };
   }, [disconnect]);
 
+  // some callbacks reference refs internally which is safe because refs are read only when those
+  // callbacks are executed (not during render). Disable the rule here to avoid false positives.
+  // eslint-disable-next-line react-hooks/refs
   return React.createElement(SocketContext.Provider, { value }, children);
 };
 

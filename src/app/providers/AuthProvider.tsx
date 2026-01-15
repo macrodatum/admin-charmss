@@ -29,16 +29,17 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             const response = await validateAuthCallback(userId, provider, role);
             if (response.jwt && response.user) {
-            const userForStore: User = { ...response.user };
-            useAuthStore.getState().setCredentials(response.jwt as unknown as string, userForStore);
-            useAuthStore.getState().setLoggedIn(true);
-            navigate('/');
-          }
-          }
-          catch (error: any) {
+              const userForStore: User = { ...response.user };
+              useAuthStore
+                .getState()
+                .setCredentials(response.jwt as unknown as string, userForStore);
+              useAuthStore.getState().setLoggedIn(true);
+              navigate('/');
+            }
+          } catch (error: any) {
             const message = error?.response?.data?.error || 'Error de autenticación';
             console.error('Error during auth validation:', message);
-            navigate('/login', { state: { from: location.pathname, authError: message } } );
+            navigate('/login', { state: { from: location.pathname, authError: message } });
           }
         } else {
           console.error('Invalid response from auth callback:');

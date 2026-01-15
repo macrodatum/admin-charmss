@@ -31,7 +31,7 @@ describe('ProfileTab (migrated from PersonalInformationTab)', () => {
       instagramLink: 'https://instagram.com/test',
       countryCode: 'Colombia +57',
       id: 0,
-      performerId: 0
+      performerId: 0,
     },
   };
 

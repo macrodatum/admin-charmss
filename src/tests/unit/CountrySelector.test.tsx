@@ -18,7 +18,16 @@ describe('CountrySelector', () => {
 
     const onChange = vi.fn();
 
-    render(<CountrySelector id="country" label="Country" value={"CO"} onChange={onChange} error={null} required />);
+    render(
+      <CountrySelector
+        id="country"
+        label="Country"
+        value={'CO'}
+        onChange={onChange}
+        error={null}
+        required
+      />
+    );
 
     const select = screen.getByRole('combobox', { name: /Country/ }) as HTMLSelectElement;
 

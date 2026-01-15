@@ -24,33 +24,20 @@ describe('StreamingChat', () => {
   });
 
   it('should render the chat component', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     expect(screen.getByText('Chat en Vivo')).toBeInTheDocument();
   });
 
   it('should join room on mount', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     expect(mockJoinRoom).toHaveBeenCalledWith('performer_123');
   });
 
   it('should leave room on unmount', () => {
     const { unmount } = render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
+      <StreamingChat room="performer_123" performerName="Test Performer" />
     );
 
     unmount();
@@ -58,18 +45,13 @@ describe('StreamingChat', () => {
   });
 
   it('should send message when form is submitted', async () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     const input = screen.getByPlaceholderText('Mensaje a Test Performer...');
     const form = input.closest('form');
 
     fireEvent.change(input, { target: { value: 'Hello world' } });
-    
+
     if (form) {
       fireEvent.submit(form);
     }
@@ -84,16 +66,11 @@ describe('StreamingChat', () => {
   });
 
   it('should not send empty messages', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     const input = screen.getByPlaceholderText('Mensaje a Test Performer...');
     const form = input.closest('form');
-    
+
     if (form) {
       fireEvent.submit(form);
     }
@@ -102,16 +79,11 @@ describe('StreamingChat', () => {
   });
 
   it('should clear input after sending message', async () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     const input = screen.getByPlaceholderText('Mensaje a Test Performer...') as HTMLInputElement;
     const form = input.closest('form');
-    
+
     fireEvent.change(input, { target: { value: 'Test message' } });
     expect(input.value).toBe('Test message');
 
@@ -125,25 +97,17 @@ describe('StreamingChat', () => {
   });
 
   it('should register message listener on mount', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     expect(mockOnRoomMessage).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('should display no messages initially', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
-    expect(screen.getByText('No hay mensajes aún. ¡Sé el primero en escribir!')).toBeInTheDocument();
+    expect(
+      screen.getByText('No hay mensajes aún. ¡Sé el primero en escribir!')
+    ).toBeInTheDocument();
   });
 
   it('should show gift button when onGiftClick is provided', () => {
@@ -158,41 +122,27 @@ describe('StreamingChat', () => {
 
     const giftButton = screen.getByTitle('Enviar regalo');
     expect(giftButton).toBeInTheDocument();
-    
+
     fireEvent.click(giftButton);
     expect(onGiftClick).toHaveBeenCalled();
   });
 
   it('should not show gift button when onGiftClick is not provided', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     const giftButton = screen.queryByTitle('Enviar regalo');
     expect(giftButton).not.toBeInTheDocument();
   });
 
   it('should display room name in info section', () => {
-    render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-      />
-    );
+    render(<StreamingChat room="performer_123" performerName="Test Performer" />);
 
     expect(screen.getByText('Sala: performer_123')).toBeInTheDocument();
   });
 
   it('should apply custom className', () => {
     const { container } = render(
-      <StreamingChat
-        room="performer_123"
-        performerName="Test Performer"
-        className="custom-class"
-      />
+      <StreamingChat room="performer_123" performerName="Test Performer" className="custom-class" />
     );
 
     const chatContainer = container.firstChild;

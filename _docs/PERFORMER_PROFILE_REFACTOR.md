@@ -9,35 +9,41 @@ Se ha completado exitosamente la refactorización completa del componente `Perfo
 ### Componentes Independientes (`src/components/performerProfile/`)
 
 1. **PersonalInformationTab.tsx**
+
    - Gestiona nickname, headline y descripción del show
    - Carga datos del perfil desde el backend
    - Guarda cambios independientemente
 
 2. **ProfileTab.tsx**
+
    - Maneja información demográfica (edad, altura, peso, etc.)
    - Incluye sliders para age, height, weight
    - Selectores para zodiac, ethnicity, sexual preference, etc.
    - Links de redes sociales (Twitter, Instagram)
 
 3. **LikeTab.tsx**
+
    - Sistema de preferencias "I Like"
    - Categorías: activities, interests, music, movies
    - Preferencias personalizadas con opción de agregar/eliminar
    - Servicio mock preparado para backend
 
 4. **PricingTab.tsx**
+
    - Visualización y edición de precios de productos
    - Carga productos editables desde ProductService
    - Sliders para ajustar precios dentro de min/max
    - Guardado pendiente de implementación en backend
 
 5. **MediaProfileTab.tsx**
+
    - Asignación de avatar desde assets aprobados
    - Asignación de video de presentación
    - Solo recibe performerId (independiente del padre)
    - Maneja su propio estado de media items
 
 6. **PaymentsTab.tsx**
+
    - Visualización de pagos semanales
    - Métodos de pago configurados
    - Historial de transacciones
@@ -53,11 +59,13 @@ Se ha completado exitosamente la refactorización completa del componente `Perfo
 ### Servicios Mock (`src/app/services/`)
 
 1. **like.service.ts**
+
    - Interfaces: `LikePreference`, `PerformerLikePreferences`
    - Métodos: `getPerformerLikes()`, `updatePerformerLikes()`, `getAvailableCategories()`
    - Categorías predefinidas preparadas
 
 2. **payments.service.ts**
+
    - Interfaces: `WeeklyPayment`, `PaymentMethod`, `Transaction`, `PaymentSummary`
    - Métodos: `getPaymentSummary()`, `getTransactionHistory()`, `setActivePaymentMethod()`
    - Estructura de datos completa para integración futura
@@ -75,6 +83,7 @@ Se ha completado exitosamente la refactorización completa del componente `Perfo
 - **MediaProfileTab.test.tsx**: 7 tests
 
 Cobertura:
+
 - Carga de datos inicial
 - Actualización de formularios
 - Guardado de datos
@@ -84,6 +93,7 @@ Cobertura:
 ### Tests E2E (`tests/e2e/performer-profile.spec.ts`)
 
 Tests Playwright organizados por tab:
+
 - Personal Information: edición y guardado
 - Profile: sliders y guardado
 - Pricing: visualización de productos
@@ -108,6 +118,7 @@ Tests Playwright organizados por tab:
 Todos los componentes reciben `performerId: string` como prop principal.
 
 Componentes adicionales:
+
 - `PersonalInformationTab`: también recibe `stageName`, `avatarUrl`, `rating`, `totalShows` para la visualización inicial
 - `MediaProfileTab`: también recibe `performerProfileId` opcional
 
@@ -128,6 +139,7 @@ PerformerProfile (padre)
 `PerformerProfile.tsx` ahora tiene solo **93 líneas** (antes tenía 1130 líneas).
 
 Responsabilidades:
+
 - Renderizar tabs de navegación
 - Controlar tab activo
 - Renderizar componente hijo correspondiente
@@ -138,7 +150,7 @@ Responsabilidades:
 ✅ **TypeScript**: `npx tsc --noEmit` - Sin errores  
 ✅ **ESLint**: `npm run lint` - Solo warnings de `any` en tests (aceptables)  
 ✅ **Build**: `npm run build` - Exitoso  
-✅ **Format**: `npm run format` - Código formateado correctamente  
+✅ **Format**: `npm run format` - Código formateado correctamente
 
 ## Archivos de Backup
 
@@ -147,6 +159,7 @@ Responsabilidades:
 ## Estructura de Datos Preparada
 
 Todos los servicios mock incluyen:
+
 - Interfaces TypeScript completas
 - Estructuras de datos listas para backend
 - Comentarios TODO para integración futura

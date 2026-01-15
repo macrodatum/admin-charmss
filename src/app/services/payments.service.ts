@@ -186,7 +186,12 @@ class PaymentsService {
     paymentMethodId: number
   ): Promise<PaymentMethod> {
     // TODO: Implementar llamada a backend cuando esté disponible
-    console.log('Mock: Setting active payment method', paymentMethodId, 'for performer', performerId);
+    console.log(
+      'Mock: Setting active payment method',
+      paymentMethodId,
+      'for performer',
+      performerId
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 300));
 

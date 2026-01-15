@@ -33,7 +33,9 @@ describe('PricingTab', () => {
   });
 
   it('loads and displays returned products', async () => {
-    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(mockProducts as any);
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(
+      mockProducts as any
+    );
 
     render(<PricingTab {...mockProps} />);
 
@@ -55,7 +57,9 @@ describe('PricingTab', () => {
       },
     ];
 
-    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(allProducts as any);
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(
+      allProducts as any
+    );
 
     render(<PricingTab {...mockProps} />);
 
@@ -67,7 +71,9 @@ describe('PricingTab', () => {
   });
 
   it('updates price slider value', async () => {
-    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(mockProducts as any);
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue(
+      mockProducts as any
+    );
 
     render(<PricingTab {...mockProps} />);
 
@@ -83,19 +89,22 @@ describe('PricingTab', () => {
 
   // PricingTab no incluye funcionalidad de guardado en el componente actual, por lo tanto se elimina la prueba de guardar.
 
-
   it('shows message when no products are returned', async () => {
     vi.mocked(ProductService.getPerformerProductByPerformerId).mockResolvedValue([]);
 
     render(<PricingTab {...mockProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('No hay productos configurables para editar el precio.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No hay productos configurables para editar el precio.')
+      ).toBeInTheDocument();
     });
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(ProductService.getPerformerProductByPerformerId).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(ProductService.getPerformerProductByPerformerId).mockImplementation(
+      () => new Promise(() => {})
+    );
 
     render(<PricingTab {...mockProps} />);
 

@@ -30,7 +30,9 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
   const updateProductPrice = async (productId: number, price: number) => {
     const idStr = String(productId);
     // Actualizar UI inmediatamente
-    setProducts((prev) => prev.map((item) => (String(item.productId) === idStr ? { ...item, price } : item)));
+    setProducts((prev) =>
+      prev.map((item) => (String(item.productId) === idStr ? { ...item, price } : item))
+    );
 
     // Enviar al backend (proteger si el service no expone setPerformerProduct en tests)
     let result;
@@ -71,7 +73,9 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
       setLoading(true);
       try {
         // Obtener productos específicos del performer (todos los datos vienen de aquí)
-        const performerProductsRaw = await ProductService.getPerformerProductByPerformerId(performerId);
+        const performerProductsRaw = await ProductService.getPerformerProductByPerformerId(
+          performerId
+        );
 
         // El servicio debería devolver un array, pero protegernos contra formas inesperadas
         let performerProducts: PerformerProduct[] = [];
@@ -79,7 +83,10 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
           performerProducts = performerProductsRaw;
         } else if (performerProductsRaw && typeof performerProductsRaw === 'object') {
           // Soporte para estructuras como { data: [] } o { items: [] }
-          const asRecord = performerProductsRaw as { data?: PerformerProduct[]; items?: PerformerProduct[] };
+          const asRecord = performerProductsRaw as {
+            data?: PerformerProduct[];
+            items?: PerformerProduct[];
+          };
           if (Array.isArray(asRecord.data)) {
             performerProducts = asRecord.data;
           } else if (Array.isArray(asRecord.items)) {
@@ -94,10 +101,12 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
         const normalized = performerProducts.map((pp) => ({
           ...pp,
           // backend sometimes returns `id` instead of `productId` — normalize to always have `productId`
-          productId: typeof (pp as any).productId === 'number' ? (pp as any).productId : (pp as any).id,
+          productId:
+            typeof (pp as any).productId === 'number' ? (pp as any).productId : (pp as any).id,
           price: typeof pp.price === 'number' ? pp.price : Number(pp.price) || 0,
           minPrice: pp.minPrice ?? Math.max(1, Math.floor((pp.price as number) * 0.5)),
-          maxPrice: pp.maxPrice ?? Math.max((pp.price as number), Math.ceil((pp.price as number) * 1.5)),
+          maxPrice:
+            pp.maxPrice ?? Math.max(pp.price as number, Math.ceil((pp.price as number) * 1.5)),
           defaultPrice: pp.price,
         }));
 
@@ -105,7 +114,6 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
       } catch (err) {
         console.error('Error loading products for pricing tab:', err);
         setProducts([]);
-
       } finally {
         setLoading(false);
       }
@@ -113,8 +121,6 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
 
     loadProducts();
   }, [performerId, performerProfileId]);
-
-
 
   if (loading) {
     return (
@@ -173,9 +179,6 @@ export default function PricingTab({ performerId, performerProfileId }: PricingT
           </div>
         ))}
       </div>
-
-
-
     </div>
   );
 }

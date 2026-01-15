@@ -29,7 +29,7 @@ const AppRouter: React.FC = () => {
   const mockOnlineStatus = false;
   const mockSetOnlineStatus = () => {};
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const mockSetIsStreaming = () => {}; 
+  const mockSetIsStreaming = () => {};
 
   return (
     <Routes>

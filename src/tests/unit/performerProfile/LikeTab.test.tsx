@@ -18,7 +18,11 @@ describe('LikeTab', () => {
       preferences: [{ id: 1, category: 'music', value: 'Pop', selected: true }],
     } as any);
 
-    vi.mocked(LikeService.getFavoriteOptions).mockReturnValue({ favoriteColor: ['Red', 'Blue'], favoriteMusic: ['Pop'], languages: ['English', 'Spanish'] } as any);
+    vi.mocked(LikeService.getFavoriteOptions).mockReturnValue({
+      favoriteColor: ['Red', 'Blue'],
+      favoriteMusic: ['Pop'],
+      languages: ['English', 'Spanish'],
+    } as any);
 
     vi.mocked(PerformerProfileService.getPerformerProfile).mockResolvedValue({
       id: 1,
@@ -59,16 +63,23 @@ describe('LikeTab', () => {
     const englishBtn = await screen.findByRole('button', { name: 'English' });
     fireEvent.click(englishBtn);
 
-
     const saveButton = screen.getByText('Save preferences');
     fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(LikeService.updatePerformerLikes).toHaveBeenCalled();
-      expect(PerformerProfileService.updatePerformerProfile).toHaveBeenCalledWith('1', expect.objectContaining({ showDescription: 'New desc', favoriteColor: 'Red::Maroon', languages: 'English' }));
+      expect(PerformerProfileService.updatePerformerProfile).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          showDescription: 'New desc',
+          favoriteColor: 'Red::Maroon',
+          languages: 'English',
+        })
+      );
 
       // Also assert id, performerId and roomTopic are not present in the sent payload
-      const callArgs = vi.mocked(PerformerProfileService.updatePerformerProfile).mock.calls[0][1] as any;
+      const callArgs = vi.mocked(PerformerProfileService.updatePerformerProfile).mock
+        .calls[0][1] as any;
       expect(callArgs.id).toBeUndefined();
       expect(callArgs.performerId).toBeUndefined();
       expect(callArgs.roomTopic).toBeUndefined();

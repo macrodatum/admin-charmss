@@ -69,7 +69,10 @@ describe('ProfileTab', () => {
     fireEvent.click(saveButton);
 
     await waitFor(() => {
-      expect(PerformerProfileService.updatePerformerProfile).toHaveBeenCalledWith('1', expect.any(Object));
+      expect(PerformerProfileService.updatePerformerProfile).toHaveBeenCalledWith(
+        '1',
+        expect.any(Object)
+      );
     });
 
     expect(await screen.findByText('Profile guardado correctamente')).toBeInTheDocument();

@@ -19,7 +19,14 @@ const getFlagEmoji = (iso?: string) => {
     .join('');
 };
 
-export default function CountrySelector({ label, value, onChange, error, required, id }: CountrySelectorProps) {
+export default function CountrySelector({
+  label,
+  value,
+  onChange,
+  error,
+  required,
+  id,
+}: CountrySelectorProps) {
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -52,8 +59,12 @@ export default function CountrySelector({ label, value, onChange, error, require
   return (
     <div>
       {label && (
-        <label htmlFor={id} className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {label}{required ? ' *' : ''}
+        <label
+          htmlFor={id}
+          className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
+          {label}
+          {required ? ' *' : ''}
         </label>
       )}
       <select
@@ -64,11 +75,13 @@ export default function CountrySelector({ label, value, onChange, error, require
       >
         {loading && <option value="">Loading...</option>}
         {!loading && countries.length === 0 && <option value="">No countries</option>}
-        {!loading && countries.map((c) => (
-          <option key={c.isoCode} value={c.isoCode}>
-            {getFlagEmoji(c.isoCode)} {c.name}{c.dialCode ? ` ${c.dialCode}` : ''}
-          </option>
-        ))}
+        {!loading &&
+          countries.map((c) => (
+            <option key={c.isoCode} value={c.isoCode}>
+              {getFlagEmoji(c.isoCode)} {c.name}
+              {c.dialCode ? ` ${c.dialCode}` : ''}
+            </option>
+          ))}
       </select>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>

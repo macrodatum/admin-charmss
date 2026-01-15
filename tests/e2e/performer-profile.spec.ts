@@ -26,7 +26,9 @@ test.describe('Performer Profile - Personal Information Tab', () => {
     await page.click('[data-testid="performer-row"]:first-child');
 
     // Verificar que el tab Personal Information está activo
-    await expect(page.locator('button:has-text("Personal Information")')).toHaveClass(/border-pink/);
+    await expect(page.locator('button:has-text("Personal Information")')).toHaveClass(
+      /border-pink/
+    );
 
     // Verificar campos del formulario
     await expect(page.locator('label:has-text("NickName")')).toBeVisible();
@@ -152,7 +154,9 @@ test.describe('Performer Profile - Media Profile Tab', () => {
     await page.click('button:has-text("Media profile")');
 
     // Verificar que el tab está activo
-    await expect(page.locator('button:has-text("Media profile")').first()).toHaveClass(/border-pink/);
+    await expect(page.locator('button:has-text("Media profile")').first()).toHaveClass(
+      /border-pink/
+    );
 
     // Verificar secciones
     await expect(page.locator('text=Avatar del perfil')).toBeVisible();
@@ -167,7 +171,9 @@ test.describe('Performer Profile - Media Profile Tab', () => {
 
     // Verificar si hay media o mensaje de no hay media
     const hasImages = await page.locator('img[alt*="Image"]').count();
-    const noImagesMessage = await page.locator('text=No hay imágenes aprobadas disponibles').count();
+    const noImagesMessage = await page
+      .locator('text=No hay imágenes aprobadas disponibles')
+      .count();
 
     expect(hasImages > 0 || noImagesMessage > 0).toBeTruthy();
   });

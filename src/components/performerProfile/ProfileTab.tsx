@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import PerformerProfileService from '../../app/services/performerProfile.service';
-import type { PerformerProfile as PerformerProfileType, Performer } from '../../app/types/performers.types';
+import type {
+  PerformerProfile as PerformerProfileType,
+  Performer,
+} from '../../app/types/performers.types';
 import {
   ZodiacType,
   EthnicityType,
@@ -33,20 +36,30 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
     age: (profile.age as number) ?? 26,
     height: (profile.height as number) ?? 165,
     weight: (profile.weight as number) ?? 60,
-    zodiac: typeof profile.zodiac === 'number' ? (profile.zodiac as number) : ZodiacType.Saggitarius,
-    ethnicity: typeof profile.ethnicity === 'number' ? (profile.ethnicity as number) : EthnicityType.White,
+    zodiac:
+      typeof profile.zodiac === 'number' ? (profile.zodiac as number) : ZodiacType.Saggitarius,
+    ethnicity:
+      typeof profile.ethnicity === 'number' ? (profile.ethnicity as number) : EthnicityType.White,
     sexualPreference:
-      typeof profile.sexualPreference === 'number' ? (profile.sexualPreference as number) : SexualPreferenceType.Straight,
-    hairColor: typeof profile.hairColor === 'number' ? (profile.hairColor as number) : HairColorType.Brown,
-    eyeColor: typeof profile.eyeColor === 'number' ? (profile.eyeColor as number) : EyeColorType.Green,
+      typeof profile.sexualPreference === 'number'
+        ? (profile.sexualPreference as number)
+        : SexualPreferenceType.Straight,
+    hairColor:
+      typeof profile.hairColor === 'number' ? (profile.hairColor as number) : HairColorType.Brown,
+    eyeColor:
+      typeof profile.eyeColor === 'number' ? (profile.eyeColor as number) : EyeColorType.Green,
     build: typeof profile.build === 'number' ? (profile.build as number) : BuildType.Slender,
     // store country as an ISO code (e.g. 'CO') instead of full text
-    country: typeof profile.countryCode === 'string' && /^[A-Z]{2}$/.test(profile.countryCode) ? profile.countryCode : 'CO',
+    country:
+      typeof profile.countryCode === 'string' && /^[A-Z]{2}$/.test(profile.countryCode)
+        ? profile.countryCode
+        : 'CO',
     twitterLink: (profile.twitterLink as string) ?? '',
     instagramLink: (profile.instagramLink as string) ?? '',
     // Personal information fields previously in PersonalInformationTab
     headline: (profile.headLines as string) ?? '',
-    myLive: (profile.showDescription as string) ?? 'Welcome! Share your story and connect with fans.',
+    myLive:
+      (profile.showDescription as string) ?? 'Welcome! Share your story and connect with fans.',
   });
 
   const handleInputChange = (field: keyof typeof formData, value: string | number) => {
@@ -139,7 +152,7 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
           NickName
         </label>
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {profile.nickName || stageName}
+          {profile.nickName || stageName}
         </h2>
       </div>
 
@@ -380,9 +393,7 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
       </div>
       {saveMessage && (
         <p
-          className={`text-sm ${
-            saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'
-          }`}
+          className={`text-sm ${saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'}`}
         >
           {saveMessage}
         </p>

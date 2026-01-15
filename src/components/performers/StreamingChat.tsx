@@ -67,7 +67,7 @@ const StreamingChat: React.FC<StreamingChatProps> = ({
 
     onRoomMessage(handleRoomMessage);
 
-    // Nota: onRoomMessage no retorna función de limpieza, 
+    // Nota: onRoomMessage no retorna función de limpieza,
     // el SocketProvider maneja la limpieza de listeners
   }, [room, onRoomMessage]);
 
@@ -138,8 +138,8 @@ const StreamingChat: React.FC<StreamingChatProps> = ({
                   isSystem
                     ? 'text-yellow-400 text-xs'
                     : isHighlight
-                      ? 'bg-purple-900/30 rounded px-2 py-1'
-                      : ''
+                    ? 'bg-purple-900/30 rounded px-2 py-1'
+                    : ''
                 }`}
               >
                 <div className="flex-1">
@@ -163,8 +163,8 @@ const StreamingChat: React.FC<StreamingChatProps> = ({
                       isSystem
                         ? 'text-yellow-300 font-medium'
                         : isHighlight
-                          ? 'text-purple-200 font-medium'
-                          : 'text-gray-300'
+                        ? 'text-purple-200 font-medium'
+                        : 'text-gray-300'
                     }`}
                   >
                     {getDisplayText(msg.messageContent)}
@@ -184,9 +184,7 @@ const StreamingChat: React.FC<StreamingChatProps> = ({
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            placeholder={
-              connected ? `Mensaje a ${performerName}...` : 'Conectando al chat...'
-            }
+            placeholder={connected ? `Mensaje a ${performerName}...` : 'Conectando al chat...'}
             disabled={!connected}
             className="flex-1 bg-slate-900 text-white border border-slate-600 rounded-lg px-3 py-2 text-sm 
                        focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent

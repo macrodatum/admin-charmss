@@ -165,7 +165,15 @@ describe('ProductService', () => {
   describe('getPerformerProductByPerformerId', () => {
     it('should return performer products when endpoint returns data', async () => {
       const performerProducts = [
-        { id: 1, productId: 3, performerProfileId: 1, price: 1, lastUpdate: '2025-12-31T21:28:02.721Z', state: true, productName: 'Streaming minute' },
+        {
+          id: 1,
+          productId: 3,
+          performerProfileId: 1,
+          price: 1,
+          lastUpdate: '2025-12-31T21:28:02.721Z',
+          state: true,
+          productName: 'Streaming minute',
+        },
       ];
       vi.mocked(ApiClient.get).mockImplementation((url: string) => {
         if ((url as string).includes('/performers/2/products')) {
@@ -228,12 +236,15 @@ describe('ProductService', () => {
 
       const res = await ProductService.setPerformerProduct(2, 3, 100);
 
-      expect(ApiClient.post).toHaveBeenCalledWith('/api/performers/2/products', expect.objectContaining({
-        productId: 3,
-        price: 100,
-        state: true,
-        lastUpdate: expect.any(String),
-      }));
+      expect(ApiClient.post).toHaveBeenCalledWith(
+        '/api/performers/2/products',
+        expect.objectContaining({
+          productId: 3,
+          price: 100,
+          state: true,
+          lastUpdate: expect.any(String),
+        })
+      );
 
       expect(res).toEqual(created);
     });
@@ -244,5 +255,4 @@ describe('ProductService', () => {
       await expect(ProductService.setPerformerProduct(5, 7, 50)).rejects.toThrow('Post failed');
     });
   });
-
 });

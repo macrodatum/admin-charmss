@@ -184,7 +184,14 @@ class SalesService {
     limit = 10
   ): Promise<SalesPeriod[]> {
     // TODO: Implementar llamada a backend cuando esté disponible
-    console.log('Mock: Getting sales by period for performer', performerId, 'period:', period, 'limit:', limit);
+    console.log(
+      'Mock: Getting sales by period for performer',
+      performerId,
+      'period:',
+      period,
+      'limit:',
+      limit
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 300));
 

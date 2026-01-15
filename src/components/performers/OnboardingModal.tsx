@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, CheckCircle, XCircle, Image as ImageIcon, FileText } from 'lucide-react';
 import AssetPreviewModal from './AssetPreviewModal';
 import { OnboardingData } from '../../types/onboarding';
-import { getOnboardingData, decideOnboarding, updateDocumentStatus } from '../../app/services/onBoarding.service';
+import { getOnboardingData, decideOnboarding } from '../../app/services/onBoarding.service';
 import type { ContentItem } from '../../types/content';
 
 interface OnboardingModalProps {
@@ -22,7 +22,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const [actionResult, setActionResult] = useState<'approved' | 'rejected' | null>(null);
 
   // Per-document states
-  const [docLoading, setDocLoading] = useState<Record<number, boolean>>({});
+  const [docLoading, _setDocLoading] = useState<Record<number, boolean>>({});
 
   // Local staged statuses for images (modified locally, not yet sent)
   const [docStatuses, setDocStatuses] = useState<Record<number, number>>({});
@@ -37,16 +37,16 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       try {
         const resp = await getOnboardingData(performerId);
         if (mounted) {
-        setData(resp);
-        // initialize local doc statuses from fetched data
-        setDocStatuses({
-          1: resp.statusCardFrontFile ?? 0,
-          2: resp.statusCardBackFile ?? 0,
-          3: resp.statusCardFrontFaceFile ?? 0,
-          4: resp.statusCardBackFaceFile ?? 0,
-          5: resp.statusProfileImageFile ?? 0,
-        });
-      }
+          setData(resp);
+          // initialize local doc statuses from fetched data
+          setDocStatuses({
+            1: resp.statusCardFrontFile ?? 0,
+            2: resp.statusCardBackFile ?? 0,
+            3: resp.statusCardFrontFaceFile ?? 0,
+            4: resp.statusCardBackFaceFile ?? 0,
+            5: resp.statusProfileImageFile ?? 0,
+          });
+        }
       } catch {
         if (mounted) setError('Error al cargar los datos de onboarding');
       } finally {
@@ -107,9 +107,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       copy[Number(doc.documentType)] = '';
       return copy;
     });
-  }; 
+  };
 
-  const doRejectDoc = (docId: number, documentType: number, reason: string) => {
+  const _doRejectDoc = (docId: number, documentType: number, reason: string) => {
     // kept for compatibility but not used to show modal anymore
     setDocStatuses((s) => ({ ...s, [documentType]: 3 }));
     setDocNotes((s) => ({ ...s, [documentType]: reason ?? '' }));
@@ -265,18 +265,28 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                         </div>
                         <div className="text-xs">
                           {getDocStatus(Number(doc.documentType)) === 2 ? (
-                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">Aprobada</span>
+                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">
+                              Aprobada
+                            </span>
                           ) : getDocStatus(Number(doc.documentType)) === 3 ? (
-                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">Rechazada</span>
+                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">
+                              Rechazada
+                            </span>
                           ) : getDocStatus(Number(doc.documentType)) === 1 ? (
-                            <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">En revisión</span>
+                            <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">
+                              En revisión
+                            </span>
                           ) : (
-                            <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">Pendiente</span>
+                            <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">
+                              Pendiente
+                            </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="text-xs text-gray-500 mt-1">Subido: {new Date(doc.loadDate).toLocaleString()}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Subido: {new Date(doc.loadDate).toLocaleString()}
+                      </div>
 
                       <div className="mt-3 flex gap-2">
                         <button
@@ -304,7 +314,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                         </button>
                       </div>
 
-                      {actionError && <div className="text-sm text-red-500 mt-2">{actionError}</div>}
+                      {actionError && (
+                        <div className="text-sm text-red-500 mt-2">{actionError}</div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -439,7 +451,6 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
               ),
             } as ContentItem
           }
-          editorialStatus={undefined}
           onClose={() => setSelectedDoc(null)}
         />
       )}
@@ -496,8 +507,6 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           </div>
         </div>
       )}
-
-
     </div>
   );
 }

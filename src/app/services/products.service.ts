@@ -112,9 +112,13 @@ class ProductService {
    * to returning the globally configured products mapped to the
    * PerformerProduct shape (so the caller always receives a list).
    */
-  async getPerformerProductByPerformerId(performerId: number | string): Promise<import('../types/products.types').PerformerProduct[]> {
+  async getPerformerProductByPerformerId(
+    performerId: number | string
+  ): Promise<import('../types/products.types').PerformerProduct[]> {
     try {
-      const resp = await ApiClient.get<import('../types/products.types').PerformerProduct[]>(`/api/performers/${performerId}/products`);
+      const resp = await ApiClient.get<import('../types/products.types').PerformerProduct[]>(
+        `/api/performers/${performerId}/products`
+      );
       const data = resp?.data ?? [];
       return data;
     } catch (err) {
@@ -128,7 +132,7 @@ class ProductService {
     performerProfileId: number | string,
     productId: number,
     price: number,
-    state = true,
+    state = true
   ): Promise<import('../types/products.types').PerformerProduct> {
     try {
       const payload = {
@@ -140,7 +144,7 @@ class ProductService {
 
       const resp = await ApiClient.post<import('../types/products.types').PerformerProduct>(
         `/api/performers/${performerProfileId}/products`,
-        payload,
+        payload
       );
 
       return resp.data;
@@ -149,7 +153,6 @@ class ProductService {
       throw err;
     }
   }
-
 }
 
 export default new ProductService();
