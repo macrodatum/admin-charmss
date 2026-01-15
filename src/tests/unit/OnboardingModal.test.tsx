@@ -89,7 +89,7 @@ describe('OnboardingModal', () => {
     (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
     (onboardingService.decideOnboarding as unknown as Mock).mockResolvedValueOnce({
       ...sample,
-      status: 3,
+      status: 2,
     } as unknown as OnboardingData);
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
@@ -218,6 +218,8 @@ describe('OnboardingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Aprobar$/ }));
 
     await waitFor(() => expect(screen.getByText(/Inscripción aprobada/i)).toBeInTheDocument());
+    // also show status badge
+    expect(screen.getByText('Aprobada')).toBeInTheDocument();
 
     // decideOnboarding should be called with the staged document statuses as explicit fields
     expect(onboardingService.decideOnboarding as unknown as Mock).toHaveBeenCalled();
@@ -297,10 +299,27 @@ describe('OnboardingModal', () => {
     fireEvent.click(screen.getByText(/Confirmar rechazo/i));
 
     await waitFor(() => expect(screen.getByText(/Inscripción rechazada/i)).toBeInTheDocument());
+    // also show status badge
+    expect(screen.getByText('Rechazada')).toBeInTheDocument();
   });
 
   it('returns null when no performerId passed', () => {
     const { container } = render(<OnboardingModal performerId={null} onClose={vi.fn()} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('shows initial request status when present', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...sample,
+      status: 0,
+      processMessage: 'Esperando revisión',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText(/Documentos/i)).toBeInTheDocument());
+
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
+    expect(screen.getByText('Esperando revisión')).toBeInTheDocument();
   });
 });

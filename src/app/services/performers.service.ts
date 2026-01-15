@@ -6,22 +6,24 @@ import {
   PerformerDto,
   Performer,
   PerformerStatus,
+  PerformerStatusEnum,
 } from '../types/performers.types';
 
 const BASE = '/api/performers';
 
 const mapStatus = (s?: number | null): PerformerStatus => {
+  // Backend numeric codes: 0 = pending, 1 = active, 2 = inactive, 3 = suspended
   switch (s) {
     case 0:
-      return 'active';
-    case 2:
-      return 'pending';
-    case 3:
-      return 'suspended';
+      return PerformerStatusEnum.Pending;
     case 1:
-      return 'inactive';
+      return PerformerStatusEnum.Active;
+    case 2:
+      return PerformerStatusEnum.Inactive;
+    case 3:
+      return PerformerStatusEnum.Suspended;
     default:
-      return 'inactive';
+      return PerformerStatusEnum.Inactive;
   }
 };
 
@@ -125,6 +127,21 @@ const updatePerformer = async (
 };
 
 /**
+ * Update performer's status by id (backend endpoint):
+ * PATCH /api/performers/by-id/{id}/status/{status}
+ * status: 0=Pending, 1=Active, 2=Inactive, 3=Suspended
+ */
+const updatePerformerStatus = async (
+  performerId: string | number,
+  status: number
+): Promise<void> => {
+  if (!performerId) throw new Error('performerId required');
+  const s = Number(status);
+  if (![0, 1, 2, 3].includes(s)) throw new Error('invalid status value');
+  await ApiClient.patch(`${BASE}/by-id/${performerId}/status/${s}`);
+};
+
+/**
  * Assign asset's fileURL to performer's avatar or video and return a pre-signed URL.
  * @param performerId - The performer ID
  * @param assetId - The asset ID to assign
@@ -144,5 +161,6 @@ export default {
   getPerformers,
   getPerformer,
   updatePerformer,
+  updatePerformerStatus,
   assignProfileAsset,
 };

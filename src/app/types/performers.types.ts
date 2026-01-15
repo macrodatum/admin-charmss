@@ -1,10 +1,11 @@
-export type PerformerStatus =
-  | 'active'
-  | 'inactive'
-  | 'pending'
-  | 'suspended'
-  | 'online'
-  | 'offline';
+export enum PerformerStatusEnum {
+  Pending = 0,
+  Active = 1,
+  Inactive = 2,
+  Suspended = 3,
+}
+
+export type PerformerStatus = PerformerStatusEnum | 'online' | 'offline';
 
 export interface Performer {
   id: string;

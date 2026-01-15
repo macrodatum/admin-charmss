@@ -144,7 +144,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         docNotes,
         documentStatusFields
       );
-      setData(resp);
+      // Ensure we have a status locally even if backend doesn't return it
+      const updated = { ...resp, status: resp.status ?? 2 } as OnboardingData;
+      setData(updated);
       setActionResult('approved');
       setConfirmApprove(false);
     } catch (err) {
@@ -152,6 +154,32 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       setActionError('Error al aprobar la inscripción');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const getRequestStatusLabel = (s: number | undefined | null) => {
+    switch (String(s)) {
+      case '1':
+        return 'Pendiente';
+      case '2':
+        return 'Aprobada';
+      case '3':
+        return 'Rechazada';
+      default:
+        return '';
+    }
+  };
+
+  const getRequestStatusColor = (s: number | undefined | null) => {
+    switch (String(s)) {
+      case '1':
+        return 'bg-yellow-100 text-yellow-800';
+      case '2':
+        return 'bg-green-100 text-green-700';
+      case '3':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
@@ -184,7 +212,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         docNotes,
         documentStatusFields
       );
-      setData(resp);
+      // Ensure we have a status locally even if backend doesn't return it
+      const updated = { ...resp, status: resp.status ?? 3 } as OnboardingData;
+      setData(updated);
       setActionResult('rejected');
       setRejectModal(null);
     } catch (err) {
@@ -204,9 +234,30 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {data ? `${data.firstName} ${data.middleName ?? ''} ${data.lastName}` : 'Cargando...'}
             </p>
-            <p className="text-xs text-gray-400 mt-1">
-              {data?.requestDate ? new Date(data.requestDate).toLocaleString() : ''}
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-xs text-gray-400">
+                {data?.requestDate ? new Date(data.requestDate).toLocaleString() : ''}
+              </p>
+
+              {(() => {
+                // Show a status badge; default to Pendiente (1) when backend doesn't provide a status
+                const displayedStatus = data?.status;
+
+                return (
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${getRequestStatusColor(
+                      displayedStatus
+                    )}`}
+                  >
+                    {getRequestStatusLabel(displayedStatus)}
+                  </span>
+                );
+              })()}
+
+              {(data?.processMessage ?? data?.notes) && (
+                <div className="text-xs text-gray-500">{data.processMessage ?? data?.notes}</div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

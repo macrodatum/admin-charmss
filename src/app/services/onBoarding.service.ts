@@ -7,7 +7,12 @@ export const getOnboardingData = async (id: string | number): Promise<Onboarding
     const response = await apiClient.get<OnboardingData>(url);
 
     // Calculate derived fields
-    const data = response.data;
+    const data: any = response.data;
+    // Map backend field `statusOnboarding` to `status` used in UI
+    if (data.status === undefined && data.statusOnboarding !== undefined) {
+      data.status = data.statusOnboarding;
+    }
+
     data.sentDocuments = calculateSentDocuments(data);
     data.signedContract = calculateSignedContract(data);
 
@@ -65,7 +70,12 @@ export const decideOnboarding = async (
 
     const response = await apiClient.patch<OnboardingData>(url, payload as any);
 
-    const data = response.data;
+    const data: any = response.data;
+    // Map backend field `statusOnboarding` to `status` used in UI
+    if (data.status === undefined && data.statusOnboarding !== undefined) {
+      data.status = data.statusOnboarding;
+    }
+
     // Recalculate derived fields
     data.sentDocuments = calculateSentDocuments(data);
     data.signedContract = calculateSignedContract(data);
@@ -96,7 +106,11 @@ export const updateDocumentStatus = async (
 
     const response = await apiClient.patch<OnboardingData>(url, payload);
 
-    const data = response.data;
+    const data: any = response.data;
+    // Map backend field `statusOnboarding` to `status` used in UI
+    if (data.status === undefined && data.statusOnboarding !== undefined) {
+      data.status = data.statusOnboarding;
+    }
 
     // Recalculate derived fields
     data.sentDocuments = calculateSentDocuments(data);

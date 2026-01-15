@@ -1,15 +1,14 @@
 /**
- * Tipos de mensajes soportados por el sistema de chat socket
+ * Tipos de mensajes soportados por el sistema de chat
  */
 export type MessageType = 'text' | 'media' | 'system' | 'tokens' | 'goal';
 
 /**
- * Contenido base común para todos los tipos de mensajes
+ * Contenido base para todos los tipos de mensajes
  */
 export interface BaseMessageContent {
   type: MessageType;
-  content: string;
-  timestamp: number;
+  timestamp: number; // Unix timestamp
 }
 
 /**
@@ -21,41 +20,48 @@ export interface TextMessageContent extends BaseMessageContent {
 }
 
 /**
- * Mensaje multimedia (imágenes, videos, etc.)
+ * Mensaje con contenido multimedia (imagen/video)
  */
 export interface MediaMessageContent extends BaseMessageContent {
   type: 'media';
   content: string; // URL del archivo multimedia
-  mediaType?: 'image' | 'video' | 'audio';
+  mediaType?: 'image' | 'video';
   fileName?: string;
 }
 
 /**
- * Evento del sistema (conexiones, desconexiones, etc.)
+ * Mensaje de evento del sistema
  */
 export interface SystemMessageContent extends BaseMessageContent {
   type: 'system';
-  content: string; // Formato: "clientId_evento" ej: "client123_connected"
+  content: string; // Formato: "{clientId}_connected" o similar
+  event: 'connected' | 'disconnected' | 'joined' | 'left';
+  clientId?: string;
 }
 
 /**
- * Mensaje de envío de tokens
+ * Mensaje de tokens
  */
 export interface TokensMessageContent extends BaseMessageContent {
   type: 'tokens';
-  content: string; // Formato: "clientId_cantidad" ej: "client123_25"
+  content: string; // Formato: "{clientId}_{cantidad}"
+  clientId: string;
+  amount: number;
 }
 
 /**
- * Mensaje de objetivo/meta (TipGoal)
+ * Mensaje de objetivo/meta
  */
 export interface GoalMessageContent extends BaseMessageContent {
   type: 'goal';
-  content: string; // Formato: "goalName_performerId_tokens" ej: "TipGoal_performer454_100"
+  content: string; // Formato: "goal_{performerId}_{tokens}"
+  goalName: string;
+  performerId: string;
+  tokens: number;
 }
 
 /**
- * Union type de todos los contenidos de mensaje posibles
+ * Unión de todos los tipos de contenido de mensaje
  */
 export type SocketMessageContent =
   | TextMessageContent
@@ -65,63 +71,37 @@ export type SocketMessageContent =
   | GoalMessageContent;
 
 /**
- * Información del remitente del mensaje
+ * Representa al remitente de un mensaje
  */
 export interface MessageSender {
   id: string;
   name?: string;
-  avatar?: string;
-  role?: 'performer' | 'client' | 'system' | 'admin';
+  clientId?: string;
 }
 
 /**
- * Estructura completa del mensaje socket con metadatos
+ * Estructura completa del mensaje de socket
  */
 export interface SocketMessage {
   id: string;
   room: string;
-  messageContent: SocketMessageContent;
   sender?: MessageSender;
-  timestamp?: number;
+  timestamp: number; // momento de creación del mensaje (ms)
+  messageContent: SocketMessageContent;
 }
 
 /**
- * Payload para enviar mensajes a una sala
+ * Payload para envío de mensajes a salas
  */
 export interface RoomMessagePayload {
   room: string;
-  message: SocketMessageContent;
+  messageContent: SocketMessageContent;
 }
 
 /**
- * Estructura de mensaje recibido desde el servidor
+ * Evento de mensaje recibido desde el servidor
  */
 export interface ReceivedRoomMessage {
   room: string;
   message: SocketMessage;
-}
-
-/**
- * Datos parseados del contenido de un mensaje de sistema
- */
-export interface ParsedSystemContent {
-  clientId: string;
-  event: string;
-}
-
-/**
- * Datos parseados del contenido de un mensaje de tokens
- */
-export interface ParsedTokensContent {
-  clientId: string;
-  amount: number;
-}
-
-/**
- * Datos parseados del contenido de un mensaje de objetivo/meta
- */
-export interface ParsedGoalContent {
-  goalName: string;
-  performerId: string;
-  tokens: number;
 }

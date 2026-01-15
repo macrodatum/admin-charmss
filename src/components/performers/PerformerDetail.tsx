@@ -21,33 +21,33 @@ interface PerformerDetailProps {
 export default function PerformerDetail({ performer, onClose }: PerformerDetailProps) {
   if (!performer) return null;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
+  const getStatusColor = (status: number | string | undefined) => {
+    switch (String(status)) {
+      case '1':
         return 'bg-green-100 text-green-800';
-      case 'inactive':
+      case '2':
         return 'bg-gray-100 text-gray-800';
-      case 'pending':
+      case '0':
         return 'bg-yellow-100 text-yellow-800';
-      case 'suspended':
+      case '3':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
+  const getStatusText = (status: number | string | undefined) => {
+    switch (String(status)) {
+      case '1':
         return 'Activo';
-      case 'inactive':
+      case '2':
         return 'Inactivo';
-      case 'pending':
+      case '0':
         return 'Pendiente';
-      case 'suspended':
+      case '3':
         return 'Suspendido';
       default:
-        return status;
+        return String(status ?? '');
     }
   };
 

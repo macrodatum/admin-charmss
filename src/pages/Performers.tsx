@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, RefreshCw } from 'lucide-react';
+import { Users, RefreshCw, CheckCircle, X as XIcon } from 'lucide-react';
 import PerformerList from '../components/performers/PerformerList';
 import PerformersService from '../app/services/performers.service';
 import { GetPerformersParams, Performer, PerformerStatus } from '../app/types/performers.types';
@@ -25,6 +25,32 @@ export default function Performers() {
     'detail' | 'profile' | 'upload' | 'streaming' | 'approval' | 'onboarding' | null
   >(null);
 
+  // Toast state for success/error notifications
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    window.setTimeout(() => setToast(null), 4000);
+  };
+
+  const statusLabel = (s: number | string | undefined) => {
+    switch (String(s)) {
+      case '0':
+        return 'Pendiente';
+      case '1':
+        return 'Activo';
+      case '2':
+        return 'Inactivo';
+      case '3':
+        return 'Suspendido';
+      default:
+        return String(s ?? '');
+    }
+  };
+
   const fetchPerformers = async (params?: GetPerformersParams) => {
     setLoading(true);
     try {
@@ -46,9 +72,9 @@ export default function Performers() {
       if (currentStatus !== 'all') {
         // Mapear status string a número según el backend
         const statusMap: Record<string, number> = {
-          active: 0,
-          inactive: 1,
-          pending: 2,
+          active: 1,
+          inactive: 2,
+          pending: 0,
           suspended: 3,
         };
         if (statusMap[currentStatus] !== undefined) {
@@ -75,11 +101,24 @@ export default function Performers() {
     }
   };
 
-  const handleToggleStatus = (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    setPerformers((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: newStatus as PerformerStatus } : p))
-    );
+  const handleToggleStatus = async (id: string, newStatus: number | string) => {
+    const statusNumber = Number(newStatus);
+    const performer = performers.find((p) => p.id === id);
+    const oldStatus = performer?.status;
+
+    // Optimistically update UI
+    setPerformers((prev) => prev.map((p) => (p.id === id ? { ...p, status: statusNumber as any } : p)));
+
+    try {
+      await PerformersService.updatePerformerStatus(id, statusNumber);
+      // Show success toast with who and new status
+      showToast(`Estado de ${performer?.stage_name ?? id} actualizado a ${statusLabel(statusNumber)}`,'success');
+    } catch (error) {
+      console.error('Error updating performer status', error);
+      // Revert UI on failure
+      setPerformers((prev) => prev.map((p) => (p.id === id ? { ...p, status: oldStatus as any } : p)));
+      showToast(`Error actualizando estado de ${performer?.stage_name ?? id}`,'error');
+    }
   };
 
   const handleViewProfile = (performer: Performer) => {
@@ -146,6 +185,23 @@ export default function Performers() {
               </button>
             </div>
           </div>
+
+          {/* Toast */}
+          {toast && (
+            <div
+              className={`fixed bottom-6 right-6 z-50 max-w-sm w-full rounded-lg shadow-lg px-4 py-3 flex items-start gap-3 text-sm text-white ${
+                toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+              }`}
+            >
+              <div className="mt-0.5">
+                {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XIcon className="w-5 h-5" />}
+              </div>
+              <div className="flex-1">{toast.message}</div>
+              <button className="ml-2 opacity-80" onClick={() => setToast(null)} aria-label="Cerrar">
+                <XIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6">

@@ -1,19 +1,11 @@
-/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react';
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useAuthStore, validateAuthState } from '../stores/auth.store';
-import type {
+import {
   SocketMessage,
   SocketMessageContent,
+  RoomMessagePayload,
   ReceivedRoomMessage,
 } from '../../shared/types/SocketMessage';
 import {
@@ -42,7 +34,7 @@ interface ClientPurchaseEvent {
   value: string;
 }
 
-/* --- Tipos locales --- */
+/* --- Nuevos tipos --- */
 interface UserJoinedEvent {
   clientId: string;
   userId: string;
@@ -55,8 +47,7 @@ interface PrivateMessageEvent {
 }
 
 interface SocketContextValue {
-  // Do not expose ref values directly during render. Provide a getter instead.
-  getSocket?: () => Socket | null;
+  socket: Socket | null;
   connected: boolean;
   emit: (event: string, ...args: unknown[]) => void;
   on: (event: string, handler: SocketHandler) => void;
@@ -105,6 +96,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const socketRef = useRef<Socket | null>(null);
+  const [socketState, setSocketState] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const pendingHandlers = useRef<Record<string, SocketHandler[]>>({});
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -155,6 +147,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     stopPing();
     socketRef.current?.disconnect();
     socketRef.current = null;
+    setSocketState(null);
     setConnected(false);
   }, [stopPing]);
 
@@ -173,6 +166,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     });
 
     const s = socketRef.current;
+    setSocketState(s);
 
     s.on('connect', () => {
       setConnected(true);
@@ -236,6 +230,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   // helpers
   const emit = useCallback((event: string, ...args: unknown[]) => {
+    // Log para debugging de eventos salientes (ver en consola del cliente / DevTools)
+    try {
+      console.log('Socket emit:', event, ...args);
+    } catch {
+      // safe fallback si console falla
+    }
+
     socketRef.current?.emit(event, ...args);
   }, []);
 
@@ -304,10 +305,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   const sendRoomMessage = useCallback(
     (room: string, messageContent: SocketMessageContent, ack?: (resp: unknown) => void) => {
+      const payload: RoomMessagePayload = {
+        room,
+        messageContent,
+      };
+
       if (ack) {
-        socketRef.current?.emit('messageToRoom', { room, message: messageContent }, ack);
+        emit('messageToRoom', payload, ack);
       } else {
-        emit('messageToRoom', { room, message: messageContent });
+        emit('messageToRoom', payload);
       }
     },
     [emit]
@@ -315,43 +321,49 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   const sendRoomTextMessage = useCallback(
     (room: string, message: string, ack?: (resp: unknown) => void) => {
-      const messageContent = createTextMessage(message);
-      sendRoomMessage(room, messageContent, ack);
+      const textContent = createTextMessage(message);
+      sendRoomMessage(room, textContent, ack);
     },
     [sendRoomMessage]
   );
 
   const onRoomMessage = useCallback(
     (handler: (data: ReceivedRoomMessage) => void) => {
-      on('message', (data) => {
-        // Parsear el mensaje entrante y convertir si es legacy
-        const rawData = data as { room: string; message: SocketMessage | string };
+      on('message', (rawData) => {
+        try {
+          // Intentar parsear como mensaje estructurado
+          let message: SocketMessage;
 
-        let parsedMessage: SocketMessage;
+          if (typeof rawData === 'string') {
+            // Mensaje legacy - convertir a estructura nueva
+            message = convertLegacyMessage(rawData, 'unknown');
+          } else if (rawData && typeof rawData === 'object') {
+            const data = rawData as Record<string, unknown>;
 
-        // Si el mensaje es un string (legacy), convertirlo
-        if (typeof rawData.message === 'string') {
-          parsedMessage = convertLegacyMessage(rawData.message, rawData.room);
-        }
-        // Si ya es un SocketMessage, validar su contenido
-        else if (rawData.message && typeof rawData.message === 'object') {
-          parsedMessage = rawData.message;
-
-          // Validar el messageContent
-          if (!validateMessageContent(parsedMessage.messageContent)) {
-            console.warn('Mensaje recibido con formato inválido:', parsedMessage);
-            // Convertir a mensaje de texto si el formato es inválido
-            parsedMessage = convertLegacyMessage(
-              JSON.stringify(parsedMessage.messageContent),
-              rawData.room
-            );
+            // Verificar si ya es un mensaje estructurado
+            if (data.messageContent && validateMessageContent(data.messageContent)) {
+              message = data as unknown as SocketMessage;
+            } else if (typeof data.message === 'string' && typeof data.room === 'string') {
+              // Formato legacy con room
+              message = convertLegacyMessage(data.message, data.room);
+            } else {
+              console.warn('Received unknown message format:', rawData);
+              return;
+            }
+          } else {
+            console.warn('Received invalid message:', rawData);
+            return;
           }
-        } else {
-          console.warn('Formato de mensaje desconocido:', rawData);
-          return;
-        }
 
-        handler({ room: rawData.room, message: parsedMessage });
+          const receivedMessage: ReceivedRoomMessage = {
+            room: message.room,
+            message,
+          };
+
+          handler(receivedMessage);
+        } catch (error) {
+          console.error('Error processing room message:', error, rawData);
+        }
       });
     },
     [on]
@@ -367,7 +379,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   const sendPrivateMessage = useCallback(
     (to: string, message: string, ack?: (resp: unknown) => void) => {
       if (ack) {
-        socketRef.current?.emit('privateMessage', { to, message }, ack);
+        emit('privateMessage', { to, message }, ack);
       } else {
         emit('privateMessage', { to, message });
       }
@@ -382,53 +394,28 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     [on]
   );
 
-  const getSocket = useCallback(() => socketRef.current, []);
-
-  const value = useMemo(
-    () => ({
-      getSocket,
-      connected,
-      emit,
-      on,
-      off,
-      disconnect,
-      connect,
-      sendPing,
-      onClientConnect,
-      onClientReceivedMessage,
-      onClientPurchase,
-      // nuevos:
-      joinRoom,
-      leaveRoom,
-      sendRoomMessage,
-      sendRoomTextMessage,
-      onRoomMessage,
-      onUserJoined,
-      sendPrivateMessage,
-      onPrivateMessage,
-    }),
-    [
-      getSocket,
-      connected,
-      emit,
-      on,
-      off,
-      disconnect,
-      connect,
-      sendPing,
-      onClientConnect,
-      onClientReceivedMessage,
-      onClientPurchase,
-      joinRoom,
-      leaveRoom,
-      sendRoomMessage,
-      sendRoomTextMessage,
-      onRoomMessage,
-      onUserJoined,
-      sendPrivateMessage,
-      onPrivateMessage,
-    ]
-  );
+  const value = {
+    socket: socketState,
+    connected,
+    emit,
+    on,
+    off,
+    disconnect,
+    connect,
+    sendPing,
+    onClientConnect,
+    onClientReceivedMessage,
+    onClientPurchase,
+    // nuevos:
+    joinRoom,
+    leaveRoom,
+    sendRoomMessage,
+    sendRoomTextMessage,
+    onRoomMessage,
+    onUserJoined,
+    sendPrivateMessage,
+    onPrivateMessage,
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -437,9 +424,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
     };
   }, [disconnect]);
 
-  // some callbacks reference refs internally which is safe because refs are read only when those
-  // callbacks are executed (not during render). Disable the rule here to avoid false positives.
-  // eslint-disable-next-line react-hooks/refs
   return React.createElement(SocketContext.Provider, { value }, children);
 };
 

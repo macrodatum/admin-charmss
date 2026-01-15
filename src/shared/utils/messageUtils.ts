@@ -1,4 +1,4 @@
-import type {
+import {
   SocketMessage,
   SocketMessageContent,
   TextMessageContent,
@@ -6,72 +6,56 @@ import type {
   SystemMessageContent,
   TokensMessageContent,
   GoalMessageContent,
-  ParsedSystemContent,
-  ParsedTokensContent,
-  ParsedGoalContent,
-  MessageSender,
 } from '../types/SocketMessage';
 
 /**
- * Genera un ID único para un mensaje
+ * Crea un mensaje de texto
  */
-export const generateMessageId = (): string => {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-// ============================================================================
-// FUNCIONES DE CREACIÓN DE MENSAJES
-// ============================================================================
-
-/**
- * Crea un mensaje de texto simple
- */
-export const createTextMessage = (content: string): TextMessageContent => {
-  return {
-    type: 'text',
-    content,
-    timestamp: Date.now(),
-  };
-};
+export const createTextMessage = (content: string): TextMessageContent => ({
+  type: 'text',
+  content,
+  timestamp: Date.now(),
+});
 
 /**
  * Crea un mensaje multimedia
  */
 export const createMediaMessage = (
   url: string,
-  mediaType?: 'image' | 'video' | 'audio',
+  mediaType: 'image' | 'video' = 'image',
   fileName?: string
-): MediaMessageContent => {
-  return {
-    type: 'media',
-    content: url,
-    mediaType,
-    fileName,
-    timestamp: Date.now(),
-  };
-};
+): MediaMessageContent => ({
+  type: 'media',
+  content: url,
+  mediaType,
+  fileName,
+  timestamp: Date.now(),
+});
 
 /**
- * Crea un mensaje de evento del sistema
+ * Crea un mensaje de sistema
  */
-export const createSystemMessage = (event: string, clientId: string): SystemMessageContent => {
-  return {
-    type: 'system',
-    content: `${clientId}_${event}`,
-    timestamp: Date.now(),
-  };
-};
+export const createSystemMessage = (
+  event: 'connected' | 'disconnected' | 'joined' | 'left',
+  clientId: string
+): SystemMessageContent => ({
+  type: 'system',
+  content: `${clientId}_${event}`,
+  event,
+  clientId,
+  timestamp: Date.now(),
+});
 
 /**
  * Crea un mensaje de tokens
  */
-export const createTokensMessage = (clientId: string, amount: number): TokensMessageContent => {
-  return {
-    type: 'tokens',
-    content: `${clientId}_${amount}`,
-    timestamp: Date.now(),
-  };
-};
+export const createTokensMessage = (clientId: string, amount: number): TokensMessageContent => ({
+  type: 'tokens',
+  content: `${clientId}_${amount}`,
+  clientId,
+  amount,
+  timestamp: Date.now(),
+});
 
 /**
  * Crea un mensaje de objetivo/meta
@@ -80,234 +64,218 @@ export const createGoalMessage = (
   goalName: string,
   performerId: string,
   tokens: number
-): GoalMessageContent => {
-  return {
-    type: 'goal',
-    content: `${goalName}_${performerId}_${tokens}`,
-    timestamp: Date.now(),
-  };
-};
+): GoalMessageContent => ({
+  type: 'goal',
+  content: `${goalName}_${performerId}_${tokens}`,
+  goalName,
+  performerId,
+  tokens,
+  timestamp: Date.now(),
+});
 
 /**
- * Crea un mensaje de socket completo con metadatos
+ * Crea un mensaje completo de socket
+ * `sender` puede ser un objeto {id,name,clientId} o un id string
  */
 export const createSocketMessage = (
   room: string,
   messageContent: SocketMessageContent,
-  sender?: MessageSender
+  sender?: { id: string; name?: string; clientId?: string } | string,
+  senderName?: string,
+  clientId?: string
 ): SocketMessage => {
+  const id = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  let senderObj: { id: string; name?: string; clientId?: string } | undefined;
+  if (!sender) {
+    senderObj = undefined;
+  } else if (typeof sender === 'object') {
+    senderObj = { id: sender.id, name: sender.name || 'Usuario', clientId: sender.clientId };
+  } else {
+    senderObj = { id: sender, name: senderName || 'Usuario', clientId };
+  }
+
   return {
-    id: generateMessageId(),
+    id,
     room,
-    messageContent,
-    sender,
+    sender: senderObj,
     timestamp: Date.now(),
+    messageContent,
   };
 };
 
-// ============================================================================
-// FUNCIONES DE PARSING DE CONTENIDO
-// ============================================================================
-
 /**
- * Parsea el contenido de un mensaje de sistema
- * Formato esperado: "clientId_evento"
+ * Parsea el contenido de un mensaje del sistema
  */
-export const parseSystemContent = (content: string): ParsedSystemContent | null => {
-  const parts = content.split('_');
-  if (parts.length < 2) return null;
+export const parseSystemContent = (content: string): { clientId: string; event: string } | null => {
+  const idx = content.indexOf('_');
+  if (idx === -1) return null;
 
-  const clientId = parts[0];
-  const event = parts.slice(1).join('_'); // Por si el evento contiene underscores
-
-  return { clientId, event };
+  return {
+    clientId: content.substring(0, idx),
+    event: content.substring(idx + 1),
+  };
 };
 
 /**
  * Parsea el contenido de un mensaje de tokens
- * Formato esperado: "clientId_cantidad"
  */
-export const parseTokensContent = (content: string): ParsedTokensContent | null => {
+export const parseTokensContent = (
+  content: string
+): { clientId: string; amount: number } | null => {
   const parts = content.split('_');
   if (parts.length !== 2) return null;
 
-  const clientId = parts[0];
-  const amount = parseInt(parts[1], 10);
-
+  const amount = parseInt(parts[1]);
   if (isNaN(amount)) return null;
 
-  return { clientId, amount };
+  return {
+    clientId: parts[0],
+    amount,
+  };
 };
 
 /**
- * Parsea el contenido de un mensaje de objetivo/meta
- * Formato esperado: "goalName_performerId_tokens"
+ * Parsea el contenido de un mensaje de objetivo
  */
-export const parseGoalContent = (content: string): ParsedGoalContent | null => {
+export const parseGoalContent = (
+  content: string
+): { goalName: string; performerId: string; tokens: number } | null => {
   const parts = content.split('_');
   if (parts.length !== 3) return null;
 
-  const goalName = parts[0];
-  const performerId = parts[1];
-  const tokens = parseInt(parts[2], 10);
-
+  const tokens = parseInt(parts[2]);
   if (isNaN(tokens)) return null;
 
-  return { goalName, performerId, tokens };
-};
-
-// ============================================================================
-// FUNCIONES DE VALIDACIÓN
-// ============================================================================
-
-/**
- * Valida si una URL es válida
- */
-const isValidUrl = (url: string): boolean => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+  return {
+    goalName: parts[0],
+    performerId: parts[1],
+    tokens,
+  };
 };
 
 /**
- * Valida la estructura de un mensaje según su tipo
+ * Valida la estructura de un mensaje
  */
-export const validateMessageContent = (messageContent: SocketMessageContent): boolean => {
-  if (!messageContent || !messageContent.type || !messageContent.content) {
+export const validateMessageContent = (
+  messageContent: unknown
+): messageContent is SocketMessageContent => {
+  if (!messageContent || typeof messageContent !== 'object') {
     return false;
   }
 
-  // Validar timestamp
-  if (
-    !messageContent.timestamp ||
-    typeof messageContent.timestamp !== 'number' ||
-    messageContent.timestamp <= 0
-  ) {
+  const obj = messageContent as Record<string, unknown>;
+  const type = obj.type as string | undefined;
+  const content = obj.content as string | undefined;
+  const timestamp = obj.timestamp as number | undefined;
+
+  if (!type || !['text', 'media', 'system', 'tokens', 'goal'].includes(type)) {
+    return false;
+  }
+
+  if (typeof content !== 'string' || !content) {
+    return false;
+  }
+
+  if (typeof timestamp !== 'number' || timestamp <= 0) {
     return false;
   }
 
   // Validaciones específicas por tipo
-  switch (messageContent.type) {
-    case 'text':
-      return typeof messageContent.content === 'string' && messageContent.content.length > 0;
-
-    case 'media':
-      return isValidUrl(messageContent.content);
-
+  switch (type) {
     case 'system':
-      return parseSystemContent(messageContent.content) !== null;
-
+      return parseSystemContent(content) !== null;
     case 'tokens':
-      return parseTokensContent(messageContent.content) !== null;
-
+      return parseTokensContent(content) !== null;
     case 'goal':
-      return parseGoalContent(messageContent.content) !== null;
-
+      return parseGoalContent(content) !== null;
+    case 'media':
+      try {
+        new URL(content);
+        return true;
+      } catch {
+        return false;
+      }
+    case 'text':
     default:
-      return false;
+      return true;
   }
 };
 
-// ============================================================================
-// FUNCIONES DE CONVERSIÓN Y RETROCOMPATIBILIDAD
-// ============================================================================
-
 /**
- * Convierte un mensaje legacy (string simple) a la nueva estructura
+ * Convierte un mensaje simple de string a estructura completa
  */
-export const convertLegacyMessage = (message: string, room: string): SocketMessage => {
-  return {
-    id: generateMessageId(),
-    room,
-    messageContent: createTextMessage(message),
-    timestamp: Date.now(),
-  };
+export const convertLegacyMessage = (
+  message: string,
+  room: string,
+  senderId?: string,
+  senderName?: string
+): SocketMessage => {
+  const textContent = createTextMessage(message);
+  return createSocketMessage(room, textContent, senderId, senderName);
 };
 
-// ============================================================================
-// FUNCIONES DE UTILIDAD PARA UI
-// ============================================================================
-
 /**
- * Genera el texto a mostrar en la UI según el tipo de mensaje
+ * Obtiene el texto mostrable de un mensaje
  */
 export const getDisplayText = (messageContent: SocketMessageContent): string => {
   switch (messageContent.type) {
     case 'text':
       return messageContent.content;
-
-    case 'media': {
-      const mediaType = (messageContent as MediaMessageContent).mediaType;
-      const fileName = (messageContent as MediaMessageContent).fileName;
-      if (fileName) return `📎 ${fileName}`;
-      if (mediaType === 'image') return '🖼️ Imagen';
-      if (mediaType === 'video') return '🎥 Video';
-      if (mediaType === 'audio') return '🎵 Audio';
-      return '📎 Archivo multimedia';
-    }
-
+    case 'media':
+      return messageContent.fileName ? `📎 ${messageContent.fileName}` : `🖼️ Imagen`;
     case 'system': {
-      const parsed = parseSystemContent(messageContent.content);
-      if (!parsed) return messageContent.content;
-      const eventText = parsed.event === 'connected' ? 'se conectó' : parsed.event;
-      return `${parsed.clientId} ${eventText}`;
+      const systemData = parseSystemContent(messageContent.content);
+      if (systemData) {
+        const eventText = {
+          connected: 'se conectó',
+          disconnected: 'se desconectó',
+          joined: 'se unió',
+          left: 'salió',
+        };
+        return `${systemData.clientId} ${
+          eventText[systemData.event as keyof typeof eventText] || systemData.event
+        }`;
+      }
+      return messageContent.content;
     }
-
     case 'tokens': {
-      const parsed = parseTokensContent(messageContent.content);
-      if (!parsed) return messageContent.content;
-      return `💰 ${parsed.clientId} envió ${parsed.amount} tokens`;
+      const tokensData = parseTokensContent(messageContent.content);
+      return tokensData
+        ? `💰 ${tokensData.clientId} envió ${tokensData.amount} tokens`
+        : messageContent.content;
     }
-
     case 'goal': {
-      const parsed = parseGoalContent(messageContent.content);
-      if (!parsed) return messageContent.content;
-      return `🎯 ${parsed.goalName}: ${parsed.tokens} tokens para ${parsed.performerId}`;
+      const goalData = parseGoalContent(messageContent.content);
+      return goalData
+        ? `🎯 ${goalData.goalName}: ${goalData.tokens} tokens para ${goalData.performerId}`
+        : messageContent.content;
     }
-
-    default:
-      return '';
   }
 };
 
 /**
- * Determina si un mensaje es de tipo sistema
+ * Determina si un mensaje es del sistema
  */
 export const isSystemMessage = (messageContent: SocketMessageContent): boolean => {
   return messageContent.type === 'system';
 };
 
 /**
- * Determina si un mensaje debe destacarse (tokens, goals)
+ * Determina si un mensaje requiere atención especial (tokens, goals)
  */
 export const isHighlightMessage = (messageContent: SocketMessageContent): boolean => {
-  return messageContent.type === 'tokens' || messageContent.type === 'goal';
+  return ['tokens', 'goal'].includes(messageContent.type);
 };
 
 /**
- * Obtiene el color de tema para un tipo de mensaje
+ * Formatea un timestamp a "HH:MM" con ceros a la izquierda.
+ * Si el timestamp no es válido, retorna cadena vacía.
  */
-export const getMessageThemeColor = (messageContent: SocketMessageContent): string => {
-  switch (messageContent.type) {
-    case 'system':
-      return 'yellow';
-    case 'tokens':
-    case 'goal':
-      return 'purple';
-    default:
-      return 'gray';
-  }
-};
-
-/**
- * Formatea un timestamp a una hora legible
- */
-export const formatMessageTime = (timestamp: number): string => {
+export const formatMessageTime = (timestamp?: number | null): string => {
+  if (typeof timestamp !== 'number' || !isFinite(timestamp) || timestamp <= 0) return '';
   const date = new Date(timestamp);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
 };

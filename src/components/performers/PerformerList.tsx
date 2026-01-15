@@ -19,7 +19,7 @@ import { Performer } from '../../app/types/performers.types';
 
 interface PerformerListProps {
   performers: Performer[];
-  onToggleStatus: (id: string, currentStatus: string) => void;
+  onToggleStatus: (id: string, newStatus: number | string) => void;
   onViewProfile: (performer: Performer) => void;
   onViewStreaming: (performer: Performer) => void;
   onUploadAssets: (performer: Performer) => void;
@@ -35,7 +35,7 @@ interface PerformerListProps {
   onSort?: (field: SortField, direction: SortDirection) => void;
 }
 
-type SortField = 'stage_name' | 'rating' | 'total_shows' | 'country' | 'status';
+type SortField = 'stage_name' | 'rating' | 'total_shows' | 'country';
 type SortDirection = 'asc' | 'desc';
 
 // SortIcon component declared outside render to satisfy lint rule react-hooks/static-components
@@ -113,41 +113,41 @@ export default function PerformerList({
     onChangePage?.(next);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (status: number | string | undefined) => {
+    switch (String(status)) {
       case 'online':
         return 'bg-green-500 text-white';
       case 'offline':
         return 'bg-red-500 text-white';
-      case 'active':
+      case '1': // active
         return 'bg-transparent border border-gray-300 text-gray-700';
-      case 'inactive':
+      case '2': // inactive
         return 'bg-gray-400 text-white';
-      case 'pending':
+      case '0': // pending
         return 'bg-yellow-100 text-yellow-800';
-      case 'suspended':
+      case '3': // suspended
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
+  const getStatusText = (status: number | string | undefined) => {
+    switch (String(status)) {
       case 'online':
         return 'Online';
       case 'offline':
         return 'Offline';
-      case 'active':
+      case '1':
         return 'Active';
-      case 'inactive':
+      case '2':
         return 'Inactive';
-      case 'pending':
+      case '0':
         return 'Pendiente';
-      case 'suspended':
+      case '3':
         return 'Suspendido';
       default:
-        return status;
+        return String(status ?? '');
     }
   };
 
@@ -230,15 +230,7 @@ export default function PerformerList({
                   />
                 </button>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                <button
-                  onClick={() => handleSort('status')}
-                  className="flex items-center gap-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                >
-                  Estado
-                  <SortIcon field="status" sortField={sortField} sortDirection={sortDirection} />
-                </button>
-              </th>
+
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 <button
                   onClick={() => handleSort('country')}
@@ -292,34 +284,34 @@ export default function PerformerList({
                     {performer.total_shows}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                      performer.status
-                    )}`}
-                  >
-                    {getStatusText(performer.status)}
-                  </span>
-                </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                     <MapPin className="h-4 w-4 mr-1" />
-                    {performer.country}
+                    {performer.performerProfile?.countryCode ?? performer.country}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => onToggleStatus(performer.id, performer.status)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        performer.status === 'active'
-                          ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
-                          : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
-                      }`}
-                      title={performer.status === 'active' ? 'Desactivar' : 'Activar'}
-                    >
-                      <Power className="h-4 w-4" />
-                    </button>
+                    <div>
+                      <label htmlFor={`status-select-${performer.id}`} className="sr-only">
+                        Cambiar estado
+                      </label>
+                      <select
+                        id={`status-select-${performer.id}`}
+                        value={String(performer.status ?? '')}
+                        onChange={(e) => onToggleStatus(performer.id, Number(e.target.value))}
+                        className={`px-3 py-1 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          getStatusColor(performer.status)
+                        }`}
+                        title="Cambiar estado"
+                      >
+                        <option value={0}>Pendiente</option>
+                        <option value={1}>Activo</option>
+                        <option value={2}>Inactivo</option>
+                        <option value={3}>Suspendido</option>
+                      </select>
+                    </div>
                     <button
                       onClick={() => onViewProfile(performer)}
                       className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -480,13 +472,7 @@ export default function PerformerList({
                   {performer.email}
                 </p>
               </div>
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                  performer.status
-                )}`}
-              >
-                {getStatusText(performer.status)}
-              </span>
+
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center py-2 border-y border-gray-100 dark:border-slate-700">
@@ -513,24 +499,29 @@ export default function PerformerList({
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  {performer.country}
+                  {performer.performerProfile?.countryCode ?? performer.country}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">País</div>
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-2">
-              <button
-                onClick={() => onToggleStatus(performer.id, performer.status)}
-                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  performer.status === 'active'
-                    ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
-                    : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                }`}
-              >
-                <Power className="h-4 w-4" />
-                {performer.status === 'active' ? 'Off' : 'On'}
-              </button>
+              <div className="flex flex-col items-center gap-1">
+                <label htmlFor={`status-select-mobile-${performer.id}`} className="sr-only">Cambiar estado</label>
+                <select
+                  id={`status-select-mobile-${performer.id}`}
+                  value={String(performer.status ?? '')}
+                  onChange={(e) => onToggleStatus(performer.id, Number(e.target.value))}
+                  className="px-2 py-1 rounded-lg text-xs border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Cambiar estado"
+                >
+                  <option value={0}>Pendiente</option>
+                  <option value={1}>Activo</option>
+                  <option value={2}>Inactivo</option>
+                  <option value={3}>Suspendido</option>
+                </select>
+                <span className="sr-only">Estado</span>
+              </div>
               <button
                 onClick={() => onViewProfile(performer)}
                 className="flex flex-col items-center gap-1 px-2 py-2 bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-medium hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"

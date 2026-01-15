@@ -9,7 +9,7 @@ interface StreamingModalProps {
 }
 
 const StreamingModal: React.FC<StreamingModalProps> = ({ performer, onClose }) => {
-  const [isLive] = useState(performer.status === 'active');
+  const [isLive] = useState(Number(performer.status) === 1);
   const [viewers, _setViewers] = useState<number | null>(
     () => Math.floor(Math.random() * 200) + 50
   );

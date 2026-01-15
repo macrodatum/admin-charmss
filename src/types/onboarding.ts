@@ -8,6 +8,7 @@ export const AssetStatusType = {
 export type AssetStatusType = (typeof AssetStatusType)[keyof typeof AssetStatusType];
 
 export interface OnboardingData {
+  notes: string | undefined;
   id: number;
   firstName: string;
   middleName?: string | null;
@@ -54,9 +55,8 @@ export interface RequestDocument {
  */
 export const RequestStatusType = {
   Pending: 0,
-  UnderReview: 1,
-  Approved: 2,
-  Rejected: 3,
+  Approved: 1,
+  Rejected: 2,
 } as const;
 
 export type RequestStatusType = (typeof RequestStatusType)[keyof typeof RequestStatusType];
