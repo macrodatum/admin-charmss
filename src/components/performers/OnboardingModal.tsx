@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, CheckCircle, XCircle, Image as ImageIcon, FileText } from 'lucide-react';
 import AssetPreviewModal from './AssetPreviewModal';
 import { OnboardingData } from '../../types/onboarding';
-import { getOnboardingData, decideOnboarding } from '../../app/services/onBoarding.service';
+import { getOnboardingData, decideOnboarding, updateDocumentStatus } from '../../app/services/onBoarding.service';
 import type { ContentItem } from '../../types/content';
 
 interface OnboardingModalProps {
@@ -21,6 +21,13 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionResult, setActionResult] = useState<'approved' | 'rejected' | null>(null);
 
+  // Per-document states
+  const [docLoading, setDocLoading] = useState<Record<number, boolean>>({});
+
+  // Local staged statuses for images (modified locally, not yet sent)
+  const [docStatuses, setDocStatuses] = useState<Record<number, number>>({});
+  const [docNotes, setDocNotes] = useState<Record<number, string>>({});
+
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -29,7 +36,17 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       setError(null);
       try {
         const resp = await getOnboardingData(performerId);
-        if (mounted) setData(resp);
+        if (mounted) {
+        setData(resp);
+        // initialize local doc statuses from fetched data
+        setDocStatuses({
+          1: resp.statusCardFrontFile ?? 0,
+          2: resp.statusCardBackFile ?? 0,
+          3: resp.statusCardFrontFaceFile ?? 0,
+          4: resp.statusCardBackFaceFile ?? 0,
+          5: resp.statusProfileImageFile ?? 0,
+        });
+      }
       } catch {
         if (mounted) setError('Error al cargar los datos de onboarding');
       } finally {
@@ -48,12 +65,85 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const documents =
     data?.requestDocuments?.filter((d) => _allowed.has(Number(d.documentType))) ?? [];
 
+  const getDocStatus = (documentType: number) => {
+    // prioritize local staged status
+    if (docStatuses && docStatuses[documentType] !== undefined) return docStatuses[documentType];
+    if (!data) return 0;
+    switch (Number(documentType)) {
+      case 1:
+        return data.statusCardFrontFile;
+      case 2:
+        return data.statusCardBackFile;
+      case 3:
+        return data.statusCardFrontFaceFile;
+      case 4:
+        return data.statusCardBackFaceFile;
+      case 5:
+        return data.statusProfileImageFile;
+      default:
+        return 0;
+    }
+  };
+
+  const handleApproveDoc = (docId: number, documentType: number) => {
+    // stage approval locally
+    setDocStatuses((s) => ({ ...s, [documentType]: 2 }));
+    // clear any previous note
+    setDocNotes((s) => {
+      const copy = { ...s };
+      delete copy[documentType];
+      return copy;
+    });
+  };
+
+  const handleOpenRejectDoc = (docId: number) => {
+    // find document and immediately stage as Rejected without asking for reason
+    const doc = documents.find((d) => d.id === docId);
+    if (!doc) return;
+    // stage rejection locally with empty note
+    setDocStatuses((s) => ({ ...s, [Number(doc.documentType)]: 3 }));
+    setDocNotes((s) => {
+      const copy = { ...s };
+      copy[Number(doc.documentType)] = '';
+      return copy;
+    });
+  }; 
+
+  const doRejectDoc = (docId: number, documentType: number, reason: string) => {
+    // kept for compatibility but not used to show modal anymore
+    setDocStatuses((s) => ({ ...s, [documentType]: 3 }));
+    setDocNotes((s) => ({ ...s, [documentType]: reason ?? '' }));
+  };
+
   const handleConfirmApprove = () => setConfirmApprove(true);
   const doApprove = async () => {
     setActionLoading(true);
     setActionError(null);
     try {
-      const resp = await decideOnboarding(performerId!, 2, 'Aprobado');
+      // Build explicit document status fields from staged statuses
+      const documentStatusFields: Record<string, number> = {};
+      const docMap: Record<number, string> = {
+        1: 'statusCardFrontFile',
+        2: 'statusCardBackFile',
+        3: 'statusCardFrontFaceFile',
+        4: 'statusCardBackFaceFile',
+        5: 'statusProfileImageFile',
+      };
+
+      [1, 2, 3, 4, 5].forEach((dt) => {
+        if (docStatuses && docStatuses[dt] !== undefined) {
+          documentStatusFields[docMap[dt]] = docStatuses[dt];
+        }
+      });
+
+      const resp = await decideOnboarding(
+        performerId!,
+        2,
+        'Aprobado',
+        undefined,
+        docNotes,
+        documentStatusFields
+      );
       setData(resp);
       setActionResult('approved');
       setConfirmApprove(false);
@@ -70,7 +160,30 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
     setActionLoading(true);
     setActionError(null);
     try {
-      const resp = await decideOnboarding(performerId!, 3, reason);
+      // Build explicit document status fields from staged statuses
+      const documentStatusFields: Record<string, number> = {};
+      const docMap: Record<number, string> = {
+        1: 'statusCardFrontFile',
+        2: 'statusCardBackFile',
+        3: 'statusCardFrontFaceFile',
+        4: 'statusCardBackFaceFile',
+        5: 'statusProfileImageFile',
+      };
+
+      [1, 2, 3, 4, 5].forEach((dt) => {
+        if (docStatuses && docStatuses[dt] !== undefined) {
+          documentStatusFields[docMap[dt]] = docStatuses[dt];
+        }
+      });
+
+      const resp = await decideOnboarding(
+        performerId!,
+        3,
+        reason,
+        undefined,
+        docNotes,
+        documentStatusFields
+      );
       setData(resp);
       setActionResult('rejected');
       setRejectModal(null);
@@ -135,21 +248,63 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
-                    onClick={() => setSelectedDoc(doc.id)}
-                    className="cursor-pointer bg-gray-50 dark:bg-slate-700 rounded overflow-hidden shadow-sm hover:shadow-md transition"
+                    className="bg-gray-50 dark:bg-slate-700 rounded overflow-hidden shadow-sm hover:shadow-md transition"
                   >
-                    <img
-                      src={doc.fileName}
-                      alt={doc.documentName}
-                      className="w-full h-40 object-cover"
-                    />
+                    <div onClick={() => setSelectedDoc(doc.id)} className="cursor-pointer">
+                      <img
+                        src={doc.fileName}
+                        alt={doc.documentName}
+                        className="w-full h-40 object-cover"
+                      />
+                    </div>
+
                     <div className="p-3">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {doc.documentName}
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {doc.documentName}
+                        </div>
+                        <div className="text-xs">
+                          {getDocStatus(Number(doc.documentType)) === 2 ? (
+                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">Aprobada</span>
+                          ) : getDocStatus(Number(doc.documentType)) === 3 ? (
+                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">Rechazada</span>
+                          ) : getDocStatus(Number(doc.documentType)) === 1 ? (
+                            <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">En revisión</span>
+                          ) : (
+                            <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">Pendiente</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Subido: {new Date(doc.loadDate).toLocaleString()}
+
+                      <div className="text-xs text-gray-500 mt-1">Subido: {new Date(doc.loadDate).toLocaleString()}</div>
+
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveDoc(doc.id, Number(doc.documentType));
+                          }}
+                          disabled={!!docLoading[doc.id]}
+                          className="flex-none flex items-center justify-center gap-2 px-2 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          Aceptar
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenRejectDoc(doc.id);
+                          }}
+                          disabled={!!docLoading[doc.id]}
+                          className="flex-none flex items-center justify-center gap-2 px-2 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Rechazar
+                        </button>
                       </div>
+
+                      {actionError && <div className="text-sm text-red-500 mt-2">{actionError}</div>}
                     </div>
                   </div>
                 ))}
@@ -160,7 +315,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             <div className="mt-6">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Firma</h4>
               {data?.sign ? (
-                <div className="bg-white dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm p-4">
+                <div className="bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm p-4">
                   <img src={data.sign} alt="Firma" className="w-full h-40 object-contain" />
                   <div className="text-xs text-gray-500 mt-2">Firma subida por el performer</div>
                 </div>
@@ -341,6 +496,8 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           </div>
         </div>
       )}
+
+
     </div>
   );
 }

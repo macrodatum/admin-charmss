@@ -14,19 +14,6 @@ export default function AssetPreviewModal({
   editorialStatus,
   onClose,
 }: AssetPreviewModalProps) {
-  // Map numeric asset status -> labels/colors according to spec: 1=Subido, 2=Rechazado, 3=Aprobado
-  const statusMap: Record<number, { label: string; color: string }> = {
-    1: { label: 'Subido', color: 'bg-gray-400' },
-    2: { label: 'Rechazado', color: 'bg-red-500' },
-    3: { label: 'Aprobado', color: 'bg-green-500' },
-    4: { label: 'Inactiva', color: 'bg-blue-500' },
-  };
-
-  const s =
-    typeof asset.status === 'number' && statusMap[asset.status]
-      ? statusMap[asset.status]
-      : { label: 'Pendiente', color: 'bg-yellow-500' };
-
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
@@ -47,7 +34,6 @@ export default function AssetPreviewModal({
         >
           <div className="sticky top-0 z-20 flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <div className="flex items-center gap-4">
-              <div className={`w-3 h-3 rounded ${s.color}`} />
               <div>
                 <div className="text-lg font-semibold text-gray-900 dark:text-white">
                   {asset.assetName || asset.description || 'Sin título'}
@@ -58,42 +44,6 @@ export default function AssetPreviewModal({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <Heart className="h-4 w-4" /> <span>{asset.likes ?? 0}</span>
-                </div>
-
-                {/* If editorialStatus is provided, show editorial pill (prioritized). Otherwise, show numeric pill only for approved(3)/rejected(2) */}
-                {editorialStatus ? (
-                  <span
-                    data-testid={`asset-preview-editorial-${asset.id}`}
-                    className={`text-xs px-2 py-1 rounded ${
-                      editorialStatus === 'pending'
-                        ? 'bg-yellow-500 text-white'
-                        : editorialStatus === 'approved'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
-                    }`}
-                  >
-                    {editorialStatus === 'pending'
-                      ? 'Pendiente'
-                      : editorialStatus === 'approved'
-                      ? 'Aprobado'
-                      : 'Rechazado'}
-                  </span>
-                ) : asset.status === 2 || asset.status === 3 ? (
-                  <span
-                    data-testid={`asset-preview-status-${asset.id}`}
-                    className={`text-xs px-2 py-1 rounded ${s.color} text-white`}
-                  >
-                    {s.label}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <MessageSquare className="h-4 w-4" /> <span>{asset.comments ?? 0}</span>
-              </div>
 
               <button
                 aria-label="Cerrar preview"
@@ -129,20 +79,10 @@ export default function AssetPreviewModal({
             </div>
 
             <div className="w-full md:w-64 flex flex-col">
-              <div className="mb-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Estado</div>
-                <div className="mt-1 font-medium text-gray-900 dark:text-white">{s.label}</div>
-              </div>
 
               <div className="mb-4">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Detalles</div>
                 <ul className="mt-2 text-sm text-gray-700 dark:text-gray-300 space-y-2">
-                  <li>
-                    <strong>Likes:</strong> {asset.likes ?? 0}
-                  </li>
-                  <li>
-                    <strong>Comments:</strong> {asset.comments ?? 0}
-                  </li>
                   {asset.duration && (
                     <li>
                       <strong>Duración:</strong> {Math.round(asset.duration)}s
@@ -158,22 +98,6 @@ export default function AssetPreviewModal({
               </div>
 
               <div className="mt-auto" />
-            </div>
-          </div>
-
-          {/* Sticky footer with close button so bottom controls remain visible */}
-          <div className="p-4 border-t bg-white dark:bg-slate-800 sticky bottom-0 z-20">
-            <div className="max-w-5xl mx-auto flex justify-end">
-              <button
-                data-testid={`asset-footer-close-${asset.id}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClose();
-                }}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg"
-              >
-                Cerrar
-              </button>
             </div>
           </div>
         </motion.div>

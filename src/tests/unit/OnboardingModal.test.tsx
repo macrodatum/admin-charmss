@@ -129,6 +129,114 @@ describe('OnboardingModal', () => {
     await waitFor(() => expect(screen.getByLabelText('Cerrar preview')).toBeInTheDocument());
   });
 
+  it('stages an individual document approval locally', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
+
+    // ensure updateDocumentStatus is NOT called when staging locally
+    (onboardingService.updateDocumentStatus as unknown as Mock).mockReset();
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('Front')).toBeInTheDocument());
+
+    // find the card for 'Front' and click its approve button
+    const frontLabel = screen.getByText('Front');
+    // climb up until we find the container that holds the action buttons
+    let cardNode: Element | null = frontLabel;
+    while (cardNode && cardNode.querySelectorAll && cardNode.querySelectorAll('button').length === 0) {
+      cardNode = cardNode.parentElement;
+    }
+    if (!cardNode) throw new Error('Front card not found');
+
+    const approveBtn = Array.from(cardNode.querySelectorAll('button')).find((b) => /Aceptar/i.test(b.textContent || '')) as HTMLButtonElement;
+    expect(approveBtn).toBeDefined();
+    fireEvent.click(approveBtn);
+
+    // updateDocumentStatus should NOT have been called
+    expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
+
+    // after staging, status badge should show 'Aprobada'
+    await waitFor(() => expect(screen.getAllByText('Aprobada').length).toBeGreaterThanOrEqual(1));
+  });
+
+  it('stages an individual document rejection locally', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
+
+    (onboardingService.updateDocumentStatus as unknown as Mock).mockReset();
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('Front')).toBeInTheDocument());
+
+    const rejectBtns = screen.getAllByRole('button', { name: /Rechazar/i });
+    // click the first reject for the 'Front' document
+    fireEvent.click(rejectBtns[0]);
+
+    // updateDocumentStatus should NOT have been called
+    expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1));
+  });
+
+  it('sends document statuses when approving the onboarding', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
+    (onboardingService.decideOnboarding as unknown as Mock).mockResolvedValueOnce({
+      ...sample,
+      status: 2,
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText(/Aprobar inscripción/i)).toBeInTheDocument());
+
+    // stage first doc as approved
+    const frontLabel = screen.getByText('Front');
+    let cardNode: Element | null = frontLabel;
+    while (cardNode && cardNode.querySelectorAll && cardNode.querySelectorAll('button').length === 0) {
+      cardNode = cardNode.parentElement;
+    }
+    const approveBtn = Array.from(cardNode!.querySelectorAll('button')).find((b) => /Aceptar/i.test(b.textContent || '')) as HTMLButtonElement;
+    fireEvent.click(approveBtn);
+
+    // click global approve and confirm
+    const approveGlobal = screen.getByRole('button', { name: /Aprobar inscripción/i });
+    fireEvent.click(approveGlobal);
+
+    await waitFor(() => expect(screen.getByText(/Confirmar aprobación/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /^Aprobar$/ }));
+
+    await waitFor(() => expect(screen.getByText(/Inscripción aprobada/i)).toBeInTheDocument());
+
+    // decideOnboarding should be called with the staged document statuses as explicit fields
+    expect(onboardingService.decideOnboarding as unknown as Mock).toHaveBeenCalled();
+    const args = (onboardingService.decideOnboarding as unknown as Mock).mock.calls[0];
+    expect(args[0]).toBe(2); // performer id
+    expect(args[1]).toBe(2); // statusOnboarding
+    // explicit fields are passed as the last argument
+    expect(args[5]).toBeDefined();
+    // staged front should be approved
+    expect(args[5].statusCardFrontFile).toBe(2);
+  });
+
+  it('rejects an individual document locally', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
+
+    (onboardingService.updateDocumentStatus as unknown as Mock).mockReset();
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('Front')).toBeInTheDocument());
+
+    const rejectBtns = screen.getAllByRole('button', { name: /Rechazar/i });
+    // click the first reject for the 'Front' document
+    fireEvent.click(rejectBtns[0]);
+
+    // updateDocumentStatus should NOT have been called
+    expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1));
+  });
+
   it('approve flow shows confirm and sets approval state', async () => {
     (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce(sample);
     (onboardingService.decideOnboarding as unknown as Mock).mockResolvedValueOnce({

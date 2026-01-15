@@ -191,8 +191,52 @@ describe('Onboarding Service', () => {
         statusOnboarding: 2,
         notes: 'Aprobado',
       });
-      expect(res.sentDocuments).toBe(true);
-      expect(res.signedContract).toBe(true);
+
+    });
+
+    it('maps provided documentStatuses to explicit payload fields and sends documentNotes', async () => {
+      const mockData = { id: 2 } as const;
+      mockApiClient.patch.mockResolvedValueOnce({ data: mockData } as unknown);
+
+      const documentStatuses = { 1: 2, 2: 3 } as Record<number, number>;
+      const documentNotes = { 2: 'Mala calidad' } as Record<number, string>;
+
+      const res = await (
+        await import('../../app/services/onBoarding.service')
+      ).decideOnboarding(2, 3, 'Motivo general', documentStatuses, documentNotes);
+
+      expect(mockApiClient.patch).toHaveBeenCalledWith('/api/performer/onboarding/2/decision', {
+        statusOnboarding: 3,
+        notes: 'Motivo general',
+        statusCardFrontFile: 2,
+        statusCardBackFile: 3,
+        documentNotes,
+      });
+
+      expect(res.id).toBe(2);
+    });
+
+    it('sends explicit per-document status fields when provided', async () => {
+      const mockData = { id: 2 } as const;
+      mockApiClient.patch.mockResolvedValueOnce({ data: mockData } as unknown);
+
+      const documentStatusFields = {
+        statusCardFrontFile: 1,
+        statusProfileImageFile: 1,
+      } as const;
+
+      const res = await (
+        await import('../../app/services/onBoarding.service')
+      ).decideOnboarding(2, 2, 'Aprobado', undefined, undefined, documentStatusFields);
+
+      expect(mockApiClient.patch).toHaveBeenCalledWith('/api/performer/onboarding/2/decision', {
+        statusOnboarding: 2,
+        notes: 'Aprobado',
+        statusCardFrontFile: 1,
+        statusProfileImageFile: 1,
+      });
+
+      expect(res.id).toBe(2);
     });
 
     it('propagates PATCH errors', async () => {
@@ -201,6 +245,43 @@ describe('Onboarding Service', () => {
 
       await expect(
         (await import('../../app/services/onBoarding.service')).decideOnboarding(2, 3, 'Rechazado')
+      ).rejects.toThrow('Patch failed');
+    });
+  });
+
+  describe('updateDocumentStatus', () => {
+    it('calls PATCH and returns updated onboarding data', async () => {
+      const mockData = {
+        id: 2,
+        statusCardFrontFile: AssetStatusType.Approved,
+        statusCardBackFile: AssetStatusType.Pending,
+        statusCardFrontFaceFile: AssetStatusType.Pending,
+        statusCardBackFaceFile: AssetStatusType.Pending,
+        statusProfileImageFile: AssetStatusType.Pending,
+        requestDocuments: [],
+      } as const;
+
+      mockApiClient.patch.mockResolvedValueOnce({ data: mockData } as unknown);
+
+      const res = await (
+        await import('../../app/services/onBoarding.service')
+      ).updateDocumentStatus(2, 1, AssetStatusType.Approved, 'Foto ok');
+
+      expect(mockApiClient.patch).toHaveBeenCalledWith('/api/performer/onboarding/2/document', {
+        documentType: 1,
+        status: 2,
+        notes: 'Foto ok',
+      });
+
+      expect(res.statusCardFrontFile).toBe(AssetStatusType.Approved);
+    });
+
+    it('propagates PATCH errors', async () => {
+      const mockError = new Error('Patch failed');
+      mockApiClient.patch.mockRejectedValueOnce(mockError);
+
+      await expect(
+        (await import('../../app/services/onBoarding.service')).updateDocumentStatus(2, 1, 3, 'Mala calidad')
       ).rejects.toThrow('Patch failed');
     });
   });

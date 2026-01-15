@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from '../../pages/Dashboard';
 import Chat from '../../pages/Chat';
@@ -28,9 +28,8 @@ const AppRouter: React.FC = () => {
   const mockIsStreaming = false;
   const mockOnlineStatus = false;
   const mockSetOnlineStatus = () => {};
-  const mockSetSidebarOpen = () => {};
-  const mockSetIsStreaming = () => {};
-  const mockSidebarOpen = false;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const mockSetIsStreaming = () => {}; 
 
   return (
     <Routes>
@@ -43,13 +42,13 @@ const AppRouter: React.FC = () => {
         element={
           <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white overflow-hidden transition-colors">
             <div className="flex h-screen">
-              <Sidebar sidebarOpen={mockSidebarOpen} setSidebarOpen={mockSetSidebarOpen} />
+              <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
               <div className="flex-1 flex flex-col min-w-0">
                 <Header
                   earnings={mockEarnings}
                   onlineStatus={mockOnlineStatus}
                   setOnlineStatus={mockSetOnlineStatus}
-                  setSidebarOpen={mockSetSidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
                 />
                 <main className="flex-1 p-3 md:p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900">
                   <Routes>
