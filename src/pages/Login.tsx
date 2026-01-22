@@ -154,7 +154,7 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setLegalName('Política de privacidad');
+                    setLegalName('LIVECHARMS PRIVACY POLICY AND PERSONAL DATA HANDLING');
                     setLegalOpen(true);
                   }}
                   className="underline hover:text-white ml-1"
@@ -165,7 +165,7 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setLegalName('Términos y Condiciones de Uso - Livecharmss.com');
+                    setLegalName('TERMS_AND_CONDITIONS_LIVECHARMSS');
                     setLegalOpen(true);
                   }}
                   className="underline hover:text-white ml-1"

@@ -4,7 +4,7 @@ import type { Mock } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import ContentApprovalModal from '../../components/performers/ContentApprovalModal';
 import * as contentService from '../../app/services/content.service';
-import { Performer } from '../../app/types/performers.types';
+import { Performer, PerformerStatusEnum } from '../../app/types/performers.types';
 
 vi.mock('../../app/services/content.service');
 
@@ -13,7 +13,7 @@ const mockPerformer: Performer = {
   full_name: 'Luis Corredor',
   stage_name: 'lgabrielcor',
   email: 'luis@example.com',
-  status: 'active',
+  status: PerformerStatusEnum.Active,
   performerProfile: { id: 1, performerId: 2 },
 };
 

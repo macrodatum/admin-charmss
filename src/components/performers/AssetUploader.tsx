@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { X, Upload, Image, Video, Trash2, Eye, CheckCircle } from 'lucide-react';
 import { Performer } from '../../app/types/performers.types';
-
+import {
+  getPresignedUploadUrl,
+  uploadToS3,
+  buildFileName,
+} from '../../app/services/s3Upload.service';
+import { optimizeImage } from '../../app/services/image-optimization.service';
 interface AssetUploaderProps {
   performer: Performer | null;
   onClose: () => void;
@@ -51,18 +56,41 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
     }
   };
 
+  /**
+   * handleFiles
+   *
+   * Acciones realizadas (enumeradas):
+   * 1) Convertir `FileList` en arreglo e iterar cada archivo.
+   * 2) Detectar si el archivo es imagen o video; ignorar otros tipos.
+   * 3) Crear un `asset` temporal en estado `uploading` y mostrarlo en la UI para seguimiento.
+   * 4) Iniciar un proceso asíncrono por archivo que realiza:
+   *    4.1) Optimización de imagen y generación de thumbnail (si corresponde).
+   *    4.2) Construcción de nombres de archivo para S3 (original y thumbnail).
+   *    4.3) Solicitud de URLs prefirmadas al backend usando los nombres generados.
+   *    4.4) Subida del archivo y del thumbnail a S3 con seguimiento de progreso.
+   *    4.5) Registro del asset en el backend (metadata y URLs definitivas).
+   *    4.6) (Opcional) Registrar y añadir thumbnail como asset separado en la UI.
+   *    4.7) Actualizar el asset temporal en el estado local con la URL real y marcarlo `completed`.
+   * 5) Capturar errores en cualquier paso y marcar el asset como `failed` si ocurre un fallo.
+   * 6) Finalmente, añadir todos los assets temporales al estado local (`setAssets`) para iniciar el flujo de subida.
+   */
   const handleFiles = (files: FileList) => {
+    // 1) Preparar array para assets temporales que se mostrarán inmediatamente en la UI
     const newAssets: Asset[] = [];
 
+    // 2) Iterar cada archivo del FileList
     Array.from(files).forEach((file) => {
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
 
+      // 2.1) Solo procesar imágenes y videos
       if (isImage || isVideo) {
+        // 3) Generar ID y objeto asset temporal en estado 'uploading'
+        const assetId = Math.random().toString(36).substr(2, 9);
         const asset: Asset = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: assetId,
           type: isImage ? 'photo' : 'video',
-          url: URL.createObjectURL(file),
+          url: URL.createObjectURL(file), // URL local para previsualización
           name: file.name,
           size: formatFileSize(file.size),
           uploadedAt: new Date(),
@@ -71,14 +99,154 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
 
         newAssets.push(asset);
 
-        setTimeout(() => {
-          setAssets((prev) =>
-            prev.map((a) => (a.id === asset.id ? { ...a, status: 'completed' } : a))
-          );
-        }, 2000);
+        // 4) Iniciar flujo de subida/registro en background (IIFE async para cada archivo)
+        (async () => {
+          try {
+            const assetTypeForPath: 'photo' | 'video' = isImage ? 'photo' : 'video';
+
+            // 4.1) Preparar archivos a subir: intentar optimizar imagen y generar thumbnail
+            let fileToUpload: File = file;
+            let thumbToUpload: File = file;
+
+            if (isImage) {
+              try {
+                // Intentamos optimizar la imagen y obtener un thumbnail
+                const { optimizedFile, thumbFile } = await optimizeImage(file);
+                if (optimizedFile) fileToUpload = optimizedFile; // usar optimizado si existe
+                if (thumbFile) thumbToUpload = thumbFile; // usar thumb si fue generado
+              } catch (optErr) {
+                // Si la optimización falla, continuamos con el archivo original
+                console.warn('Image optimization failed, proceeding with original file', optErr);
+              }
+            }
+
+            // 4.2) Construir nombres de archivo esperados para S3, que incluyen la ruta relativa y performer ID
+            // TODO: debe aclararse el proceso para llevarlo a performer y a client
+            const generatedFileName = buildFileName(fileToUpload, assetTypeForPath, performer?.id);
+            const generatedThumbFileName = buildFileName(
+              thumbToUpload,
+              assetTypeForPath,
+              performer?.id,
+              true
+            );
+
+            // 5) Si no se pudo construir un nombre válido, marcar fallo y salir
+            if (!generatedFileName || !generatedThumbFileName) {
+              setAssets((prev) =>
+                prev.map((a) => (a.id === assetId ? { ...a, status: 'failed' } : a))
+              );
+              return;
+            }
+
+            // 4.3) Solicitar URLs prefirmadas al backend para ambos archivos
+            const { url: presignedUrl, fileName } = await getPresignedUploadUrl(
+              fileToUpload.type,
+              900,
+              generatedFileName
+            );
+
+            const { url: presignedThumbUrl } = await getPresignedUploadUrl(
+              thumbToUpload.type,
+              900,
+              generatedThumbFileName
+            );
+
+            // 4.4) Subir archivo y thumbnail a S3 con seguimiento de progreso (actualizando UI)
+            const { objectUrl } = await uploadToS3(fileToUpload, presignedUrl, (_p) => {
+              // Actualizar UI con progreso (aquí solo refrescamos el asset correspondiente)
+              setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a } : a)));
+            });
+
+            const { objectUrl: objectThumbUrl } = await uploadToS3(
+              thumbToUpload,
+              presignedThumbUrl,
+              (_p) => {
+                setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a } : a)));
+              }
+            );
+
+            // 4.5) Registrar el asset en el backend con la metadata y las URLs obtenidas
+            const assetType: 'photo' | 'video' = isImage ? 'photo' : 'video';
+
+            const uploadPayload = {
+              fileName,
+              fileURLthumb: objectThumbUrl,
+              fileURL: objectUrl,
+              contentType: fileToUpload.type,
+              size: fileToUpload.size,
+              assetType,
+              performerId: performer?.id,
+              // conservar nombre original como assetName
+              assetName: file.name,
+            };
+
+            const { uploadAsset } = await import('../../app/services/s3Upload.service');
+            const registered = await uploadAsset(uploadPayload);
+
+            // 4.6) Si se generó un thumbnail, intentar subirlo/registrarlo y añadirlo como asset separado
+            if (thumbToUpload) {
+              try {
+                const thumbGeneratedFileName = buildFileName(
+                  thumbToUpload,
+                  assetTypeForPath,
+                  performer?.id
+                );
+                if (thumbGeneratedFileName) {
+                  const { url: thumbPresignedUrl, fileName: thumbFileName } =
+                    await getPresignedUploadUrl(thumbToUpload.type, 900, thumbGeneratedFileName);
+                  const { objectUrl: thumbObjectUrl } = await uploadToS3(
+                    thumbToUpload,
+                    thumbPresignedUrl,
+                    () => {}
+                  );
+                  const registeredThumb = await uploadAsset({
+                    fileName: thumbFileName,
+                    fileURL: thumbObjectUrl,
+                    contentType: thumbToUpload.type,
+                    size: thumbToUpload.size,
+                    assetType,
+                    performerId: performer?.id,
+                    assetName: file.name,
+                  });
+
+                  // Añadir thumbnail como asset separado en la UI
+                  setAssets((prev) => [
+                    ...prev,
+                    {
+                      id: Math.random().toString(36).substr(2, 9),
+                      type: 'photo',
+                      url: registeredThumb.fileURL,
+                      name: file.name,
+                      size: formatFileSize(thumbToUpload.size),
+                      uploadedAt: new Date(),
+                      status: 'completed',
+                    },
+                  ]);
+                }
+              } catch (thumbErr) {
+                // Si falla subir/registrar el thumbnail, se registra la advertencia y se continúa
+                console.warn('Thumbnail upload failed', thumbErr);
+              }
+            }
+
+            // 4.7) Actualizar el asset original en estado local con la URL real y marcar como completado
+            setAssets((prev) =>
+              prev.map((a) =>
+                a.id === assetId ? { ...a, status: 'completed', url: registered.fileURL } : a
+              )
+            );
+          } catch (err) {
+            // 5) En caso de error en cualquier paso, marcar asset como 'failed'
+            console.error('Asset upload failed', err);
+            setAssets((prev) =>
+              prev.map((a) => (a.id === assetId ? { ...a, status: 'failed' } : a))
+            );
+          }
+        })();
       }
     });
 
+    // 6) Añadir los assets temporales al estado para que la UI los muestre e inicie el proceso
     setAssets((prev) => [...prev, ...newAssets]);
   };
 
@@ -117,7 +285,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
   return (
     <div className="modal-backdrop-adaptive">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-linear-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
               src={performer.avatar || '/icons/default-avatar.svg'}
@@ -172,7 +340,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
                 </div>
                 <button
                   type="button"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
+                  className="px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
                 >
                   Seleccionar archivos
                 </button>
@@ -226,7 +394,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
                     key={asset.id}
                     className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    <div className="relative flex-shrink-0">
+                    <div className="relative shrink-0">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200">
                         {asset.type === 'photo' ? (
                           <img
@@ -301,7 +469,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
               Cerrar
             </button>
             <button
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
+              className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
               disabled={assets.filter((a) => a.status === 'completed').length === 0}
             >
               Guardar Assets

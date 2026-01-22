@@ -68,7 +68,7 @@ export default function LegalModal({ name, open, onClose }: LegalModalProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 prose prose-slate dark:prose-invert max-w-none">
+        <div className="flex-1 overflow-y-auto p-6 prose prose-slate dark:prose-invert max-w-none [&_*]:text-gray-900 [&_*]:dark:text-white">
           {loading ? (
             <div className="text-center text-gray-500">Cargando...</div>
           ) : error ? (

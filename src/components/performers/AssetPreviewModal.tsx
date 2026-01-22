@@ -6,6 +6,8 @@ import type { ContentItem } from '../../types/content';
 interface AssetPreviewModalProps {
   asset: ContentItem;
   onClose: () => void;
+  // Optional editorial status passed by some consumers (e.g., approval modals)
+  editorialStatus?: 'pending' | 'approved' | 'rejected';
 }
 
 export default function AssetPreviewModal({ asset, onClose }: AssetPreviewModalProps) {

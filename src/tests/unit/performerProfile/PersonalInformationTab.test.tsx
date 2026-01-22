@@ -4,6 +4,7 @@ import ProfileTab from '../../../components/performerProfile/ProfileTab';
 import PerformerProfileService from '../../../app/services/performerProfile.service';
 import GeodataService from '../../../app/services/geodata.service';
 import type { Performer } from '../../../app/types/performers.types';
+import { PerformerStatusEnum } from '../../../app/types/performers.types';
 import { ZodiacType } from '../../../performers/enums/profile.enums';
 
 vi.mock('../../../app/services/performerProfile.service');
@@ -18,7 +19,7 @@ describe('ProfileTab (migrated from PersonalInformationTab)', () => {
     avatar: 'https://example.com/avatar.jpg',
     rating: 4.5,
     total_shows: 100,
-    status: 'active',
+    status: PerformerStatusEnum.Active,
     performerProfile: {
       nickName: 'TestNick',
       headLines: 'Test headline',
