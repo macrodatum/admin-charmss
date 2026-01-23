@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
       `}
       >
         <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
-          <div className="flex flex-col items-center flex-1 bg-black">
+          <div className="flex flex-col items-center flex-1 dark:border-slate-700">
             <img src={logo} alt="Live Charmss" className="h-16 w-auto object-contain" />
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">Studio Platform</div>
           </div>
