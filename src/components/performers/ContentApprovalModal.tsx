@@ -81,8 +81,6 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
         });
 
         if (mounted) setMediaItems(mapped);
-
-
       } catch {
         if (mounted) setError('Error al cargar contenido');
       } finally {

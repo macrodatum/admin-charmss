@@ -10,8 +10,19 @@ interface AssetPreviewModalProps {
   editorialStatus?: 'pending' | 'approved' | 'rejected';
 }
 
-export default function AssetPreviewModal({ asset, onClose, editorialStatus }: AssetPreviewModalProps) {
-  const statusLabel = editorialStatus === 'approved' ? 'Aprobada' : editorialStatus === 'rejected' ? 'Rechazada' : editorialStatus === 'pending' ? 'Pendiente' : undefined;
+export default function AssetPreviewModal({
+  asset,
+  onClose,
+  editorialStatus,
+}: AssetPreviewModalProps) {
+  const statusLabel =
+    editorialStatus === 'approved'
+      ? 'Aprobada'
+      : editorialStatus === 'rejected'
+      ? 'Rechazada'
+      : editorialStatus === 'pending'
+      ? 'Pendiente'
+      : undefined;
 
   return (
     <AnimatePresence>

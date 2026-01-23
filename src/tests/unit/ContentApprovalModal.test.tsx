@@ -195,8 +195,6 @@ describe('ContentApprovalModal', () => {
     // Ensure the shared-layout node exists (Framer Motion layoutId)
     expect(screen.getByTestId('asset-preview-30')).toBeInTheDocument();
 
-
-
     // Editorial status pill should be visible (pending) and numeric 'subido' should NOT be shown
     expect(screen.getByTestId('asset-preview-editorial-30')).toBeInTheDocument();
     expect(screen.queryByTestId('asset-preview-status-30')).toBeNull();
@@ -290,8 +288,6 @@ describe('ContentApprovalModal', () => {
 
     updateMock.mockRestore();
   });
-
-
 
   it('calls API to reject an item with a reason and updates UI on success', async () => {
     const fakeResp = {

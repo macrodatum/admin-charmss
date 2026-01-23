@@ -1,30 +1,27 @@
 import React, { useState } from 'react';
-import { X, Upload, Image, Video, Trash2, Eye, CheckCircle } from 'lucide-react';
+import { X, Upload, Image, Video, Trash2, Eye } from 'lucide-react';
 import { Performer } from '../../app/types/performers.types';
-import { optimizeImage } from '../../app/services/image-optimization.service';
-import { buildFileName, getPresignedUploadUrl, uploadToS3 } from '../../app/services/s3Upload.service';
-import { truncateAssetName } from '../../shared/utils/truncateAssetName';
+import { useAssetUpload } from '../../hooks/useAssetUpload';
+import { getStatusIcon } from './AssetStatusIcons';
+
 interface AssetUploaderProps {
   performer: Performer | null;
   onClose: () => void;
 }
 
-interface Asset {
-  id: string;
-  type: 'photo' | 'video';
-  url: string;
-  name: string;
-  size: string;
-  uploadedAt: Date;
-  status: 'pending' | 'uploading' | 'completed' | 'failed';
-  // keep original File for later upload
-  file?: File;
-}
-
 export default function AssetUploader({ performer, onClose }: AssetUploaderProps) {
-  const [assets, setAssets] = useState<Asset[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [selectedType, setSelectedType] = useState<'all' | 'photo' | 'video'>('all');
+
+  const {
+    assets,
+    addFiles,
+    uploadAllPending,
+    deleteAsset,
+    filterAssets,
+    pendingCount,
+    completedCount,
+  } = useAssetUpload({ performerId: performer?.id });
 
   if (!performer) return null;
 
@@ -44,186 +41,22 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files);
+      addFiles(e.dataTransfer.files);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files);
+      addFiles(e.target.files);
     }
-  };
-
-  /**
-   * handleFiles
-   *
-   * Acciones realizadas (enumeradas):
-   * 1) Convertir `FileList` en arreglo e iterar cada archivo.
-   * 2) Detectar si el archivo es imagen o video; ignorar otros tipos.
-   * 3) Crear un `asset` temporal en estado `uploading` y mostrarlo en la UI para seguimiento.
-   * 4) Iniciar un proceso asíncrono por archivo que realiza:
-   *    4.1) Optimización de imagen y generación de thumbnail (si corresponde).
-   *    4.2) Construcción de nombres de archivo para S3 (original y thumbnail).
-   *    4.3) Solicitud de URLs prefirmadas al backend usando los nombres generados.
-   *    4.4) Subida del archivo y del thumbnail a S3 con seguimiento de progreso.
-   *    4.5) Registro del asset en el backend (metadata y URLs definitivas).
-   *    4.6) (Opcional) Registrar y añadir thumbnail como asset separado en la UI.
-   *    4.7) Actualizar el asset temporal en el estado local con la URL real y marcarlo `completed`.
-   * 5) Capturar errores en cualquier paso y marcar el asset como `failed` si ocurre un fallo.
-   * 6) Finalmente, añadir todos los assets temporales al estado local (`setAssets`) para iniciar el flujo de subida.
-   */
-  const handleFiles = (files: FileList) => {
-    // 1) Preparar array para assets temporales que se mostrarán inmediatamente en la UI
-    const newAssets: Asset[] = [];
-
-    // 2) Iterar cada archivo del FileList
-    Array.from(files).forEach((file) => {
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
-
-      // 2.1) Solo procesar imágenes y videos
-      if (isImage || isVideo) {
-        // 3) Generar ID y objeto asset temporal en estado 'pending' (se subirá cuando el usuario pulse Guardar)
-        const assetId = Math.random().toString(36).substr(2, 9);
-        const asset: Asset = {
-          id: assetId,
-          type: isImage ? 'photo' : 'video',
-          url: URL.createObjectURL(file), // URL local para previsualización
-          name: truncateAssetName(file.name, 50),
-          size: formatFileSize(file.size),
-          uploadedAt: new Date(),
-          status: 'pending',
-          file,
-        };
-
-        newAssets.push(asset);
-
-        // NO iniciar la subida aquí. La subida se realizará cuando el usuario pulse Guardar Assets
-      }
-    });
-
-    // 6) Añadir los assets temporales al estado para que la UI los muestre e inicie el proceso
-    setAssets((prev) => [...prev, ...newAssets]);
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
-
-
-  // Subir y registrar un asset dado su id interno
-  const handleUploadAsset = async (assetId: string) => {
-    const asset = assets.find((a) => a.id === assetId);
-    if (!asset || !asset.file) return;
-
-    setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a, status: 'uploading' } : a)));
-
-    try {
-      const isImage = asset.type === 'photo';
-      const assetTypeForPath: 'photo' | 'video' = isImage ? 'photo' : 'video';
-
-      let fileToUpload: File = asset.file as File;
-      let thumbToUpload: File = asset.file as File;
-
-      if (isImage) {
-        try {
-          const { optimizedFile, thumbFile } = await optimizeImage(asset.file as File);
-          if (optimizedFile) fileToUpload = optimizedFile;
-          if (thumbFile) thumbToUpload = thumbFile;
-        } catch (optErr) {
-          console.warn('Image optimization failed, proceeding with original file', optErr);
-        }
-      }
-
-      const generatedFileName = buildFileName(fileToUpload, assetTypeForPath, performer?.id);
-      const generatedThumbFileName = buildFileName(thumbToUpload, assetTypeForPath, performer?.id, true);
-
-      if (!generatedFileName || !generatedThumbFileName) {
-        setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a, status: 'failed' } : a)));
-        return;
-      }
-
-      const { url: presignedUrl, fileName } = await getPresignedUploadUrl(
-        fileToUpload.type,
-        900,
-        generatedFileName
-      );
-
-      const { url: presignedThumbUrl } = await getPresignedUploadUrl(
-        thumbToUpload.type,
-        900,
-        generatedThumbFileName
-      );
-
-      const { objectUrl } = await uploadToS3(fileToUpload, presignedUrl, (_p) => {
-        setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a } : a)));
-      });
-
-      const { objectUrl: objectThumbUrl } = await uploadToS3(thumbToUpload, presignedThumbUrl, (_p) => {
-        setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a } : a)));
-      });
-
-      const assetType: 'photo' | 'video' = isImage ? 'photo' : 'video';
-
-      const uploadPayload = {
-        fileName,
-        fileURLthumb: objectThumbUrl,
-        fileURL: objectUrl,
-        contentType: fileToUpload.type,
-        size: fileToUpload.size,
-        assetType,
-        performerId: performer?.id,
-        assetName: asset.name,
-      };
-
-      const { uploadAsset } = await import('../../app/services/s3Upload.service');
-      const registered = await uploadAsset(uploadPayload);
-
-      setAssets((prev) =>
-        prev.map((a) => (a.id === assetId ? { ...a, status: 'completed', url: registered.fileURL } : a))
-      );
-    } catch (err) {
-      console.error('Asset upload failed', err);
-      setAssets((prev) => prev.map((a) => (a.id === assetId ? { ...a, status: 'failed' } : a)));
-    }
-  };
-
-  const handleUploadAll = () => {
-    const pending = assets.filter((a) => a.status === 'pending');
-    pending.forEach((a) => void handleUploadAsset(a.id));
   };
 
   const handleDelete = (id: string) => {
-    setAssets((prev) => prev.filter((asset) => asset.id !== id));
+    deleteAsset(id);
   };
 
-  const filteredAssets = assets.filter((asset) => {
-    if (selectedType === 'all') return true;
-    return asset.type === selectedType;
-  });
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Upload className="h-4 w-4 text-gray-400" />;
-      case 'uploading':
-        return (
-          <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-        );
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'failed':
-        return <X className="h-4 w-4 text-red-600" />;
-      default:
-        return null;
-    }
-  };
+  const filteredAssets = filterAssets(selectedType);
 
   return (
     <div className="modal-backdrop-adaptive">
@@ -395,8 +228,7 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
 
         <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            {assets.filter((a) => a.status === 'completed').length} de {assets.length} archivos
-            completados
+            {completedCount} de {assets.length} archivos completados
           </div>
           <div className="flex gap-3">
             <button
@@ -406,9 +238,9 @@ export default function AssetUploader({ performer, onClose }: AssetUploaderProps
               Cerrar
             </button>
             <button
-              onClick={() => handleUploadAll()}
+              onClick={() => uploadAllPending()}
               className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
-              disabled={assets.filter((a) => a.status === 'pending').length === 0}
+              disabled={pendingCount === 0}
             >
               Guardar Assets
             </button>
