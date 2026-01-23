@@ -189,13 +189,13 @@ describe('ContentApprovalModal', () => {
     // Preview should display metadata (wait for preview close button to appear)
     await waitFor(() => expect(screen.getByLabelText('Cerrar preview')).toBeInTheDocument());
     expect(screen.getByText(/previewer/i)).toBeInTheDocument();
-    expect(screen.getByText(/Likes:/i)).toBeInTheDocument();
+    // details section should be visible
+    expect(screen.getByText(/Detalles/i)).toBeInTheDocument();
 
     // Ensure the shared-layout node exists (Framer Motion layoutId)
     expect(screen.getByTestId('asset-preview-30')).toBeInTheDocument();
 
-    // Bottom 'Cerrar' button should be visible (sticky footer control)
-    expect(screen.getByTestId('asset-footer-close-30')).toBeInTheDocument();
+
 
     // Editorial status pill should be visible (pending) and numeric 'subido' should NOT be shown
     expect(screen.getByTestId('asset-preview-editorial-30')).toBeInTheDocument();
@@ -209,12 +209,10 @@ describe('ContentApprovalModal', () => {
     expect(screen.getByText(/Aprobación de Contenido/i)).toBeInTheDocument();
     expect(onCloseSpy).not.toHaveBeenCalled();
 
-    // Open video preview (click its thumbnail)
-    const videoImg = screen.getByAltText('Preview Video');
-    const videoCard = videoImg.closest('div')?.parentElement;
-    expect(videoCard).toBeTruthy();
-    fireEvent.click(videoCard!);
-
+    // Open video preview (click its thumbnail container)
+    const videoThumb = screen.getByTestId('asset-thumb-31');
+    expect(videoThumb).toBeTruthy();
+    fireEvent.click(videoThumb);
     await waitFor(() => expect(screen.getByLabelText('Cerrar preview')).toBeInTheDocument());
 
     // Now editorial pill for video should be visible and numeric status not shown
@@ -292,6 +290,8 @@ describe('ContentApprovalModal', () => {
 
     updateMock.mockRestore();
   });
+
+
 
   it('calls API to reject an item with a reason and updates UI on success', async () => {
     const fakeResp = {

@@ -81,6 +81,8 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
         });
 
         if (mounted) setMediaItems(mapped);
+
+
       } catch {
         if (mounted) setError('Error al cargar contenido');
       } finally {
@@ -257,10 +259,13 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
                         />
                       ) : (
                         <div className="relative w-full h-full">
-                          <img
-                            src={item.thumbnail || item.url}
-                            alt={item.title}
+                          <video
+                            src={item.url}
+                            poster={item.thumbnail}
                             className="w-full h-full object-cover"
+                            muted
+                            playsInline
+                            preload="metadata"
                           />
                           <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center">
                             <Video className="h-12 w-12 text-white" />

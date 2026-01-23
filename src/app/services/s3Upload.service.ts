@@ -10,6 +10,8 @@ import ApiClient from './api/axios/apiClient';
 import { API_CONFIG } from '../config/appConfig';
 import type { UploadAssetRequest, UploadAssetResponse } from '../types/s3Upload.types';
 
+import { truncateAssetName } from '../../shared/utils/truncateAssetName';
+
 /**
  * Sube un archivo a S3 usando una URL prefirmada con XMLHttpRequest
  * Permite monitorear el progreso de subida
@@ -246,8 +248,12 @@ export const uploadAsset = async (
         ? 1
         : 2;
 
+    // Ensure assetName does not exceed 50 chars (preserve extension when possible)
+    const rawAssetName = payload.assetName ?? fileName.split('/').pop() ?? '';
+    const assetName = truncateAssetName(rawAssetName, 50);
+
     const body = {
-      assetName: payload.assetName ?? fileName.split('/').pop(),
+      assetName,
       assetType: assetTypeNumber,
       price: payload.price ?? 0,
       fileName,

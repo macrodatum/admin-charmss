@@ -10,7 +10,9 @@ interface AssetPreviewModalProps {
   editorialStatus?: 'pending' | 'approved' | 'rejected';
 }
 
-export default function AssetPreviewModal({ asset, onClose }: AssetPreviewModalProps) {
+export default function AssetPreviewModal({ asset, onClose, editorialStatus }: AssetPreviewModalProps) {
+  const statusLabel = editorialStatus === 'approved' ? 'Aprobada' : editorialStatus === 'rejected' ? 'Rechazada' : editorialStatus === 'pending' ? 'Pendiente' : undefined;
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
@@ -39,6 +41,21 @@ export default function AssetPreviewModal({ asset, onClose }: AssetPreviewModalP
                   {asset.creator?.username} • {new Date(asset.createdAt).toLocaleString()}
                 </div>
               </div>
+
+              {statusLabel && (
+                <div
+                  data-testid={`asset-preview-editorial-${asset.id}`}
+                  className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                    statusLabel === 'Aprobada'
+                      ? 'bg-green-100 text-green-700'
+                      : statusLabel === 'Rechazada'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}
+                >
+                  {statusLabel}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <button
