@@ -28,6 +28,7 @@ export interface OnboardingData {
   statusCardFrontFaceFile: AssetStatusType;
   statusCardBackFaceFile: AssetStatusType;
   statusProfileImageFile: AssetStatusType;
+  statusProfileVideoFile?: AssetStatusType;
   sign?: string | null;
   securityRequest?: string | null;
   requestDocuments: RequestDocument[];

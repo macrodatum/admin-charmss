@@ -45,10 +45,11 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             3: resp.statusCardFrontFaceFile ?? 0,
             4: resp.statusCardBackFaceFile ?? 0,
             5: resp.statusProfileImageFile ?? 0,
+            7: resp.statusProfileVideoFile ?? 0,
           });
         }
       } catch {
-        if (mounted) setError('Error al cargar los datos de onboarding');
+        if (mounted) setError('Error loading onboarding data');
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -64,6 +65,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const _allowed = new Set<number>([1, 2, 3, 4, 5]);
   const documents =
     data?.requestDocuments?.filter((d) => _allowed.has(Number(d.documentType))) ?? [];
+  
+  // Get profile video (documentType 7)
+  const profileVideo = data?.requestDocuments?.find((d) => Number(d.documentType) === 7);
 
   const getDocStatus = (documentType: number) => {
     // prioritize local staged status
@@ -80,6 +84,8 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         return data.statusCardBackFaceFile;
       case 5:
         return data.statusProfileImageFile;
+      case 7:
+        return data.statusProfileVideoFile ?? 0;
       default:
         return 0;
     }
@@ -128,9 +134,10 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         3: 'statusCardFrontFaceFile',
         4: 'statusCardBackFaceFile',
         5: 'statusProfileImageFile',
+        7: 'statusProfileVideoFile',
       };
 
-      [1, 2, 3, 4, 5].forEach((dt) => {
+      [1, 2, 3, 4, 5, 7].forEach((dt) => {
         if (docStatuses && docStatuses[dt] !== undefined) {
           documentStatusFields[docMap[dt]] = docStatuses[dt];
         }
@@ -139,7 +146,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       const resp = await decideOnboarding(
         performerId!,
         2,
-        'Aprobado',
+        'Approved',
         undefined,
         docNotes,
         documentStatusFields
@@ -150,8 +157,8 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       setActionResult('approved');
       setConfirmApprove(false);
     } catch (err) {
-      console.error('Error aprovar onboarding', err);
-      setActionError('Error al aprobar la inscripción');
+      console.error('Error approving onboarding', err);
+      setActionError('Error approving registration');
     } finally {
       setActionLoading(false);
     }
@@ -160,11 +167,11 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const getRequestStatusLabel = (s: number | undefined | null) => {
     switch (String(s)) {
       case '1':
-        return 'Pendiente';
+        return 'Pending';
       case '2':
-        return 'Aprobada';
+        return 'Approved';
       case '3':
-        return 'Rechazada';
+        return 'Rejected';
       default:
         return '';
     }
@@ -196,9 +203,10 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         3: 'statusCardFrontFaceFile',
         4: 'statusCardBackFaceFile',
         5: 'statusProfileImageFile',
+        7: 'statusProfileVideoFile',
       };
 
-      [1, 2, 3, 4, 5].forEach((dt) => {
+      [1, 2, 3, 4, 5, 7].forEach((dt) => {
         if (docStatuses && docStatuses[dt] !== undefined) {
           documentStatusFields[docMap[dt]] = docStatuses[dt];
         }
@@ -218,8 +226,8 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
       setActionResult('rejected');
       setRejectModal(null);
     } catch (err) {
-      console.error('Error rechazar onboarding', err);
-      setActionError('Error al rechazar la inscripción');
+      console.error('Error rejecting onboarding', err);
+      setActionError('Error rejecting registration');
     } finally {
       setActionLoading(false);
     }
@@ -232,7 +240,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Onboarding</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {data ? `${data.firstName} ${data.middleName ?? ''} ${data.lastName}` : 'Cargando...'}
+              {data ? `${data.firstName} ${data.middleName ?? ''} ${data.lastName}` : 'Loading...'}
             </p>
             <div className="flex items-center gap-3 mt-1">
               <p className="text-xs text-gray-400">
@@ -240,7 +248,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
               </p>
 
               {(() => {
-                // Show a status badge; default to Pendiente (1) when backend doesn't provide a status
+                // Show a status badge; default to Pending (1) when backend doesn't provide a status
                 const displayedStatus = data?.status;
 
                 return (
@@ -263,17 +271,17 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           <div className="flex items-center gap-2">
             {actionResult === 'approved' && (
               <div className="px-3 py-2 bg-green-100 text-green-700 rounded">
-                Inscripción aprobada
+                Registration approved
               </div>
             )}
             {actionResult === 'rejected' && (
-              <div className="px-3 py-2 bg-red-100 text-red-700 rounded">Inscripción rechazada</div>
+              <div className="px-3 py-2 bg-red-100 text-red-700 rounded">Registration rejected</div>
             )}
 
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              title="Cerrar"
+              title="Close"
             >
               <X className="h-6 w-6 text-gray-500 dark:text-gray-400" />
             </button>
@@ -285,15 +293,15 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <ImageIcon className="h-5 w-5 text-gray-500" />
-              Documentos
+              Documents
             </h3>
 
             {isLoading ? (
               <div className="flex items-center justify-center p-12 text-gray-500">
-                Cargando documentos...
+                Loading documents...
               </div>
             ) : documents.length === 0 ? (
-              <div className="p-6 text-gray-500">No hay documentos adjuntos.</div>
+              <div className="p-6 text-gray-500">No documents attached.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {documents.map((doc) => (
@@ -317,26 +325,26 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                         <div className="text-xs">
                           {getDocStatus(Number(doc.documentType)) === 2 ? (
                             <span className="px-2 py-1 rounded bg-green-100 text-green-700">
-                              Aprobada
+                              Approved
                             </span>
                           ) : getDocStatus(Number(doc.documentType)) === 3 ? (
                             <span className="px-2 py-1 rounded bg-red-100 text-red-700">
-                              Rechazada
+                              Rejected
                             </span>
                           ) : getDocStatus(Number(doc.documentType)) === 1 ? (
                             <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">
-                              En revisión
+                              Under review
                             </span>
                           ) : (
                             <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">
-                              Pendiente
+                              Pending
                             </span>
                           )}
                         </div>
                       </div>
 
                       <div className="text-xs text-gray-500 mt-1">
-                        Subido: {new Date(doc.loadDate).toLocaleString()}
+                        Uploaded: {new Date(doc.loadDate).toLocaleString()}
                       </div>
 
                       <div className="mt-3 flex gap-2">
@@ -349,7 +357,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                           className="flex-none flex items-center justify-center gap-2 px-2 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
                         >
                           <CheckCircle className="h-4 w-4" />
-                          Aceptar
+                          Accept
                         </button>
 
                         <button
@@ -361,7 +369,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                           className="flex-none flex items-center justify-center gap-2 px-2 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50"
                         >
                           <XCircle className="h-4 w-4" />
-                          Rechazar
+                          Reject
                         </button>
                       </div>
 
@@ -374,16 +382,91 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
               </div>
             )}
 
+            {/* Profile Video */}
+            {profileVideo && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Profile Video
+                </h4>
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm">
+                  <video 
+                    controls 
+                    className="w-full h-auto max-h-96 object-contain bg-black"
+                    preload="metadata"
+                  >
+                    <source src={profileVideo.fileName} type="video/mp4" />
+                    Your browser does not support video playback.
+                  </video>
+                  <div className="p-3">
+                    <div className="flex flex-col items-start gap-2">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {profileVideo.documentName}
+                        </div>
+                        <div className="text-xs">
+                          {getDocStatus(7) === 2 ? (
+                            <span className="px-2 py-1 rounded bg-green-100 text-green-700">
+                              Approved
+                            </span>
+                          ) : getDocStatus(7) === 3 ? (
+                            <span className="px-2 py-1 rounded bg-red-100 text-red-700">
+                              Rejected
+                            </span>
+                          ) : getDocStatus(7) === 1 ? (
+                            <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">
+                              Under review
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Uploaded: {new Date(profileVideo.loadDate).toLocaleString()}
+                      </div>
+                      <div className="flex gap-2 w-full mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveDoc(profileVideo.id, 7);
+                          }}
+                          disabled={!!docLoading[profileVideo.id]}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenRejectDoc(profileVideo.id);
+                          }}
+                          disabled={!!docLoading[profileVideo.id]}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Contract signature */}
             <div className="mt-6">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Firma</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Signature</h4>
               {data?.sign ? (
                 <div className="bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm p-4">
-                  <img src={data.sign} alt="Firma" className="w-full h-40 object-contain" />
-                  <div className="text-xs text-gray-500 mt-2">Firma subida por el performer</div>
+                  <img src={data.sign} alt="Signature" className="w-full h-40 object-contain" />
+                  <div className="text-xs text-gray-500 mt-2">Signature uploaded by performer</div>
                 </div>
               ) : (
-                <div className="text-sm text-gray-500">No hay firma registrada</div>
+                <div className="text-sm text-gray-500">No signature registered</div>
               )}
             </div>
           </div>
@@ -392,19 +475,19 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 h-full">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-gray-500" />
-              Datos del performer
+              Performer Info
             </h3>
 
             {isLoading ? (
-              <div className="text-gray-500">Cargando...</div>
+              <div className="text-gray-500">Loading...</div>
             ) : error ? (
               <div className="text-red-500">{error}</div>
             ) : !data ? (
-              <div className="text-gray-500">Sin datos</div>
+              <div className="text-gray-500">No data</div>
             ) : (
               <div className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
                 <div>
-                  <div className="text-xs text-gray-500">Nombre</div>
+                  <div className="text-xs text-gray-500">Name</div>
                   <div>
                     {data.firstName} {data.middleName ?? ''} {data.lastName}
                   </div>
@@ -414,27 +497,27 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                   <div>{data.emailAddress}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Nick</div>
+                  <div className="text-xs text-gray-500">Nickname</div>
                   <div>{data.nickName}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Fecha de nacimiento</div>
+                  <div className="text-xs text-gray-500">Birth Date</div>
                   <div>{new Date(data.birthDate).toLocaleDateString()}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">País</div>
+                  <div className="text-xs text-gray-500">Country</div>
                   <div>{data.countryCode}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Género</div>
+                  <div className="text-xs text-gray-500">Gender</div>
                   <div>{data.gender}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Fecha de solicitud</div>
+                  <div className="text-xs text-gray-500">Request Date</div>
                   <div>{new Date(data.requestDate).toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Identificación</div>
+                  <div className="text-xs text-gray-500">ID Number</div>
                   <div>
                     {data.identificationNumber ?? '—'}{' '}
                     {data.identificationType ? `(${data.identificationType})` : ''}
@@ -450,7 +533,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 <CheckCircle className="h-4 w-4" />
-                Aprobar inscripción
+                Approve Registration
               </button>
 
               <button
@@ -459,7 +542,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 <XCircle className="h-4 w-4" />
-                Rechazar inscripción
+                Reject Registration
               </button>
             </div>
 
@@ -467,16 +550,6 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-750">
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
       </div>
 
       {selectedDoc !== null && (
@@ -510,19 +583,19 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-lg w-full z-10">
-            <h3 className="text-lg font-semibold mb-4">Confirmar aprobación</h3>
+            <h3 className="text-lg font-semibold mb-4">Confirm Approval</h3>
             <p className="text-sm text-gray-600 mb-4">
-              ¿Deseas aprobar la inscripción de este performer?
+              Do you want to approve this performer's registration?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmApprove(false)}
                 className="px-4 py-2 rounded bg-gray-200"
               >
-                Cancelar
+                Cancel
               </button>
               <button onClick={doApprove} className="px-4 py-2 rounded bg-green-600 text-white">
-                Aprobar
+                Approve
               </button>
             </div>
           </div>
@@ -533,10 +606,10 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 backdrop-blur-glass" />
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-lg w-full z-10">
-            <h3 className="text-lg font-semibold mb-4">Rechazar inscripción</h3>
-            <p className="text-sm text-gray-600 mb-2">Indica la causa del rechazo</p>
+            <h3 className="text-lg font-semibold mb-4">Reject Registration</h3>
+            <p className="text-sm text-gray-600 mb-2">Indicate the reason for rejection</p>
             <textarea
-              aria-label="Motivo de rechazo"
+              aria-label="Rejection reason"
               value={rejectModal.reason}
               onChange={(e) => setRejectModal({ reason: e.target.value })}
               className="w-full border border-gray-300 rounded p-2 min-h-30 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
@@ -546,13 +619,13 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                 onClick={() => setRejectModal(null)}
                 className="px-4 py-2 rounded bg-gray-200"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 onClick={() => doReject(rejectModal.reason)}
                 className="px-4 py-2 rounded bg-red-600 text-white"
               >
-                Confirmar rechazo
+                Confirm Rejection
               </button>
             </div>
           </div>
