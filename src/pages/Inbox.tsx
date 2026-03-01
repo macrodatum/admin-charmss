@@ -30,9 +30,9 @@ const Inbox: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>([
     {
       id: '1',
-      from: 'lgabrielcor',
+      from: 'admin_user',
       to: 'Zafira',
-      subject: 'Message from lgabrielcor',
+      subject: 'Message from admin_user',
       message:
         "Hi Zafira! I really enjoyed your last stream. You have such amazing energy and I love your personality. I was wondering if you might be available for a private show sometime this week? I'd love to spend some quality time with you. Let me know what works best for your schedule. Looking forward to hearing from you! 💕",
       preview: 'Hi Zafira! I really enjoyed your last stream...',
@@ -47,9 +47,9 @@ const Inbox: React.FC = () => {
     },
     {
       id: '2',
-      from: 'lgabrielcor',
+      from: 'admin_user',
       to: 'Zafira',
-      subject: 'VideoCall from lgabrielcor',
+      subject: 'VideoCall from admin_user',
       message:
         "Hey beautiful! I had such an amazing time during our video call yesterday. You really know how to make someone feel special. I've been thinking about you all day and I can't wait for our next session. Would you be available for another call this weekend? I have some exciting ideas for what we could do together. Can't wait to see your gorgeous smile again! 😘",
       preview: 'Hey beautiful! I had such an amazing time during our video call...',

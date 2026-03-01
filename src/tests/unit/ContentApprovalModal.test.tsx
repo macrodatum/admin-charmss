@@ -10,9 +10,9 @@ vi.mock('../../app/services/content.service');
 
 const mockPerformer: Performer = {
   id: '2',
-  full_name: 'Luis Corredor',
-  stage_name: 'lgabrielcor',
-  email: 'luis@example.com',
+  full_name: 'Ana Ramírez',
+  stage_name: 'anaperformer',
+  email: 'ana@example.com',
   status: PerformerStatusEnum.Active,
   performerProfile: { id: 1, performerId: 2 },
 };

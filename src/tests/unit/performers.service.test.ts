@@ -24,9 +24,9 @@ describe('Performers Service', () => {
         data: [
           {
             id: 1,
-            firstName: 'Luis',
-            lastName: 'Corredor',
-            email: 'luis@example.com',
+            firstName: 'Ana',
+            lastName: 'Ramírez',
+            email: 'ana@example.com',
             avatar: null,
             rating: 4.2,
             shows: 10,

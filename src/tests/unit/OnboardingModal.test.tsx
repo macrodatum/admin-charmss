@@ -10,19 +10,19 @@ vi.mock('../../app/services/onBoarding.service');
 
 const sample = {
   id: 2,
-  firstName: 'Luis',
-  middleName: 'Gabriel Corredor',
-  lastName: 'Combita',
-  emailAddress: 'luis.corredor@macrodatum.com',
-  nickName: 'luis',
-  birthDate: '1978-07-16T00:00:00.000Z',
-  countryCode: 'CO',
-  gender: 1,
+  firstName: 'Ana',
+  middleName: 'María López',
+  lastName: 'Ramírez',
+  emailAddress: 'ana.ramirez@example.com',
+  nickName: 'anaR',
+  birthDate: '1995-03-22T00:00:00.000Z',
+  countryCode: 'MX',
+  gender: 2,
   requestDate: '2025-12-17T23:29:59.200Z',
   performerId: 2,
   studioId: 2,
-  identificationNumber: '79999378',
-  identificationType: 'CE',
+  identificationNumber: '12345678',
+  identificationType: 'CC',
   statusCardFrontFile: 2,
   statusCardBackFile: 2,
   statusCardFrontFaceFile: 2,
@@ -109,8 +109,8 @@ describe('OnboardingModal', () => {
     expect(screen.getByAltText('Firma')).toBeInTheDocument();
 
     // Details should be visible
-    expect(screen.getAllByText('Luis Gabriel Corredor Combita').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/luis.corredor@macrodatum.com/)).toBeInTheDocument();
+    expect(screen.getAllByText('Ana María López Ramírez').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/ana.ramirez@example.com/)).toBeInTheDocument();
   });
 
   it('opens preview modal when clicking a document', async () => {

@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({
               />
               <div className="hidden sm:flex flex-col">
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  lgabrielcor
+                  admin_user
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">Premium Member</span>
               </div>

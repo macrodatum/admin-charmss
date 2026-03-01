@@ -55,7 +55,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onClose }) => {
               className="w-12 h-12 rounded-full border-2 border-pink-500"
             />
             <div>
-              <div className="text-white font-medium">lgabrielcor</div>
+              <div className="text-white font-medium">admin_user</div>
               <div className="text-sm text-gray-400">Administrator</div>
             </div>
           </div>

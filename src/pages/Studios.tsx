@@ -64,8 +64,8 @@ const MOCK_STUDIOS: Studio[] = [
   {
     id: '5',
     name: 'Diamond Entertainment Group',
-    legal_representative: 'Luis Fernandez',
-    email: 'luis@diamond.com',
+    legal_representative: 'Carlos Mendoza',
+    email: 'carlos@diamond.com',
     location: 'Chicago, Illinois',
     status: 'active',
     active_performers: 25,
