@@ -69,6 +69,18 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   // Get profile video (documentType 7)
   const profileVideo = data?.requestDocuments?.find((d) => Number(d.documentType) === 7);
 
+  const getDocTypeName = (documentType: number): string => {
+    switch (documentType) {
+      case 1: return 'ID Front';
+      case 2: return 'ID Back';
+      case 3: return 'ID Front with Face';
+      case 4: return 'ID Back with Face';
+      case 5: return 'Profile Photo';
+      case 7: return 'Profile Video';
+      default: return 'Document';
+    }
+  };
+
   const getDocStatus = (documentType: number) => {
     // prioritize local staged status
     if (docStatuses && docStatuses[documentType] !== undefined) return docStatuses[documentType];
@@ -309,7 +321,10 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                     key={doc.id}
                     className="bg-gray-50 dark:bg-slate-700 rounded overflow-hidden shadow-sm hover:shadow-md transition"
                   >
-                    <div onClick={() => setSelectedDoc(doc.id)} className="cursor-pointer">
+                    <div onClick={() => setSelectedDoc(doc.id)} className="cursor-pointer relative">
+                      <div className="absolute top-0 left-0 right-0 bg-black/60 text-white text-xs font-semibold px-2 py-1 z-10">
+                        {getDocTypeName(Number(doc.documentType))}
+                      </div>
                       <img
                         src={doc.fileName}
                         alt={doc.documentName}
@@ -590,7 +605,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmApprove(false)}
-                className="px-4 py-2 rounded bg-gray-200"
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -617,7 +632,7 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setRejectModal(null)}
-                className="px-4 py-2 rounded bg-gray-200"
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
