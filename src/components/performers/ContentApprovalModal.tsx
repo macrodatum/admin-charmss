@@ -377,7 +377,7 @@ export default function ContentApprovalModal({ performer, onClose }: ContentAppr
           )}
         </div>
 
-        <div className="p-6 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-750">
+        <div className="p-6 border-t border-gray-200 dark:border-slate-700 dark:bg-slate-750">
           <div className="flex flex-wrap gap-4 justify-between items-center">
             <div className="flex gap-4 text-sm">
               <div className="flex items-center gap-2">

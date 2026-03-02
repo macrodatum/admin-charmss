@@ -119,7 +119,7 @@ export default function PerformerList({
       case 'offline':
         return 'bg-red-500 text-white';
       case '1': // active
-        return 'bg-transparent border border-gray-300 text-gray-700';
+        return 'bg-green-100 text-green-800';
       case '2': // inactive
         return 'bg-gray-400 text-white';
       case '0': // pending
