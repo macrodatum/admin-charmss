@@ -9,7 +9,13 @@ const BASE = '/api/parameter';
 
 class ParameterService {
   private normalize(raw: unknown): Parameter {
-    if (raw && typeof raw === 'object' && 'data' in raw && raw.data && typeof raw.data === 'object') {
+    if (
+      raw &&
+      typeof raw === 'object' &&
+      'data' in raw &&
+      raw.data &&
+      typeof raw.data === 'object'
+    ) {
       return (raw as { data: Parameter }).data;
     }
     return raw as Parameter;

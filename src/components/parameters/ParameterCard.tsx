@@ -27,12 +27,17 @@ export default function ParameterCard({ param, onEdit, onDelete }: Props) {
   const isJson = param.typeParameter === 'json';
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700
-      shadow-sm hover:shadow-md transition-shadow flex flex-col">
+    <div
+      className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700
+      shadow-sm hover:shadow-md transition-shadow flex flex-col"
+    >
       {/* Header */}
       <div className="flex items-start justify-between p-4 border-b border-gray-100 dark:border-slate-700">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={param.name}>
+          <h3
+            className="text-sm font-semibold text-gray-900 dark:text-white truncate"
+            title={param.name}
+          >
             {param.name}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -40,7 +45,9 @@ export default function ParameterCard({ param, onEdit, onDelete }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColor}`}>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColor}`}
+          >
             {typeLabel}
           </span>
         </div>
@@ -52,13 +59,17 @@ export default function ParameterCard({ param, onEdit, onDelete }: Props) {
           Valor
         </p>
         {isJson ? (
-          <pre className="text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/60
-            rounded-lg p-2 overflow-x-auto max-h-24 font-mono border border-gray-100 dark:border-slate-600">
+          <pre
+            className="text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/60
+            rounded-lg p-2 overflow-x-auto max-h-24 font-mono border border-gray-100 dark:border-slate-600"
+          >
             {displayValue()}
           </pre>
         ) : (
-          <p className="text-sm text-gray-800 dark:text-gray-200 font-mono bg-gray-50 dark:bg-slate-700/60
-            rounded-lg px-2 py-1.5 truncate border border-gray-100 dark:border-slate-600">
+          <p
+            className="text-sm text-gray-800 dark:text-gray-200 font-mono bg-gray-50 dark:bg-slate-700/60
+            rounded-lg px-2 py-1.5 truncate border border-gray-100 dark:border-slate-600"
+          >
             {displayValue()}
           </p>
         )}
@@ -72,7 +83,13 @@ export default function ParameterCard({ param, onEdit, onDelete }: Props) {
           ) : (
             <XCircle className="h-4 w-4 text-gray-400" />
           )}
-          <span className={`text-xs font-medium ${param.state ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}>
+          <span
+            className={`text-xs font-medium ${
+              param.state
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-gray-400 dark:text-gray-500'
+            }`}
+          >
             {param.state ? 'Activo' : 'Inactivo'}
           </span>
         </div>

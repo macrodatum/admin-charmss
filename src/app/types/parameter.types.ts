@@ -22,8 +22,8 @@ export const PARAMETER_TYPE_LABELS: Record<ParameterDataType, string> = {
 };
 
 export const PARAMETER_TYPE_COLORS: Record<ParameterDataType, string> = {
-  string:  'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  string: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   boolean: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  number:  'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  json:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  number: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  json: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
 };

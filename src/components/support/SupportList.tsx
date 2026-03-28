@@ -12,6 +12,7 @@ import {
   Calendar,
   Mail,
   User,
+  Edit,
 } from 'lucide-react';
 
 import { SupportRequest } from '../../app/types/support.types';
@@ -20,6 +21,7 @@ import SupportService from '../../app/services/support.service';
 interface SupportListProps {
   supportRequests: SupportRequest[];
   onViewDetail: (supportRequest: SupportRequest) => void;
+  onEditRequest?: (supportRequest: SupportRequest) => void;
   onDownloadDocument?: (supportRequest: SupportRequest) => void;
   totalCount?: number;
   currentSkip?: number;
@@ -59,6 +61,7 @@ const SortIcon = ({
 export default function SupportList({
   supportRequests,
   onViewDetail,
+  onEditRequest,
   onDownloadDocument,
   totalCount,
   currentSkip: currentSkipProp,
@@ -153,9 +156,9 @@ export default function SupportList({
             >
               <option value="all">Todos los Estados</option>
               <option value="PENDING">Pendientes</option>
-              <option value="IN_PROGRESS">En Progreso</option>
+              <option value="IN_REVIEW">En Revisión</option>
               <option value="RESOLVED">Resueltos</option>
-              <option value="CLOSED">Cerrados</option>
+              <option value="REJECTED">Rechazados</option>
             </select>
           </div>
         </div>
@@ -172,11 +175,7 @@ export default function SupportList({
                   className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-100"
                 >
                   <span>Solicitante</span>
-                  <SortIcon
-                    field="fullName"
-                    sortField={sortField}
-                    sortDirection={sortDirection}
-                  />
+                  <SortIcon field="fullName" sortField={sortField} sortDirection={sortDirection} />
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -211,11 +210,7 @@ export default function SupportList({
                   className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-100"
                 >
                   <span>Estado</span>
-                  <SortIcon
-                    field="status"
-                    sortField={sortField}
-                    sortDirection={sortDirection}
-                  />
+                  <SortIcon field="status" sortField={sortField} sortDirection={sortDirection} />
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -260,7 +255,9 @@ export default function SupportList({
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <span
-                    className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${SupportService.getStatusColor(request.status)}`}
+                    className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${SupportService.getStatusColor(
+                      request.status
+                    )}`}
                   >
                     {SupportService.getStatusLabel(request.status)}
                   </span>
@@ -287,6 +284,15 @@ export default function SupportList({
                     >
                       <Eye className="h-4 w-4" />
                     </button>
+                    {onEditRequest && (
+                      <button
+                        onClick={() => onEditRequest(request)}
+                        className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                        title="Editar reporte"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -323,7 +329,8 @@ export default function SupportList({
               <option value={100}>100</option>
             </select>
             <span>
-              de {totalCount ?? displayedRequests.length} resultados (página {currentPage} de {totalPages})
+              de {totalCount ?? displayedRequests.length} resultados (página {currentPage} de{' '}
+              {totalPages})
             </span>
           </div>
           <div className="flex space-x-1">

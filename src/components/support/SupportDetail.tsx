@@ -20,10 +20,10 @@ interface SupportDetailProps {
   onDownloadDocument?: (supportRequest: SupportRequest) => void;
 }
 
-export default function SupportDetail({ 
-  supportRequest, 
+export default function SupportDetail({
+  supportRequest,
   onClose,
-  onDownloadDocument
+  onDownloadDocument,
 }: SupportDetailProps) {
   if (!supportRequest) return null;
 
@@ -82,7 +82,9 @@ export default function SupportDetail({
           {/* Status Badge */}
           <div className="flex justify-center">
             <div
-              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${SupportService.getStatusColor(supportRequest.status)}`}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${SupportService.getStatusColor(
+                supportRequest.status
+              )}`}
             >
               {getStatusIcon()}
               <span className="ml-2">{SupportService.getStatusLabel(supportRequest.status)}</span>
@@ -112,9 +114,7 @@ export default function SupportDetail({
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     Correo Electrónico
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {supportRequest.email}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{supportRequest.email}</p>
                 </div>
               </div>
             </div>
@@ -207,16 +207,12 @@ export default function SupportDetail({
 
           {/* Timestamps */}
           <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Historial
-            </h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Historial</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-gray-400" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Creado
-                  </p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Creado</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     {formatDate(supportRequest.createdAt)}
                   </p>

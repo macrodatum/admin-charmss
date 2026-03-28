@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2 } from 'lucide-react';
 import ParameterService from '../../app/services/parameter.service';
-import type { Parameter, CreateParameterPayload, UpdateParameterPayload, ParameterDataType } from '../../app/types/parameter.types';
+import type {
+  Parameter,
+  CreateParameterPayload,
+  UpdateParameterPayload,
+  ParameterDataType,
+} from '../../app/types/parameter.types';
 import { PARAMETER_TYPE_LABELS } from '../../app/types/parameter.types';
 
 interface Props {
@@ -45,7 +50,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
     if (!form.data_type.trim()) e.data_type = 'El tipo de dato es requerido';
     if (!form.value.trim()) e.value = 'El valor es requerido';
     if (form.typeParameter === 'json') {
-      try { JSON.parse(form.value); } catch { e.value = 'El valor no es un JSON válido'; }
+      try {
+        JSON.parse(form.value);
+      } catch {
+        e.value = 'El valor no es un JSON válido';
+      }
     }
     if (form.typeParameter === 'number' && isNaN(Number(form.value))) {
       e.value = 'El valor debe ser un número';
@@ -113,7 +122,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
               className={`w-full px-3 py-2 rounded-lg border text-sm bg-white dark:bg-slate-700 
                 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
                 focus:outline-none focus:ring-2 focus:ring-pink-500 transition
-                ${errors.name ? 'border-red-400 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'}`}
+                ${
+                  errors.name
+                    ? 'border-red-400 dark:border-red-500'
+                    : 'border-gray-300 dark:border-slate-600'
+                }`}
             />
             {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
           </div>
@@ -131,7 +144,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
               className={`w-full px-3 py-2 rounded-lg border text-sm bg-white dark:bg-slate-700 
                 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
                 focus:outline-none focus:ring-2 focus:ring-pink-500 transition
-                ${errors.data_type ? 'border-red-400 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'}`}
+                ${
+                  errors.data_type
+                    ? 'border-red-400 dark:border-red-500'
+                    : 'border-gray-300 dark:border-slate-600'
+                }`}
             />
             {errors.data_type && <p className="mt-1 text-xs text-red-500">{errors.data_type}</p>}
           </div>
@@ -148,9 +165,10 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
                   type="button"
                   onClick={() => set('typeParameter', t)}
                   className={`py-2 px-3 rounded-lg text-xs font-semibold border-2 transition-all
-                    ${form.typeParameter === t
-                      ? 'border-pink-500 bg-pink-600 text-white shadow-md'
-                      : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
+                    ${
+                      form.typeParameter === t
+                        ? 'border-pink-500 bg-pink-600 text-white shadow-md'
+                        : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
                     }`}
                 >
                   {PARAMETER_TYPE_LABELS[t]}
@@ -173,7 +191,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
                 className={`w-full px-3 py-2 rounded-lg border text-sm font-mono bg-white dark:bg-slate-700
                   text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
                   focus:outline-none focus:ring-2 focus:ring-pink-500 transition resize-none
-                  ${errors.value ? 'border-red-400 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'}`}
+                  ${
+                    errors.value
+                      ? 'border-red-400 dark:border-red-500'
+                      : 'border-gray-300 dark:border-slate-600'
+                  }`}
               />
             ) : form.typeParameter === 'boolean' ? (
               <div className="flex gap-3">
@@ -183,11 +205,12 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
                     type="button"
                     onClick={() => set('value', v)}
                     className={`flex-1 py-2 rounded-lg text-sm font-semibold border-2 transition-all
-                      ${form.value === v
-                        ? v === 'true'
-                          ? 'border-emerald-500 bg-emerald-600 text-white'
-                          : 'border-red-400 bg-red-500 text-white'
-                        : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400'
+                      ${
+                        form.value === v
+                          ? v === 'true'
+                            ? 'border-emerald-500 bg-emerald-600 text-white'
+                            : 'border-red-400 bg-red-500 text-white'
+                          : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400'
                       }`}
                   >
                     {v === 'true' ? '✓ True' : '✗ False'}
@@ -203,7 +226,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
                 className={`w-full px-3 py-2 rounded-lg border text-sm bg-white dark:bg-slate-700
                   text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
                   focus:outline-none focus:ring-2 focus:ring-pink-500 transition
-                  ${errors.value ? 'border-red-400 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'}`}
+                  ${
+                    errors.value
+                      ? 'border-red-400 dark:border-red-500'
+                      : 'border-gray-300 dark:border-slate-600'
+                  }`}
               />
             )}
             {errors.value && <p className="mt-1 text-xs text-red-500">{errors.value}</p>}
@@ -252,7 +279,11 @@ export default function ParameterFormModal({ open, onClose, onSaved, initial }: 
               className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-pink-600
                 text-white text-sm font-medium hover:bg-pink-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
               {loading ? 'Guardando…' : 'Guardar'}
             </button>
           </div>

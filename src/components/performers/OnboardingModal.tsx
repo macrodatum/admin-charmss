@@ -65,19 +65,26 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
   const _allowed = new Set<number>([1, 2, 3, 4, 5]);
   const documents =
     data?.requestDocuments?.filter((d) => _allowed.has(Number(d.documentType))) ?? [];
-  
+
   // Get profile video (documentType 7)
   const profileVideo = data?.requestDocuments?.find((d) => Number(d.documentType) === 7);
 
   const getDocTypeName = (documentType: number): string => {
     switch (documentType) {
-      case 1: return 'ID Front';
-      case 2: return 'ID Back';
-      case 3: return 'ID Front with Face';
-      case 4: return 'ID Back with Face';
-      case 5: return 'Profile Photo';
-      case 7: return 'Profile Video';
-      default: return 'Document';
+      case 1:
+        return 'ID Front';
+      case 2:
+        return 'ID Back';
+      case 3:
+        return 'ID Front with Face';
+      case 4:
+        return 'ID Back with Face';
+      case 5:
+        return 'Profile Photo';
+      case 7:
+        return 'Profile Video';
+      default:
+        return 'Document';
     }
   };
 
@@ -405,8 +412,8 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                   Profile Video
                 </h4>
                 <div className="bg-gray-50 dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm">
-                  <video 
-                    controls 
+                  <video
+                    controls
                     className="w-full h-auto max-h-96 object-contain bg-black"
                     preload="metadata"
                   >
@@ -474,7 +481,9 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
 
             {/* Contract signature */}
             <div className="mt-6">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Signature</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Signature
+              </h4>
               {data?.sign ? (
                 <div className="bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden shadow-sm p-4">
                   <img src={data.sign} alt="Signature" className="w-full h-40 object-contain" />
@@ -564,7 +573,6 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
             {actionError && <div className="text-sm text-red-500 mt-3">{actionError}</div>}
           </div>
         </div>
-
       </div>
 
       {selectedDoc !== null && (

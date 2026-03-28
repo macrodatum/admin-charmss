@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LifeBuoy, RefreshCw, X as XIcon } from 'lucide-react';
 import SupportList from '../components/support/SupportList';
 import SupportDetail from '../components/support/SupportDetail';
+import SupportEdit from '../components/support/SupportEdit';
 import SupportService from '../app/services/support.service';
 import { GetSupportRequestsParams, SupportRequest } from '../app/types/support.types';
 
@@ -15,7 +16,7 @@ export default function Support() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [orderBy, setOrderBy] = useState<string>('requestDate:desc');
   const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null);
-  const [activeModal, setActiveModal] = useState<'detail' | null>(null);
+  const [activeModal, setActiveModal] = useState<'detail' | 'edit' | null>(null);
 
   // Toast state for success/error notifications
   const [toast, setToast] = useState<{
@@ -83,6 +84,21 @@ export default function Support() {
   const handleViewDetail = (supportRequest: SupportRequest) => {
     setSelectedRequest(supportRequest);
     setActiveModal('detail');
+  };
+
+  const handleEditRequest = (supportRequest: SupportRequest) => {
+    setSelectedRequest(supportRequest);
+    setActiveModal('edit');
+  };
+
+  const handleSaveRequest = (updatedRequest: SupportRequest) => {
+    // Update the request in the list
+    setSupportRequests((prev) =>
+      prev.map((req) => (req.id === updatedRequest.id ? updatedRequest : req))
+    );
+    showToast('Reporte actualizado correctamente');
+    // Refresh the list to get the latest data
+    fetchSupportRequests();
   };
 
   const handleDownloadDocument = (supportRequest: SupportRequest) => {
@@ -162,9 +178,7 @@ export default function Support() {
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Reportes
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reportes</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{total}</p>
             </div>
             <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -190,11 +204,9 @@ export default function Support() {
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                En Progreso
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En Revisión</p>
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {supportRequests.filter((r) => r.status === 'IN_PROGRESS').length}
+                {supportRequests.filter((r) => r.status === 'IN_REVIEW').length}
               </p>
             </div>
             <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -206,13 +218,13 @@ export default function Support() {
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Resueltos</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {supportRequests.filter((r) => r.status === 'RESOLVED').length}
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rechazados</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {supportRequests.filter((r) => r.status === 'REJECTED').length}
               </p>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-              <LifeBuoy className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+              <LifeBuoy className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
           </div>
         </div>
@@ -222,6 +234,7 @@ export default function Support() {
       <SupportList
         supportRequests={supportRequests}
         onViewDetail={handleViewDetail}
+        onEditRequest={handleEditRequest}
         onDownloadDocument={handleDownloadDocument}
         totalCount={total}
         currentSkip={skip}
@@ -242,24 +255,26 @@ export default function Support() {
         />
       )}
 
+      {activeModal === 'edit' && selectedRequest && (
+        <SupportEdit
+          supportRequest={selectedRequest}
+          onClose={closeModal}
+          onSave={handleSaveRequest}
+          onError={(error) => showToast(error, 'error')}
+        />
+      )}
+
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-4 right-4 z-50">
           <div
             className={`
               flex items-center space-x-2 px-4 py-3 rounded-lg shadow-lg
-              ${
-                toast.type === 'success'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-red-600 text-white'
-              }
+              ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}
             `}
           >
             <span className="text-sm font-medium">{toast.message}</span>
-            <button
-              onClick={() => setToast(null)}
-              className="ml-2 hover:bg-white/20 rounded p-1"
-            >
+            <button onClick={() => setToast(null)} className="ml-2 hover:bg-white/20 rounded p-1">
               <XIcon className="h-4 w-4" />
             </button>
           </div>

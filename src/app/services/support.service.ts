@@ -6,6 +6,7 @@ import {
   SupportRequest,
   SupportStatusEnum,
   RequirementTypeEnum,
+  UpdateSupportRequestData,
 } from '../types/support.types';
 
 const BASE = '/api/service/support';
@@ -14,20 +15,37 @@ const BASE = '/api/service/support';
  * Map backend DTO to frontend interface
  */
 const mapDto = (dto: SupportRequestDto): SupportRequest => {
+  // Map requirement type by value
+  const requirementTypeMap: Record<string, RequirementTypeEnum> = {
+    Copyright: RequirementTypeEnum.COPYRIGHT,
+    'Content Violation': RequirementTypeEnum.CONTENT_VIOLATION,
+    'Technical Issue': RequirementTypeEnum.TECHNICAL_ISSUE,
+    'Account Issue': RequirementTypeEnum.ACCOUNT_ISSUE,
+    'Payment Issue': RequirementTypeEnum.PAYMENT_ISSUE,
+    Other: RequirementTypeEnum.OTHER,
+  };
+
+  // Map status by value
+  const statusMap: Record<string, SupportStatusEnum> = {
+    PENDING: SupportStatusEnum.PENDING,
+    IN_REVIEW: SupportStatusEnum.IN_REVIEW,
+    RESOLVED: SupportStatusEnum.RESOLVED,
+    REJECTED: SupportStatusEnum.REJECTED,
+    // Legacy states for compatibility
+    IN_PROGRESS: SupportStatusEnum.IN_PROGRESS,
+    CLOSED: SupportStatusEnum.CLOSED,
+  };
+
   return {
     id: dto.id,
     fullName: dto.fullName,
     email: dto.email,
     requestDate: dto.requestDate,
-    requirementType: (dto.requirementType as keyof typeof RequirementTypeEnum) in RequirementTypeEnum
-      ? RequirementTypeEnum[dto.requirementType as keyof typeof RequirementTypeEnum]
-      : RequirementTypeEnum.OTHER,
+    requirementType: requirementTypeMap[dto.requirementType] || RequirementTypeEnum.OTHER,
     notes: dto.notes,
     documentUrl: dto.documentUrl || undefined,
     documentKey: dto.documentKey || undefined,
-    status: (dto.status as keyof typeof SupportStatusEnum) in SupportStatusEnum
-      ? SupportStatusEnum[dto.status as keyof typeof SupportStatusEnum]
-      : SupportStatusEnum.PENDING,
+    status: statusMap[dto.status] || SupportStatusEnum.PENDING,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
   };
@@ -63,7 +81,7 @@ const getSupportRequests = async (
   }
 
   const response = await ApiClient.get(BASE, { params: query });
-  
+
   // API devuelve un array directamente según la documentación
   const items = Array.isArray(response.data) ? response.data : [];
   const mappedItems = items.map(mapDto);
@@ -94,10 +112,15 @@ const getStatusLabel = (status: SupportStatusEnum): string => {
   switch (status) {
     case SupportStatusEnum.PENDING:
       return 'Pendiente';
-    case SupportStatusEnum.IN_PROGRESS:
-      return 'En Progreso';
+    case SupportStatusEnum.IN_REVIEW:
+      return 'En Revisión';
     case SupportStatusEnum.RESOLVED:
       return 'Resuelto';
+    case SupportStatusEnum.REJECTED:
+      return 'Rechazado';
+    // Legacy states
+    case SupportStatusEnum.IN_PROGRESS:
+      return 'En Progreso';
     case SupportStatusEnum.CLOSED:
       return 'Cerrado';
     default:
@@ -112,10 +135,15 @@ const getStatusColor = (status: SupportStatusEnum): string => {
   switch (status) {
     case SupportStatusEnum.PENDING:
       return 'bg-yellow-100 text-yellow-800';
-    case SupportStatusEnum.IN_PROGRESS:
+    case SupportStatusEnum.IN_REVIEW:
       return 'bg-blue-100 text-blue-800';
     case SupportStatusEnum.RESOLVED:
       return 'bg-green-100 text-green-800';
+    case SupportStatusEnum.REJECTED:
+      return 'bg-red-100 text-red-800';
+    // Legacy states
+    case SupportStatusEnum.IN_PROGRESS:
+      return 'bg-blue-100 text-blue-800';
     case SupportStatusEnum.CLOSED:
       return 'bg-gray-100 text-gray-800';
     default:
@@ -145,9 +173,55 @@ const getRequirementTypeLabel = (type: RequirementTypeEnum): string => {
   }
 };
 
+/**
+ * Update support request by ID
+ */
+const updateSupportRequest = async (
+  supportId: string | number,
+  data: UpdateSupportRequestData
+): Promise<SupportRequest> => {
+  if (!supportId) throw new Error('supportId required');
+
+  // Create FormData for multipart/form-data
+  const formData = new FormData();
+
+  // Add only non-undefined fields to FormData
+  if (data.fullName !== undefined) {
+    formData.append('fullName', data.fullName);
+  }
+  if (data.email !== undefined) {
+    formData.append('email', data.email);
+  }
+  if (data.requestDate !== undefined) {
+    formData.append('requestDate', data.requestDate);
+  }
+  if (data.requirementType !== undefined) {
+    formData.append('requirementType', data.requirementType);
+  }
+  if (data.status !== undefined) {
+    formData.append('status', data.status);
+  }
+  if (data.notes !== undefined) {
+    formData.append('notes', data.notes);
+  }
+  if (data.file !== undefined) {
+    formData.append('file', data.file);
+  }
+
+  const response = await ApiClient.patch(`${BASE}/${supportId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  const dto = response.data as SupportRequestDto;
+  return mapDto(dto);
+};
+
 export default {
   getSupportRequests,
   getSupportRequest,
+  updateSupportRequest,
   getStatusLabel,
   getStatusColor,
   getRequirementTypeLabel,

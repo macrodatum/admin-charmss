@@ -35,8 +35,8 @@ export default function ParametersPage() {
       const data: Parameter[] = Array.isArray(raw)
         ? raw
         : Array.isArray((raw as { data?: Parameter[] }).data)
-          ? (raw as { data: Parameter[] }).data
-          : [];
+        ? (raw as { data: Parameter[] }).data
+        : [];
       setParameters(data);
     } catch {
       setError('No se pudieron cargar los parámetros. Verifica la conexión.');
@@ -45,10 +45,18 @@ export default function ParametersPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const handleEdit = (param: Parameter) => { setEditParam(param); setFormOpen(true); };
-  const handleDeleteClick = (param: Parameter) => { setParamToDelete(param); setDeleteOpen(true); };
+  const handleEdit = (param: Parameter) => {
+    setEditParam(param);
+    setFormOpen(true);
+  };
+  const handleDeleteClick = (param: Parameter) => {
+    setParamToDelete(param);
+    setDeleteOpen(true);
+  };
 
   const handleDeleteConfirm = async () => {
     if (!paramToDelete) return;
@@ -122,7 +130,10 @@ export default function ParametersPage() {
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
-            onClick={() => { setEditParam(null); setFormOpen(true); }}
+            onClick={() => {
+              setEditParam(null);
+              setFormOpen(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-600 text-white text-sm
               font-medium hover:bg-pink-700 transition-colors shadow-sm"
           >
@@ -135,11 +146,29 @@ export default function ParametersPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
-          { label: 'Total', value: parameters.length, color: 'text-gray-900 dark:text-white', bg: 'bg-white dark:bg-slate-800' },
-          { label: 'Activos', value: counts.active, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-white dark:bg-slate-800' },
-          { label: 'Inactivos', value: counts.inactive, color: 'text-red-500 dark:text-red-400', bg: 'bg-white dark:bg-slate-800' },
+          {
+            label: 'Total',
+            value: parameters.length,
+            color: 'text-gray-900 dark:text-white',
+            bg: 'bg-white dark:bg-slate-800',
+          },
+          {
+            label: 'Activos',
+            value: counts.active,
+            color: 'text-emerald-600 dark:text-emerald-400',
+            bg: 'bg-white dark:bg-slate-800',
+          },
+          {
+            label: 'Inactivos',
+            value: counts.inactive,
+            color: 'text-red-500 dark:text-red-400',
+            bg: 'bg-white dark:bg-slate-800',
+          },
         ].map((s) => (
-          <div key={s.label} className={`${s.bg} rounded-xl border border-gray-200 dark:border-slate-700 p-4 text-center shadow-sm`}>
+          <div
+            key={s.label}
+            className={`${s.bg} rounded-xl border border-gray-200 dark:border-slate-700 p-4 text-center shadow-sm`}
+          >
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label}</p>
           </div>
@@ -170,9 +199,10 @@ export default function ParametersPage() {
                 key={s}
                 onClick={() => setFilterState(s)}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all
-                  ${filterState === s
-                    ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ${
+                    filterState === s
+                      ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
               >
                 {s === 'all' ? 'Todos' : s === 'active' ? 'Activos' : 'Inactivos'}
@@ -189,9 +219,10 @@ export default function ParametersPage() {
               key={t}
               onClick={() => setFilterType(t)}
               className={`px-3 py-1 rounded-full text-xs font-medium border transition-all
-                ${filterType === t
-                  ? 'border-pink-500 bg-pink-600 text-white shadow-sm'
-                  : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
+                ${
+                  filterType === t
+                    ? 'border-pink-500 bg-pink-600 text-white shadow-sm'
+                    : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
                 }`}
             >
               {t === ALL ? 'Todos los tipos' : PARAMETER_TYPE_LABELS[t]}
@@ -225,7 +256,10 @@ export default function ParametersPage() {
           </p>
           {parameters.length === 0 && (
             <button
-              onClick={() => { setEditParam(null); setFormOpen(true); }}
+              onClick={() => {
+                setEditParam(null);
+                setFormOpen(true);
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-600 text-white text-sm hover:bg-pink-700 transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -255,7 +289,10 @@ export default function ParametersPage() {
       {/* Modals */}
       <ParameterFormModal
         open={formOpen}
-        onClose={() => { setFormOpen(false); setEditParam(null); }}
+        onClose={() => {
+          setFormOpen(false);
+          setEditParam(null);
+        }}
         onSaved={handleSaved}
         initial={editParam}
       />
@@ -265,7 +302,10 @@ export default function ParametersPage() {
         param={paramToDelete}
         deleting={deleting}
         onConfirm={handleDeleteConfirm}
-        onClose={() => { setDeleteOpen(false); setParamToDelete(null); }}
+        onClose={() => {
+          setDeleteOpen(false);
+          setParamToDelete(null);
+        }}
       />
     </div>
   );

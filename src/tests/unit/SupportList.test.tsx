@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SupportList from '../../components/support/SupportList';
-import { SupportStatusEnum, RequirementTypeEnum, SupportRequest } from '../../app/types/support.types';
+import {
+  SupportStatusEnum,
+  RequirementTypeEnum,
+  SupportRequest,
+} from '../../app/types/support.types';
 
 const mockSupportRequests: SupportRequest[] = [
   {
@@ -77,7 +81,7 @@ describe('SupportList', () => {
 
     const documentButtons = screen.getAllByText('Documento');
     expect(documentButtons).toHaveLength(1); // Only first request has document
-    
+
     const noDocumentText = screen.getByText('Sin documento');
     expect(noDocumentText).toBeInTheDocument();
   });
@@ -134,7 +138,9 @@ describe('SupportList', () => {
     render(<SupportList {...emptyProps} />);
 
     expect(screen.getByText('No hay reportes de soporte')).toBeInTheDocument();
-    expect(screen.getByText('No se encontraron reportes de soporte con los criterios actuales.')).toBeInTheDocument();
+    expect(
+      screen.getByText('No se encontraron reportes de soporte con los criterios actuales.')
+    ).toBeInTheDocument();
   });
 
   it('should handle pagination correctly', () => {
@@ -165,7 +171,7 @@ describe('SupportList', () => {
 
     const firstPageButton = screen.getByRole('button', { name: '' }).closest('button');
     const prevButton = screen.getAllByRole('button')[screen.getAllByRole('button').length - 4];
-    
+
     // First and previous buttons should be disabled on page 1
     expect(firstPageButton).toBeDisabled();
     expect(prevButton).toBeDisabled();

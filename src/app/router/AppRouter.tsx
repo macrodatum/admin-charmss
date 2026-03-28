@@ -82,8 +82,8 @@ const AppRouter: React.FC = () => {
                     <Route path="/inbox" element={<Inbox />} />
                     <Route path="/performers" element={<Performers />} />
                     <Route path="/studios" element={<Studios />} />
-                    <Route 
-                      path="/support" 
+                    <Route
+                      path="/support"
                       element={
                         <ErrorBoundary title="Error en el módulo de Soporte">
                           <Support />

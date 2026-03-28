@@ -1,8 +1,10 @@
 export enum SupportStatusEnum {
   PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
+  IN_REVIEW = 'IN_REVIEW',
   RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
+  REJECTED = 'REJECTED',
+  // Mantenemos estados legacy para compatibilidad
+  IN_PROGRESS = 'IN_PROGRESS',
 }
 
 export type SupportStatus = SupportStatusEnum;
@@ -72,5 +74,20 @@ export interface PaginatedResponse<T> {
 }
 
 export type GetSupportRequestsResponse = PaginatedResponse<SupportRequest>;
+
+// Interfaces for updating support requests
+export interface UpdateSupportRequestData {
+  fullName?: string;
+  email?: string;
+  requestDate?: string; // YYYY-MM-DD format
+  requirementType?: RequirementType;
+  status?: SupportStatus;
+  notes?: string;
+  file?: File; // For file upload
+}
+
+export interface UpdateSupportRequestFormData extends FormData {
+  append(name: keyof UpdateSupportRequestData, value: string | Blob, fileName?: string): void;
+}
 
 export default SupportRequest;

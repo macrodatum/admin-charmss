@@ -11,6 +11,7 @@ Se ha refactorizado el componente `AssetUploader` para separar la lógica de neg
 **Propósito**: Funciones puras y reutilizables para manejo de archivos.
 
 **Funciones exportadas**:
+
 - `formatFileSize(bytes: number)`: Formatea tamaños de archivo en formato legible
 - `generateAssetId()`: Genera IDs únicos para assets
 - `isImageFile(file: File)`: Valida si un archivo es imagen
@@ -19,6 +20,7 @@ Se ha refactorizado el componente `AssetUploader` para separar la lógica de neg
 - `createPreviewUrl(file: File)`: Crea URLs de previsualización
 
 **Beneficios**:
+
 - ✅ Funciones puras fáciles de probar
 - ✅ Reutilizables en cualquier parte de la aplicación
 - ✅ Sin dependencias del DOM o React
@@ -28,6 +30,7 @@ Se ha refactorizado el componente `AssetUploader` para separar la lógica de neg
 **Propósito**: Encapsular toda la lógica compleja de gestión de assets.
 
 **Responsabilidades**:
+
 - Gestión del estado de assets (pending, uploading, completed, failed)
 - Procesamiento y optimización de archivos
 - Subida a S3 con URLs prefirmadas
@@ -35,6 +38,7 @@ Se ha refactorizado el componente `AssetUploader` para separar la lógica de neg
 - Filtrado y contadores de assets
 
 **Interface exportada**:
+
 ```typescript
 interface UseAssetUploadReturn {
   assets: Asset[];
@@ -49,6 +53,7 @@ interface UseAssetUploadReturn {
 ```
 
 **Beneficios**:
+
 - ✅ Lógica de negocio aislada y testeable
 - ✅ Estado encapsulado con hooks de React
 - ✅ Reutilizable en otros componentes
@@ -57,22 +62,27 @@ interface UseAssetUploadReturn {
 ### 3. Componentes de UI
 
 #### `AssetStatusIcons.tsx`
+
 **Propósito**: Componente para renderizar iconos de estado de assets.
 
 **Beneficios**:
+
 - ✅ Componente visual reutilizable
 - ✅ Fácil de mantener y modificar
 - ✅ Consistencia en la UI
 
 #### `AssetUploader.tsx` (Refactorizado)
+
 **Reducción de código**: De ~200 líneas a ~80 líneas
 
 **Responsabilidades actuales**:
+
 - Renderizado de UI
 - Manejo de eventos de drag & drop
 - Delegación al hook para lógica de negocio
 
 **Beneficios**:
+
 - ✅ Componente más limpio y legible
 - ✅ Más fácil de mantener
 - ✅ Enfocado solo en presentación
@@ -81,18 +91,22 @@ interface UseAssetUploadReturn {
 ### 4. Tests Unitarios
 
 #### `fileUtils.test.ts`
+
 **Cobertura**: 100% de las funciones utilitarias
 
 **Tests incluidos**:
+
 - Formateo de tamaños de archivo
 - Generación de IDs únicos
 - Validación de tipos de archivo
 - Creación de URLs de previsualización
 
 #### `useAssetUpload.test.ts`
+
 **Cobertura**: Funcionalidad principal del hook
 
 **Tests incluidos**:
+
 - Añadir archivos (imágenes, videos, múltiples)
 - Eliminación de assets
 - Filtrado por tipo
@@ -100,6 +114,7 @@ interface UseAssetUploadReturn {
 - Proceso de upload con mocks
 
 **Beneficios**:
+
 - ✅ Pruebas unitarias robustas
 - ✅ Cobertura de casos edge
 - ✅ Mocks apropiados de servicios externos
@@ -121,13 +136,13 @@ s3Upload.service
 
 ## Métricas de Mejora
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| Líneas en AssetUploader | ~280 | ~220 | -21% |
-| Funciones en componente | 6 | 3 | -50% |
-| Lógica de negocio en componente | Alta | Mínima | ✅ |
-| Testabilidad | Baja | Alta | ✅ |
-| Reutilización | Baja | Alta | ✅ |
+| Métrica                         | Antes | Después | Mejora |
+| ------------------------------- | ----- | ------- | ------ |
+| Líneas en AssetUploader         | ~280  | ~220    | -21%   |
+| Funciones en componente         | 6     | 3       | -50%   |
+| Lógica de negocio en componente | Alta  | Mínima  | ✅     |
+| Testabilidad                    | Baja  | Alta    | ✅     |
+| Reutilización                   | Baja  | Alta    | ✅     |
 
 ## Verificaciones
 
@@ -138,6 +153,7 @@ s3Upload.service
 ## Archivos Modificados
 
 **Nuevos archivos**:
+
 - `src/shared/utils/fileUtils.ts`
 - `src/hooks/useAssetUpload.ts`
 - `src/components/performers/AssetStatusIcons.tsx`
@@ -145,6 +161,7 @@ s3Upload.service
 - `src/tests/unit/useAssetUpload.test.ts`
 
 **Archivos modificados**:
+
 - `src/components/performers/AssetUploader.tsx`
 
 ## Próximos Pasos Recomendados
@@ -158,6 +175,7 @@ s3Upload.service
 ## Conclusión
 
 La refactorización ha logrado:
+
 - ✅ Mayor mantenibilidad del código
 - ✅ Mejor testabilidad con pruebas unitarias
 - ✅ Separación clara de responsabilidades
