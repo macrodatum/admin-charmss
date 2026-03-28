@@ -12,6 +12,7 @@ import CustomerRegister from '../../pages/CustomerRegister';
 import Inbox from '../../pages/Inbox';
 import Performers from '../../pages/Performers';
 import Studios from '../../pages/Studios';
+import Support from '../../pages/Support';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Help from '../../pages/Help';
@@ -21,6 +22,8 @@ import Legals from '../../pages/Legals';
 import Gifts from '../../pages/Gifts';
 import Products from '../../pages/Products';
 import Packages from '../../pages/Packages';
+import ParametersPage from '../../pages/Parameters';
+import ErrorBoundary from '../../components/ui/ErrorBoundary';
 
 const AppRouter: React.FC = () => {
   // Mock values for now - these would come from global state
@@ -79,10 +82,26 @@ const AppRouter: React.FC = () => {
                     <Route path="/inbox" element={<Inbox />} />
                     <Route path="/performers" element={<Performers />} />
                     <Route path="/studios" element={<Studios />} />
+                    <Route 
+                      path="/support" 
+                      element={
+                        <ErrorBoundary title="Error en el módulo de Soporte">
+                          <Support />
+                        </ErrorBoundary>
+                      }
+                    />
                     <Route path="/legals" element={<Legals />} />
                     <Route path="/gifts" element={<Gifts />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/packages" element={<Packages />} />
+                    <Route
+                      path="/parameters"
+                      element={
+                        <ErrorBoundary title="Error en el módulo de Parámetros">
+                          <ParametersPage />
+                        </ErrorBoundary>
+                      }
+                    />
                     <Route
                       path="/help"
                       element={
