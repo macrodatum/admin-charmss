@@ -20,6 +20,21 @@ class PerformerProfileService {
   }
 
   /**
+   * Actualiza únicamente el nickname del perfil del performer.
+   * PATCH /api/performers/{id}/profile/nickname
+   */
+  async updateNickname(
+    performerId: string | number,
+    nickName: string
+  ): Promise<{ nickName: string }> {
+    const response = await ApiClient.patch<{ nickName: string }>(
+      `${BASE}/${performerId}/profile/nickname`,
+      { nickName }
+    );
+    return response.data;
+  }
+
+  /**
    * Update performer profile partial fields (e.g., videoAssetId, profileAssetId)
    */
   async updatePerformerProfile(

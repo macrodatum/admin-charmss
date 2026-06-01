@@ -67,6 +67,16 @@ class ParameterService {
     }
   }
 
+  async getParameterByName(name: string): Promise<Parameter | null> {
+    try {
+      const all = await this.getParameters();
+      return all.find((p) => p.name === name) ?? null;
+    } catch (err) {
+      console.error(`Error fetching parameter by name "${name}":`, err);
+      return null;
+    }
+  }
+
   async deleteParameter(id: number): Promise<void> {
     try {
       await ApiClient.delete(`${BASE}/${id}`);

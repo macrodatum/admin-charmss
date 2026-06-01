@@ -14,6 +14,7 @@ import {
   BuildType,
 } from '../../performers/enums/profile.enums';
 import CountrySelector from '../ui/CountrySelector';
+import NicknameEditor from './NicknameEditor';
 
 interface ProfileTabProps {
   performer: Performer;
@@ -148,12 +149,10 @@ export default function ProfileTab({ performer }: ProfileTabProps) {
       </div>
 
       <div className="mt-4">
-        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          NickName
-        </label>
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          {profile.nickName || stageName}
-        </h2>
+        <NicknameEditor
+          performerId={performerId}
+          currentNickname={profile.nickName}
+        />
       </div>
 
       <div>

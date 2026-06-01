@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import PackageService from '../../app/services/packages.service';
+import ParameterService from '../../app/services/parameter.service';
 import type {
   Package,
   CreatePackagePayload,
@@ -27,6 +28,25 @@ export default function PackageFormModal({ open, onClose, onSaved, initial }: Pr
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [tokenValueDollars, setTokenValueDollars] = useState<number>(0);
+
+  // Cargar el parámetro product::tokenValueDollars una sola vez al montar
+  useEffect(() => {
+    ParameterService.getParameterByName('product::tokenValueDollars').then((param) => {
+      if (param) {
+        const val = parseFloat(param.value);
+        if (!isNaN(val) && val > 0) setTokenValueDollars(val);
+      }
+    });
+  }, []);
+
+  // Recalcular totalCredit automáticamente cuando cambia precio o tokenValueDollars
+  useEffect(() => {
+    if (tokenValueDollars > 0) {
+      const calculated = formData.price > 0 ? Math.floor(formData.price / tokenValueDollars) : 0;
+      setFormData((prev) => ({ ...prev, totalCredit: calculated }));
+    }
+  }, [formData.price, tokenValueDollars]);
 
   useEffect(() => {
     if (initial) {
@@ -59,10 +79,6 @@ export default function PackageFormModal({ open, onClose, onSaved, initial }: Pr
 
     if (formData.lifeTime <= 0) {
       newErrors.lifeTime = 'La duración debe ser mayor a 0';
-    }
-
-    if (formData.totalCredit <= 0) {
-      newErrors.totalCredit = 'Los créditos totales deben ser mayor a 0';
     }
 
     if (formData.bonus < 0) {
@@ -192,21 +208,25 @@ export default function PackageFormModal({ open, onClose, onSaved, initial }: Pr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Créditos Totales *
+                Créditos Totales
+                <span className="ml-2 text-xs font-normal text-blue-500 dark:text-blue-400">
+                  (calculado automáticamente)
+                </span>
               </label>
               <input
                 type="number"
-                min="1"
+                readOnly
                 value={formData.totalCredit}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  handleInputChange('totalCredit', val);
-                }}
-                placeholder="100"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-400 cursor-not-allowed"
               />
-              {errors.totalCredit && (
-                <p className="text-red-500 text-sm mt-1">{errors.totalCredit}</p>
+              {tokenValueDollars > 0 ? (
+                <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
+                  1 token = ${tokenValueDollars} USD &mdash; Precio ÷ valor token
+                </p>
+              ) : (
+                <p className="text-amber-500 text-xs mt-1">
+                  Parámetro &quot;product::tokenValueDollars&quot; no encontrado
+                </p>
               )}
             </div>
 
