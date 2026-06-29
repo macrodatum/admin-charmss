@@ -5,6 +5,7 @@ export enum SupportStatusEnum {
   REJECTED = 'REJECTED',
   // Mantenemos estados legacy para compatibilidad
   IN_PROGRESS = 'IN_PROGRESS',
+  CLOSED = 'CLOSED',
 }
 
 export type SupportStatus = SupportStatusEnum;
