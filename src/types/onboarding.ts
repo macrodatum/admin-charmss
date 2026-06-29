@@ -61,3 +61,61 @@ export const RequestStatusType = {
 } as const;
 
 export type RequestStatusType = (typeof RequestStatusType)[keyof typeof RequestStatusType];
+
+/**
+ * KYC / SecurityRequest states (normalized from backend string)
+ */
+export const SecurityRequestStatus = {
+  Pending: 0,
+  InReview: 1,
+  Approved: 2,
+  Declined: 3,
+} as const;
+
+export type SecurityRequestStatus = (typeof SecurityRequestStatus)[keyof typeof SecurityRequestStatus];
+
+export type SecurityRequestState = 'Approved' | 'InReview' | 'Declined' | 'Pending' | 'Unknown';
+
+/**
+ * Normalize the backend `securityRequest` string to a known state.
+ * Accepts variations in casing and common synonyms.
+ */
+export const normalizeSecurityRequest = (raw: string | null | undefined): SecurityRequestState => {
+  if (!raw) return 'Unknown';
+  const value = String(raw).trim().toLowerCase();
+  if (!value) return 'Unknown';
+  if (
+    value === 'approved' ||
+    value === 'approve' ||
+    value === 'kyc_approved' ||
+    value === 'verified' ||
+    value === 'kycapproved'
+  ) {
+    return 'Approved';
+  }
+  if (
+    value === 'inreview' ||
+    value === 'in_review' ||
+    value === 'in review' ||
+    value === 'inprogress' ||
+    value === 'in_progress' ||
+    value === 'in progress' ||
+    value === 'pending' ||
+    value === 'underreview' ||
+    value === 'under_review'
+  ) {
+    return 'InReview';
+  }
+  if (
+    value === 'declined' ||
+    value === 'decline' ||
+    value === 'rejected' ||
+    value === 'reject' ||
+    value === 'kyc_declined' ||
+    value === 'kycrejected' ||
+    value === 'failed'
+  ) {
+    return 'Declined';
+  }
+  return 'Unknown';
+};

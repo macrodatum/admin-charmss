@@ -139,13 +139,13 @@ test.describe('Onboarding Modal UI', () => {
     // Ensure at least one performer row is rendered, then click onboarding button
     await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 15000 });
 
-    const onboardingBtn = page.locator('button[title="Ver Onboarding"]');
+    const onboardingBtn = page.locator('button[title="View Onboarding"]');
     await expect(onboardingBtn.first()).toBeVisible({ timeout: 10000 });
     await onboardingBtn.first().click();
 
     // Modal should appear
     await expect(page.locator('text=Onboarding')).toBeVisible();
-    await expect(page.locator('text=Documentos')).toBeVisible();
+    await expect(page.locator('text=Documents')).toBeVisible();
 
     // Documents should show
     await expect(page.locator('text=Front')).toBeVisible();
@@ -153,23 +153,23 @@ test.describe('Onboarding Modal UI', () => {
 
     // Click document to open preview
     await page.locator('img[alt="Front"]').click();
-    await expect(page.locator('button[aria-label="Cerrar preview"]')).toBeVisible();
+    await expect(page.locator('button[aria-label="Close preview"]')).toBeVisible();
 
     // Close preview
-    await page.locator('button[aria-label="Cerrar preview"]').click();
+    await page.locator('button[aria-label="Close preview"]').click();
 
     // Approve flow
-    await page.locator('button:has-text("Aprobar inscripción")').click();
-    await expect(page.locator('text=Confirmar aprobación')).toBeVisible();
-    await page.locator('button:has-text("Aprobar")').click();
+    await page.locator('button:has-text("Approve Registration")').click();
+    await expect(page.locator('text=Confirm Approval')).toBeVisible();
+    await page.locator('button:has-text("Approve")').click();
 
-    await expect(page.locator('text=Inscripción aprobada')).toBeVisible();
+    await expect(page.locator('text=Registration approved')).toBeVisible();
 
     // Reject flow
-    await page.locator('button:has-text("Rechazar inscripción")').click();
-    await page.locator('textarea').fill('Motivo: documento ilegible');
-    await page.locator('button:has-text("Confirmar rechazo")').click();
+    await page.locator('button:has-text("Reject Registration")').click();
+    await page.locator('textarea').fill('Reason: illegible document');
+    await page.locator('button:has-text("Confirm Rejection")').click();
 
-    await expect(page.locator('text=Inscripción rechazada')).toBeVisible();
+    await expect(page.locator('text=Registration rejected')).toBeVisible();
   });
 });

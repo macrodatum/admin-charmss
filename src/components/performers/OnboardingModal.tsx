@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle, XCircle, Image as ImageIcon, FileText } from 'lucide-react';
 import AssetPreviewModal from './AssetPreviewModal';
-import { OnboardingData } from '../../types/onboarding';
+import {
+  OnboardingData,
+  normalizeSecurityRequest,
+  type SecurityRequestState,
+} from '../../types/onboarding';
 import { getOnboardingData, decideOnboarding } from '../../app/services/onBoarding.service';
 import type { ContentItem } from '../../types/content';
 
@@ -209,6 +213,36 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
     }
   };
 
+  const getKycBubbleColor = (state: SecurityRequestState): string => {
+    switch (state) {
+      case 'Approved':
+        return 'bg-green-500';
+      case 'InReview':
+        return 'bg-yellow-500';
+      case 'Declined':
+        return 'bg-red-500';
+      case 'Pending':
+        return 'bg-gray-400';
+      default:
+        return 'bg-gray-300';
+    }
+  };
+
+  const getKycLabel = (state: SecurityRequestState): string => {
+    switch (state) {
+      case 'Approved':
+        return 'approved';
+      case 'InReview':
+        return 'in review';
+      case 'Declined':
+        return 'declined';
+      case 'Pending':
+        return 'pending';
+      default:
+        return 'unavailable';
+    }
+  };
+
   const handleReject = () => setRejectModal({ reason: '' });
   const doReject = async (reason: string) => {
     setActionLoading(true);
@@ -280,6 +314,21 @@ export default function OnboardingModal({ performerId, onClose }: OnboardingModa
                   </span>
                 );
               })()}
+
+              <div className="flex items-center gap-2">
+                {(() => {
+                  const kycState = normalizeSecurityRequest(data?.securityRequest);
+                  return (
+                    <span
+                      aria-label={`KYC ${kycState}`}
+                      title={`KYC ${getKycLabel(kycState)}`}
+                      className={`inline-block h-2.5 w-2.5 rounded-full ${getKycBubbleColor(
+                        kycState
+                      )}`}
+                    />
+                  );
+                })()}
+              </div>
 
               {(data?.processMessage ?? data?.notes) && (
                 <div className="text-xs text-gray-500">{data.processMessage ?? data?.notes}</div>

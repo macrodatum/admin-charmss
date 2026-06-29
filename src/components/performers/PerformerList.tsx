@@ -316,7 +316,7 @@ export default function PerformerList({
                     <button
                       onClick={() => onViewOnboarding?.(performer)}
                       className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                      title="Ver Onboarding"
+                      title="View Onboarding"
                     >
                       <FileText className="h-4 w-4" />
                     </button>

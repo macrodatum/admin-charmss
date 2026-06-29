@@ -70,7 +70,7 @@ export default function AssetPreviewModal({
             </div>
             <div className="flex items-center gap-3">
               <button
-                aria-label="Cerrar preview"
+                aria-label="Close preview"
                 onClick={(e) => {
                   e.stopPropagation();
                   onClose();

@@ -94,9 +94,9 @@ describe('OnboardingModal', () => {
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
 
-    expect(screen.getByText(/Cargando documentos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading documents/i)).toBeInTheDocument();
 
-    await waitFor(() => expect(screen.getByText(/Documentos/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Documents/i)).toBeInTheDocument());
 
     // Check documents are rendered (should show 5 images of types 1..5)
     expect(screen.getByText('Front')).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('OnboardingModal', () => {
     expect(screen.getByText('ProfileImage')).toBeInTheDocument();
 
     // Signature should be visible
-    expect(screen.getByAltText('Firma')).toBeInTheDocument();
+    expect(screen.getByAltText('Signature')).toBeInTheDocument();
 
     // Details should be visible
     expect(screen.getAllByText('Ana María López Ramírez').length).toBeGreaterThanOrEqual(1);
@@ -126,7 +126,7 @@ describe('OnboardingModal', () => {
     fireEvent.click(img);
 
     // AssetPreviewModal should open and display close button with aria-label
-    await waitFor(() => expect(screen.getByLabelText('Cerrar preview')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByLabelText('Close preview')).toBeInTheDocument());
   });
 
   it('stages an individual document approval locally', async () => {
@@ -153,7 +153,7 @@ describe('OnboardingModal', () => {
     if (!cardNode) throw new Error('Front card not found');
 
     const approveBtn = Array.from(cardNode.querySelectorAll('button')).find((b) =>
-      /Aceptar/i.test(b.textContent || '')
+      /Accept/i.test(b.textContent || '')
     ) as HTMLButtonElement;
     expect(approveBtn).toBeDefined();
     fireEvent.click(approveBtn);
@@ -161,8 +161,8 @@ describe('OnboardingModal', () => {
     // updateDocumentStatus should NOT have been called
     expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
 
-    // after staging, status badge should show 'Aprobada'
-    await waitFor(() => expect(screen.getAllByText('Aprobada').length).toBeGreaterThanOrEqual(1));
+    // after staging, status badge should show 'Approved'
+    await waitFor(() => expect(screen.getAllByText('Approved').length).toBeGreaterThanOrEqual(1));
   });
 
   it('stages an individual document rejection locally', async () => {
@@ -174,14 +174,14 @@ describe('OnboardingModal', () => {
 
     await waitFor(() => expect(screen.getByText('Front')).toBeInTheDocument());
 
-    const rejectBtns = screen.getAllByRole('button', { name: /Rechazar/i });
+    const rejectBtns = screen.getAllByRole('button', { name: /Reject/i });
     // click the first reject for the 'Front' document
     fireEvent.click(rejectBtns[0]);
 
     // updateDocumentStatus should NOT have been called
     expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1));
+    await waitFor(() => expect(screen.getAllByText('Rejected').length).toBeGreaterThanOrEqual(1));
   });
 
   it('sends document statuses when approving the onboarding', async () => {
@@ -193,7 +193,7 @@ describe('OnboardingModal', () => {
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
 
-    await waitFor(() => expect(screen.getByText(/Aprobar inscripción/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Approve Registration/i)).toBeInTheDocument());
 
     // stage first doc as approved
     const frontLabel = screen.getByText('Front');
@@ -206,20 +206,20 @@ describe('OnboardingModal', () => {
       cardNode = cardNode.parentElement;
     }
     const approveBtn = Array.from(cardNode!.querySelectorAll('button')).find((b) =>
-      /Aceptar/i.test(b.textContent || '')
+      /Accept/i.test(b.textContent || '')
     ) as HTMLButtonElement;
     fireEvent.click(approveBtn);
 
     // click global approve and confirm
-    const approveGlobal = screen.getByRole('button', { name: /Aprobar inscripción/i });
+    const approveGlobal = screen.getByRole('button', { name: /Approve Registration/i });
     fireEvent.click(approveGlobal);
 
-    await waitFor(() => expect(screen.getByText(/Confirmar aprobación/i)).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: /^Aprobar$/ }));
+    await waitFor(() => expect(screen.getByText(/Confirm Approval/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /^Approve$/ }));
 
-    await waitFor(() => expect(screen.getByText(/Inscripción aprobada/i)).toBeInTheDocument());
-    // also show status badge
-    expect(screen.getByText('Aprobada')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/Registration approved/i)).toBeInTheDocument());
+    // also show status badge (use getAllByText because "Approved" appears on multiple approved docs)
+    expect(screen.getAllByText('Approved').length).toBeGreaterThanOrEqual(1);
 
     // decideOnboarding should be called with the staged document statuses as explicit fields
     expect(onboardingService.decideOnboarding as unknown as Mock).toHaveBeenCalled();
@@ -241,14 +241,14 @@ describe('OnboardingModal', () => {
 
     await waitFor(() => expect(screen.getByText('Front')).toBeInTheDocument());
 
-    const rejectBtns = screen.getAllByRole('button', { name: /Rechazar/i });
+    const rejectBtns = screen.getAllByRole('button', { name: /Reject/i });
     // click the first reject for the 'Front' document
     fireEvent.click(rejectBtns[0]);
 
     // updateDocumentStatus should NOT have been called
     expect(onboardingService.updateDocumentStatus as unknown as Mock).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1));
+    await waitFor(() => expect(screen.getAllByText('Rejected').length).toBeGreaterThanOrEqual(1));
   });
 
   it('approve flow shows confirm and sets approval state', async () => {
@@ -260,19 +260,19 @@ describe('OnboardingModal', () => {
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
 
-    await waitFor(() => expect(screen.getByText(/Aprobar inscripción/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Approve Registration/i)).toBeInTheDocument());
 
-    const approveBtn = screen.getByRole('button', { name: /Aprobar inscripción/i });
+    const approveBtn = screen.getByRole('button', { name: /Approve Registration/i });
     fireEvent.click(approveBtn);
 
     // Confirm modal should appear
-    await waitFor(() => expect(screen.getByText(/Confirmar aprobación/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Confirm Approval/i)).toBeInTheDocument());
 
     // Click approve in confirm (exact button)
-    fireEvent.click(screen.getByRole('button', { name: /^Aprobar$/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Approve$/ }));
 
     // After action, header should show approval message
-    await waitFor(() => expect(screen.getByText(/Inscripción aprobada/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Registration approved/i)).toBeInTheDocument());
   });
 
   it('reject flow opens textarea and sets rejected state', async () => {
@@ -284,23 +284,23 @@ describe('OnboardingModal', () => {
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
 
-    await waitFor(() => expect(screen.getByText(/Rechazar inscripción/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Reject Registration/i)).toBeInTheDocument());
 
-    const rejectBtn = screen.getByRole('button', { name: /Rechazar inscripción/i });
+    const rejectBtn = screen.getByRole('button', { name: /Reject Registration/i });
     fireEvent.click(rejectBtn);
 
     await waitFor(() =>
-      expect(screen.getByText(/Indica la causa del rechazo/i)).toBeInTheDocument()
+      expect(screen.getByText(/Indicate the reason for rejection/i)).toBeInTheDocument()
     );
 
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-    fireEvent.change(textarea, { target: { value: 'Documento ilegible' } });
+    fireEvent.change(textarea, { target: { value: 'Illegible document' } });
 
-    fireEvent.click(screen.getByText(/Confirmar rechazo/i));
+    fireEvent.click(screen.getByText(/Confirm Rejection/i));
 
-    await waitFor(() => expect(screen.getByText(/Inscripción rechazada/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Registration rejected/i)).toBeInTheDocument());
     // also show status badge
-    expect(screen.getByText('Rechazada')).toBeInTheDocument();
+    expect(screen.getByText('Rejected')).toBeInTheDocument();
   });
 
   it('returns null when no performerId passed', () => {
@@ -311,15 +311,175 @@ describe('OnboardingModal', () => {
   it('shows initial request status when present', async () => {
     (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
       ...sample,
-      status: 0,
-      processMessage: 'Esperando revisión',
+      status: 1,
+      processMessage: 'Awaiting review',
     } as unknown as OnboardingData);
 
     render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
 
-    await waitFor(() => expect(screen.getByText(/Documentos/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Documents/i)).toBeInTheDocument());
 
-    expect(screen.getByText('Pendiente')).toBeInTheDocument();
-    expect(screen.getByText('Esperando revisión')).toBeInTheDocument();
+    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Awaiting review')).toBeInTheDocument();
+  });
+});
+
+describe('OnboardingModal - KYC SecurityRequest semaphore', () => {
+  afterEach(() => vi.resetAllMocks());
+
+  const baseSample = {
+    ...sample,
+    status: 0,
+  };
+
+  it('renders KYC green bubble when securityRequest is "Approved"', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'Approved',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    // only the colored bubble is rendered (no duplicate text label)
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC Approved"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-green-500');
+  });
+
+  it('renders KYC yellow bubble when securityRequest is "InReview"', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'InReview',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC InReview"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-yellow-500');
+  });
+
+  it('renders KYC red bubble when securityRequest is "Declined"', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'Declined',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC Declined"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-red-500');
+  });
+
+  it('renders KYC gray bubble when securityRequest is null', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: null,
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC Unknown"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-gray-300');
+  });
+
+  it('normalizes variants of approved (e.g. "approved", "kyc_approved", "verified")', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'kyc_approved',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC Approved"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble).not.toBeNull();
+  });
+
+  it('normalizes variants of in review (e.g. "In_Progress")', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'In_Progress',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC InReview"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-yellow-500');
+  });
+
+  it('normalizes variants of declined (e.g. "rejected", "failed")', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'failed',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    const bubble = await waitFor(() => {
+      const el = document.querySelector('[aria-label="KYC Declined"]');
+      if (!el) throw new Error('KYC bubble not found');
+      return el;
+    });
+    expect(bubble.className).toContain('bg-red-500');
+  });
+
+  it('does NOT render the duplicated KYC text label', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'Approved',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    // wait for modal data to load by checking the bubble exists
+    await waitFor(() =>
+      expect(document.querySelector('[aria-label="KYC Approved"]')).not.toBeNull()
+    );
+
+    // neither the "KYC:" prefix nor the textual state should be rendered
+    expect(screen.queryByText('KYC:')).toBeNull();
+    expect(screen.queryByText('approved')).toBeNull();
+    expect(screen.queryByText('in review')).toBeNull();
+    expect(screen.queryByText('declined')).toBeNull();
+    expect(screen.queryByText('unavailable')).toBeNull();
+  });
+
+  it('exposes KYC state via aria-label and title for accessibility', async () => {
+    (onboardingService.getOnboardingData as unknown as Mock).mockResolvedValueOnce({
+      ...baseSample,
+      securityRequest: 'InReview',
+    } as unknown as OnboardingData);
+
+    render(<OnboardingModal performerId={2} onClose={vi.fn()} />);
+
+    await waitFor(() =>
+      expect(document.querySelector('[aria-label="KYC InReview"]')).not.toBeNull()
+    );
+
+    const bubble = document.querySelector('[aria-label="KYC InReview"]') as HTMLElement;
+    expect(bubble.getAttribute('aria-label')).toBe('KYC InReview');
+    expect(bubble.getAttribute('title')).toBe('KYC in review');
   });
 });
